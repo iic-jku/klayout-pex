@@ -28,9 +28,9 @@ import unittest
 
 import allure
 
-from klayout_pex.env import Env
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.netlist_format import NetlistFormat
+from kpex.env import Env
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.netlist_format import NetlistFormat
 from tests.common.cli_runner import run_cli
 
 

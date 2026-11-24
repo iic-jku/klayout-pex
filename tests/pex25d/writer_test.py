@@ -28,7 +28,7 @@ import allure
 from fractions import Fraction
 import unittest
 
-from klayout_pex.pex25d.writer import (
+from kpex.pex25d.writer import (
     CONTINUATION, WRAP_COLUMN, WriteError, format_exact, write_pex25d_text,
 )
 

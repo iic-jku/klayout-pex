@@ -32,7 +32,7 @@ into a fresh venv, and smoke tests run its console scripts outside of the checko
 All tests of this suite are marked 'smoke', and skipped unless KPEX_SMOKE_TEST_WHEEL points to the wheel.
 Locally, run_smoke_tests.sh builds the wheel and runs the suite, or manually:
     poetry build
-    KPEX_SMOKE_TEST_WHEEL=dist/klayout_pex-<version>-py3-none-any.whl poetry run pytest -m smoke
+    KPEX_SMOKE_TEST_WHEEL=dist/kpex-<version>-py3-none-any.whl poetry run pytest -m smoke
 
 Requires network access, to install the wheel's dependencies.
 """
@@ -113,8 +113,8 @@ def installed_wheel(tmp_path_factory) -> InstalledWheel:
                     cwd=wheel.venv_dir)
 
     # NOTE: guard against testing the source checkout by accident
-    module_path = wheel.check_run('python', '-c', 'import klayout_pex; print(klayout_pex.__file__)',
+    module_path = wheel.check_run('python', '-c', 'import kpex; print(kpex.__file__)',
                                   cwd=wheel.venv_dir).stdout.strip()
     assert Path(module_path).resolve().is_relative_to(wheel.venv_dir.resolve()), \
-        f"klayout_pex is not imported from the wheel venv {wheel.venv_dir}, but from {module_path}"
+        f"kpex is not imported from the wheel venv {wheel.venv_dir}, but from {module_path}"
     return wheel

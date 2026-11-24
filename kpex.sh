@@ -25,4 +25,4 @@
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 export PYTHONPATH=$DIR:$PYTHONPATH
-/usr/bin/env python3 -m klayout_pex $*
+/usr/bin/env python3 -m kpex $*

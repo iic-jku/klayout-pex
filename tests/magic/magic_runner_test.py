@@ -29,12 +29,12 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.env import Env
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.magic.magic_runner import (
+from kpex.env import Env
+from kpex.kpex_cli import KpexCLI
+from kpex.magic.magic_runner import (
     MagicMergeMode, MagicPEXMode, MagicShortMode, MagicUniqueMode, prepare_magic_script,
 )
-from klayout_pex.pex25d.diagnostics import ExitCode
+from kpex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
 
 pytestmark = [allure.parent_suite("Unit Tests"), allure.tag("MAGIC", "Pruning")]

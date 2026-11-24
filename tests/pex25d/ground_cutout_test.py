@@ -30,11 +30,11 @@ from unittest.mock import patch
 import klayout.db as kdb
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.fastercap.pex25d_exporter import FasterCapModelOptions
-from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
-from klayout_pex.plugin_api.v1 import retained_ground_region
+from kpex import pex25d
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.fastercap.pex25d_exporter import FasterCapModelOptions
+from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+from kpex.plugin_api.v1 import retained_ground_region
 
 
 from tests.common.pex25d_ground import GROUND_CUTOUT_TEXT as BASE
@@ -97,7 +97,7 @@ def test_contact_clearance_at_cutout_edge(edge: float, accepted: bool):
     text = BASE.replace('OUTER -1 -1 2 -1 2 2 -1 2',
                         f'OUTER {edge} -1 2 -1 2 2 {edge} 2')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     if accepted:
         validate_export_scene(scene)
     else:
@@ -109,7 +109,7 @@ def test_ground_island_inside_cutout_remains_an_electrical_body():
     text = BASE.replace('OUTER -1 -1 2 -1 2 2 -1 2',
                         'OUTER -1 -1 2 -1 2 2 -1 2 HOLE 0.2 0.2 0.2 0.8 0.8 0.8 0.8 0.2')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     with pytest.raises(pex25d.InvalidSceneError):
         validate_export_scene(scene)
 
@@ -118,7 +118,7 @@ def test_ground_island_inside_cutout_remains_an_electrical_body():
 def test_only_explicit_reference_net_can_touch_ground(net: str):
     scene = pex25d.resolve(pex25d.read_text(BASE.replace('CONDUCTOR pin signal',
         f'CONDUCTOR pin {net}').replace('GROUND_CUTOUT subs OUTER -1 -1 2 -1 2 2 -1 2\n', '').encode('utf-8')))
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     if net == 'VSS':
         validate_export_scene(scene)
     else:
@@ -128,7 +128,7 @@ def test_only_explicit_reference_net_can_touch_ground(net: str):
 
 def test_floating_shortname_matching_ground_keeps_distinct_solver_body(tmp_path: Path):
     import json
-    from klayout_pex.pex25d.electrical import BodyKind, write_solver_body_map
+    from kpex.pex25d.electrical import BodyKind, write_solver_body_map
     text = BASE.replace('CONDUCTOR pin signal', 'CONDUCTOR VSS FLOATING').replace('CONDUCTOR pin LAYER', 'CONDUCTOR VSS LAYER')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
     model = PEX25DFasterCapModelBuilder(scene, FasterCapModelOptions())
@@ -154,7 +154,7 @@ def test_complete_reference_removal_is_rejected_before_meshing():
 
 
 def test_no_ground_scene_has_no_phantom_electrical_net():
-    from klayout_pex.pex25d.electrical import BodyKind, ElectricalBody, solver_body_names
+    from kpex.pex25d.electrical import BodyKind, ElectricalBody, solver_body_names
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     scene.ClearField('ground_plane')
     assert solver_body_names(scene) == {ElectricalBody(BodyKind.NET, 'signal'): 'signal'}
@@ -170,7 +170,7 @@ def test_no_ground_scene_has_no_phantom_electrical_net():
                                                (-(2 ** 31) - 1, False),
                                                (2 ** 31, False)])
 def test_cutout_native_grid_limits_report_domain_diagnostics(coordinate: int, accepted: bool):
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     # Isolate representability from contact topology; this conductor clears z.
     scene.layers[0].zlow = 1
@@ -192,7 +192,7 @@ def test_cutout_native_grid_limits_report_domain_diagnostics(coordinate: int, ac
                                           (2 ** 31 - 2, False),
                                           (2 ** 31 - 1, False)])
 def test_ground_contact_envelope_limit_is_checked_before_native_arithmetic(right: int, accepted: bool):
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     points = scene.ground_plane.cutouts[0].polygon.outer.points
     for point in points:
@@ -213,7 +213,7 @@ def test_ground_contact_envelope_limit_is_checked_before_native_arithmetic(right
                                           (-(2 ** 31) + 1, False),
                                           (-(2 ** 31), False)])
 def test_lower_contact_envelope_limit(left: int, accepted: bool):
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     for point in scene.ground_plane.cutouts[0].polygon.outer.points:
         point.x = -(2 ** 31) + 1 if point.x < 0 else -(2 ** 31) + 100
@@ -259,7 +259,7 @@ def test_export_field_range_checked_before_native_construction(coordinate: int, 
                                          (-(2 ** 31) + 2, 'PEX25D-E0310')])
 def test_ground_overlap_near_lower_native_limit_is_never_silently_accepted(
         axis: str, offset: int, code: str):
-    from klayout_pex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.exporters import validate_export_scene
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     scene.ClearField('domain')
     # The contact is far from the opening, so all its XY area touches ground.
@@ -321,8 +321,8 @@ def test_strict_validation_checks_ground_contacts_while_structural_validation_ke
 @pytest.mark.parametrize('invalid', ['net', 'ring'])
 @pytest.mark.parametrize('operation', ['strict-file', 'strict-scene', 'export'])
 def test_invalid_cutout_definition_never_reaches_native_ground_geometry(invalid: str, operation: str):
-    from klayout_pex.pex25d.exporters import validate_export_scene
-    from klayout_pex.pex25d.validator import Validator
+    from kpex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.validator import Validator
     file = pex25d.read_text(BASE.encode('utf-8'))
     if invalid == 'net':
         file.ground_plane.net = ''
@@ -343,8 +343,8 @@ def test_invalid_cutout_definition_never_reaches_native_ground_geometry(invalid:
 
 @pytest.mark.parametrize('operation', ['strict', 'export'])
 def test_prior_report_errors_do_not_suppress_new_ground_contact(operation: str):
-    from klayout_pex.pex25d.exporters import validate_export_scene
-    from klayout_pex.pex25d.validator import Validator
+    from kpex.pex25d.exporters import validate_export_scene
+    from kpex.pex25d.validator import Validator
     text = BASE.replace('GROUND_CUTOUT subs OUTER -1 -1 2 -1 2 2 -1 2\n', '')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
     report = pex25d.DiagnosticsReport()

@@ -30,8 +30,8 @@ import unittest
 import allure
 import klayout.rdb as rdb
 
-from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
-import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
+from kpex.rcx25.extraction_reporter import ExtractionReporter
+import kpex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
 
 
 def category_names(categories: Iterable[rdb.RdbCategory]) -> List[str]:

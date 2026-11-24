@@ -28,11 +28,11 @@ from __future__ import annotations
 
 from typing import Iterable, List, Mapping, Optional, Set, Tuple
 
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
-import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
-import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
-import klayout_pex_protobuf.kpex.tech.substrate_pb2 as substrate_pb2
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+import kpex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
+import kpex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
+import kpex_protobuf.kpex.tech.substrate_pb2 as substrate_pb2
 
 Technology = tech_pb2.Technology
 LayerInfo = tech_pb2.LayerInfo

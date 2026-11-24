@@ -34,7 +34,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction, netlist_ports
 

@@ -43,18 +43,18 @@ import pytest
 import klayout.db as kdb
 import klayout.rdb as rdb
 
-from klayout_pex.fastercap.fastercap_error import FasterCapError
-from klayout_pex.kpex_cli import ArgumentValidationError, KpexCLI, halo_default_help, side_halo_by_pdk
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.rcx25.extraction_results import ExtractionResults, ExtractionSummary
-from klayout_pex.rcx25.r.r_extractor import RExtractionTechError
-from klayout_pex.run_result import RESULT_FILE_NAME
-from klayout_pex.tech_info import TechDefError, TechInfo
-from klayout_pex.version import __version__
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+from kpex.fastercap.fastercap_error import FasterCapError
+from kpex.kpex_cli import ArgumentValidationError, KpexCLI, halo_default_help, side_halo_by_pdk
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.pdk_config import PDK
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.rcx25.extraction_results import ExtractionResults, ExtractionSummary
+from kpex.rcx25.r.r_extractor import RExtractionTechError
+from kpex.run_result import RESULT_FILE_NAME
+from kpex.tech_info import TechDefError, TechInfo
+from kpex.version import __version__
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from tests.common.cli_runner import run_cli
 from tests.common.device_model_mappings import NMOS, device_models
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
@@ -413,10 +413,10 @@ def test_field_solver_blackbox_mim_fails_before_geometry_or_solver(engine: str, 
     gds = pdk.gds_path('sg13g2_pr__cmim', 'cmim.gds.gz')
     cli = KpexCLI()
     with mock.patch.dict(os.environ, {'KPEX_FASTCAP_EXE': sys.executable, 'KPEX_FASTERCAP_EXE': sys.executable}), \
-         mock.patch('klayout_pex.kpex_cli.check_tool_versions', return_value=True), \
+         mock.patch('kpex.kpex_cli.check_tool_versions', return_value=True), \
          mock.patch.object(KpexCLI, 'build_fastercap_input', side_effect=AssertionError('must not build geometry')), \
-         mock.patch('klayout_pex.kpex_cli.run_fastercap') as fastercap, \
-         mock.patch('klayout_pex.kpex_cli.run_fastcap') as fastcap:
+         mock.patch('kpex.kpex_cli.run_fastercap') as fastercap, \
+         mock.patch('kpex.kpex_cli.run_fastcap') as fastcap:
         code, output = run_cli(cli.main, ['kpex', 'extract', '--pdk', pdk.name,
                                                 '--lvsdb', lvsdb_fixture_path(pdk.name, gds),
                                                 engine, '--blackbox', 'y', '--out-dir', str(tmp_path)])
@@ -752,7 +752,7 @@ def test_pins_of_the_schematic_other_than_the_ports_fail_the_rc_run(tmp_path):
 
 def run_result(run_dir: Path) -> Dict[str, Any]:
     """
-    :return: the result file of the run in the run directory (see klayout_pex.run_result)
+    :return: the result file of the run in the run directory (see kpex.run_result)
     """
     with open(run_dir / RESULT_FILE_NAME, encoding='utf-8') as f:
         return json.load(f)
@@ -878,15 +878,15 @@ def test_result_file_of_pex25d_names_its_outputs(tmp_path):
 
 @pytest.mark.parametrize('version,accepted', [('0.30.13', False), ('0.30.14', True), ('0.30.15', True)])
 def test_lvsdb_input_checks_python_module_without_needing_executable(version: str, accepted: bool):
-    from klayout_pex.env import Env
-    from klayout_pex.tool_version_constraints import Tool
+    from kpex.env import Env
+    from kpex.tool_version_constraints import Tool
     args = KpexCLI.parse_args(['extract', '--pdk', 'sky130A', '--2.5D',
                               '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH)], Env.from_os_environ())
     args.magic_exe_path = '/nonexistent/magic'
     args.klayout_exe_path = '/nonexistent/klayout'
     with mock.patch.object(kdb, '__version__', version), \
             mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('LVSDB needs no executable')), \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+            mock.patch('kpex.tool_version_constraints.error') as error:
         if accepted:
             KpexCLI.validate_args(args)
         else:
@@ -912,7 +912,7 @@ def test_lvsdb_input_checks_python_module_without_needing_executable(version: st
 def test_magic_version_check_precedes_extraction(
         version: Optional[str], mode: Optional[str], prune: Optional[str], accepted: bool, tmp_path: Path):
     from packaging.version import Version
-    from klayout_pex.tool_version_constraints import Tool
+    from kpex.tool_version_constraints import Tool
 
     # Keep parsing and validation real: the CLI must reject an affected
     # installation by default, while explicit warning/off overrides still run.

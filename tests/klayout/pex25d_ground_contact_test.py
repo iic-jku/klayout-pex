@@ -32,11 +32,11 @@ from unittest.mock import Mock
 import klayout.db as kdb
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_info import TechInfo
+from kpex import pex25d
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.pex25d_builder import PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 

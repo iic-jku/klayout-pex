@@ -29,16 +29,16 @@ import unittest
 
 import allure
 
-from klayout_pex.netlist.expression.ngspice import NGSPICE_SYNTAX
-from klayout_pex.netlist.expression.nodes import (
+from kpex.netlist.expression.ngspice import NGSPICE_SYNTAX
+from kpex.netlist.expression.nodes import (
     BinaryOperation,
     BinaryOperator,
     Number,
     Parameter,
 )
-from klayout_pex.netlist.expression.parser import ExpressionParser, ExpressionSyntaxError
-from klayout_pex.netlist.expression.scope import ParameterScope
-from klayout_pex.netlist.expression.syntax import Associativity, BinaryOperatorSyntax
+from kpex.netlist.expression.parser import ExpressionParser, ExpressionSyntaxError
+from kpex.netlist.expression.scope import ParameterScope
+from kpex.netlist.expression.syntax import Associativity, BinaryOperatorSyntax
 
 
 @allure.parent_suite("Unit Tests")

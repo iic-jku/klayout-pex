@@ -34,8 +34,8 @@ from __future__ import annotations
 
 from typing import *
 
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
-from klayout_pex.pex25d.reader import ReadError, read_pex25d_text
+from kpex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.reader import ReadError, read_pex25d_text
 
 HEADER = """\
 PEX25D 1.0-rc1

@@ -33,10 +33,10 @@ from typing import Callable, List
 import pytest
 import rich.console
 
-from klayout_pex import pex25d
-from klayout_pex.pex25d.pex25d_cli import Pex25DCLI, plugin_tables
-from klayout_pex.plugin_api.v1 import EXPORTER_ENTRY_POINT_GROUP, IMPORTER_ENTRY_POINT_GROUP
-from klayout_pex.version import __version__
+from kpex import pex25d
+from kpex.pex25d.pex25d_cli import Pex25DCLI, plugin_tables
+from kpex.plugin_api.v1 import EXPORTER_ENTRY_POINT_GROUP, IMPORTER_ENTRY_POINT_GROUP
+from kpex.version import __version__
 
 
 BROKEN = 'raise ImportError("listing must not import plugins")'
@@ -61,10 +61,10 @@ def test_overview_shows_versions_summaries_and_selectors(install_plugin: Callabl
     importer = install_plugin('test-two', 'example', BROKEN, IMPORTER_ENTRY_POINT_GROUP, 'create')
     exporters, importers = rendered()
 
-    assert row(exporters, '│ fastercap ', 'klayout-pex', __version__, 'FasterCap input:',
-               'klayout_pex.pex25d.exporters:create_fastercap_exporter')
-    assert row(exporters, '│ fastcap2 ', 'klayout-pex', __version__, 'FastCap2 input:')
-    assert row(exporters, '│ stl ', 'klayout-pex', __version__, 'STL solids of the scene')
+    assert row(exporters, '│ fastercap ', 'kpex', __version__, 'FasterCap input:',
+               'kpex.pex25d.exporters:create_fastercap_exporter')
+    assert row(exporters, '│ fastcap2 ', 'kpex', __version__, 'FastCap2 input:')
+    assert row(exporters, '│ stl ', 'kpex', __version__, 'STL solids of the scene')
     # a bare 'fastercap' selects the built-in, so the plugin needs its qualified name
     assert row(exporters, 'test-one:fastercap', '1.0', 'Test plugin from test-one',
                'test_plugin_test_one:create')
@@ -74,13 +74,13 @@ def test_overview_shows_versions_summaries_and_selectors(install_plugin: Callabl
 
 def test_overview_lists_builtin_importer():
     _, importers = rendered()
-    assert row(importers, '│ openrcx-uf ', 'klayout-pex', __version__,
+    assert row(importers, '│ openrcx-uf ', 'kpex', __version__,
                'OpenRCX Universal Pattern Format (UF) 3D patterns with one ground plane.')
 
 
 def test_overview_marks_missing_plugins(monkeypatch: pytest.MonkeyPatch):
-    from klayout_pex.pex25d import importers
-    from klayout_pex.plugin.importer_registry import ImporterRegistry
+    from kpex.pex25d import importers
+    from kpex.plugin.importer_registry import ImporterRegistry
 
     monkeypatch.setattr(importers, 'importer_registry', ImporterRegistry)
     _, listed = rendered()

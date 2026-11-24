@@ -30,9 +30,9 @@ import unittest
 import allure
 import klayout.db as kdb
 
-from klayout_pex.device_totals import DeviceTotalParameters
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_info import TechInfo
+from kpex.device_totals import DeviceTotalParameters
+from kpex.pdk_config import PDK
+from kpex.tech_info import TechInfo
 from tests.common.device_model_mappings import MIM, NMOS, NPN, device_models
 
 

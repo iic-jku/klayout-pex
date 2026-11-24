@@ -33,7 +33,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.util.multiple_choice import MultipleChoicePattern
+from kpex.util.multiple_choice import MultipleChoicePattern
 
 CHOICES = ['ild1', 'ild2', 'Pass']
 

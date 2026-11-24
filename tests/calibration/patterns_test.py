@@ -33,8 +33,8 @@ import allure
 from google.protobuf.json_format import MessageToJson, Parse, ParseDict
 import pytest
 
-from klayout_pex.calibration.patterns import CalibrationError, MAX_CASES, MAX_COORDINATE, MAX_SPEC_BYTES, read_patterns
-from klayout_pex_protobuf.kpex.calibration import patterns_pb2
+from kpex.calibration.patterns import CalibrationError, MAX_CASES, MAX_COORDINATE, MAX_SPEC_BYTES, read_patterns
+from kpex_protobuf.kpex.calibration import patterns_pb2
 from tests.common.calibration import read_pattern_data as read_data
 
 pytestmark = allure.parent_suite('Unit Tests')

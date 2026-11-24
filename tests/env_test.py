@@ -30,8 +30,8 @@ from typing import *
 import unittest
 from unittest import mock
 
-from klayout_pex.env import Env, EnvVar
-from klayout_pex.pdk_config import PDK
+from kpex.env import Env, EnvVar
+from kpex.pdk_config import PDK
 
 
 @allure.parent_suite("Unit Tests")

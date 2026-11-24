@@ -32,9 +32,9 @@ from typing import List
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.klayout.lvs_runner import LVSRunner
-from klayout_pex.pdk_config import PDK
+from kpex.kpex_cli import KpexCLI
+from kpex.klayout.lvs_runner import LVSRunner
+from kpex.pdk_config import PDK
 from tests.common.cli_runner import run_cli
 from tests.common.lvsdb_fixtures import klayout_exe_path, lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig

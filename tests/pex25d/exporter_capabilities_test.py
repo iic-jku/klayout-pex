@@ -30,10 +30,10 @@ from typing import Any, FrozenSet, List
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter, FastCap2SceneExporter
-from klayout_pex.plugin_api.v1 import PEX25DSceneExporter, SceneCapability
-from klayout_pex.stl.pex25d_exporter import STLSceneExporter
+from kpex import pex25d
+from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter, FastCap2SceneExporter
+from kpex.plugin_api.v1 import PEX25DSceneExporter, SceneCapability
+from kpex.stl.pex25d_exporter import STLSceneExporter
 from tests.common.pex25d_ground import GROUND_CUTOUT_TEXT
 
 

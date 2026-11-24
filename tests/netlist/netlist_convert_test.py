@@ -29,10 +29,10 @@ import unittest
 
 import allure
 
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.netlist.netlist_convert import convert_to_vacask
-from klayout_pex.netlist.vacask_writer import VacaskWriterError
-from klayout_pex.pex25d.diagnostics import ExitCode
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.netlist.netlist_convert import convert_to_vacask
+from kpex.netlist.vacask_writer import VacaskWriterError
+from kpex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import (
     assert_netlist_cli_loads_neither_klayout_nor_protobuf,
     run_cli,
@@ -124,7 +124,7 @@ class NetlistConvertTest(unittest.TestCase):
                                      '-o', workspace.path('divider.inc'))
         self.assertEqual(ExitCode.OK, code, output)
         text = workspace.read('divider.inc')
-        self.assertTrue(text.startswith('// VACASK netlist converted by KLayout-PEX'), text)
+        self.assertTrue(text.startswith('// VACASK netlist converted by KPEX'), text)
         self.assertEqual(EXPECTED_VACASK_BODY.format(mos=MOS_COPIES), self.body(text))
 
     def test_pdk_tells_the_subcircuits_that_declare_m(self):
@@ -247,12 +247,12 @@ class NetlistConvertTest(unittest.TestCase):
 
     def test_netlist_tool_converts_in_a_subprocess(self):
         workspace = self.workspace()
-        result = run_cli_process('klayout_pex.netlist', ['convert', '--to', 'vacask',
+        result = run_cli_process('kpex.netlist', ['convert', '--to', 'vacask',
                                                          workspace.input_path, '-o', workspace.path('out.inc')])
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual(EXPECTED_VACASK_BODY.format(mos=MOS_COPIES), self.body(workspace.read('out.inc')))
 
-        result = run_cli_process('klayout_pex.netlist', ['convert', '--to', 'vacask', workspace.path('missing.spice')])
+        result = run_cli_process('kpex.netlist', ['convert', '--to', 'vacask', workspace.path('missing.spice')])
         self.assertEqual(ExitCode.USAGE, result.returncode, result.stdout + result.stderr)
 
     def test_conversion_needs_neither_klayout_nor_generated_protobuf(self):

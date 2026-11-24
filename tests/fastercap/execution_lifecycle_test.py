@@ -37,8 +37,8 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix, _stop_process, FasterCapRunResult
-from klayout_pex.fastercap.fastercap_error import (FasterCapError, FasterCapExecutionError,
+from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix, _stop_process, FasterCapRunResult
+from kpex.fastercap.fastercap_error import (FasterCapError, FasterCapExecutionError,
                                                  FasterCapTimeoutError, FasterCapCancelledError)
 
 pytestmark = [allure.parent_suite('Unit Tests'),
@@ -57,7 +57,7 @@ def child_runner(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Callable:
             if args[0] == 'taskkill':
                 return popen(args, **kwargs)
             return popen([sys.executable, str(script), *args[1:]], **kwargs)
-        monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.subprocess.Popen', launch)
+        monkeypatch.setattr('kpex.fastercap.fastercap_runner.subprocess.Popen', launch)
         return run_fastercap(sys.executable, 'input.lst', str(tmp_path / 'solver.log'),
                              0.05, 0.5, 0, True, False, False, **options)
     return start
@@ -138,7 +138,7 @@ def test_group_permission_error_is_only_ignored_after_darwin_exit(
     # and the follow-up KILL can race with reaping; real permission errors for
     # a live leader and other kernels must remain visible.
     denied_signal = getattr(signal, denied_signal_name)
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.sys.platform', platform_name)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.sys.platform', platform_name)
     process = mock.Mock(pid=12345, poll=mock.Mock(return_value=returncode))
 
     def signal_group(pid: int, sig: int):
@@ -146,7 +146,7 @@ def test_group_permission_error_is_only_ignored_after_darwin_exit(
         if sig == denied_signal:
             raise PermissionError(errno.EPERM, 'Operation not permitted')
 
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.os.killpg', signal_group)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.os.killpg', signal_group)
     if allowed:
         _stop_process(process, include_exited_group=True)
         process.wait.assert_called()

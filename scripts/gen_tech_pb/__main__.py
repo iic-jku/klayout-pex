@@ -26,9 +26,9 @@
 Generate the KPEX tech info JSON files <tech>_tech.pb.json of the bundled PDKs.
 
 The PDK specifics (layers, process stack, parasitics) are defined here, not in the KPEX runtime,
-which only reads the generated tech info files (klayout_pex_protobuf/*_tech.pb.json).
+which only reads the generated tech info files (kpex_protobuf/*_tech.pb.json).
 
-Requires the generated protobuf python modules (klayout_pex_protobuf/**/*_pb2.py), see gen_tech_pb.sh.
+Requires the generated protobuf python modules (kpex_protobuf/**/*_pb2.py), see gen_tech_pb.sh.
 
 Usage:
     python scripts/gen_tech_pb OUTPUT_DIR
@@ -67,7 +67,7 @@ def write_tech(output_directory: Path, tech: Technology):
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate the KPEX tech info JSON files of the bundled PDKs")
     parser.add_argument('output_directory', type=Path,
-                        help="e.g. klayout_pex_protobuf")
+                        help="e.g. kpex_protobuf")
     args = parser.parse_args()
 
     output_directory: Path = args.output_directory

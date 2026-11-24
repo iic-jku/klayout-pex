@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-from klayout_pex.calibration.patterns import CalibrationPatternSpec, read_patterns
+from kpex.calibration.patterns import CalibrationPatternSpec, read_patterns
 
 
 def read_pattern_data(tmp_path: Path, data: Dict[str, Any]) -> CalibrationPatternSpec:

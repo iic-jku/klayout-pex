@@ -33,9 +33,9 @@ from typing import Dict, List, Tuple
 
 from google.protobuf.json_format import ParseDict
 
-from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import ResistanceInfo
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyProvenance
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex_protobuf.kpex.tech.process_parasitics_pb2 import ResistanceInfo
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyProvenance
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from scripts.gen_tech_pb.tech_builder import add_layer_resistance, add_contact_resistance, add_via_resistance
 
 

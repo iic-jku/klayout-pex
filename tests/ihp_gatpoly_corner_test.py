@@ -31,9 +31,9 @@ from pathlib import Path
 import allure
 import pytest
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_catalog import load_technology_catalog
-from klayout_pex.tech_info import TechInfo
+from kpex.pdk_config import PDK
+from kpex.tech_catalog import load_technology_catalog
+from kpex.tech_info import TechInfo
 from scripts.gen_tech_pb.corner_data import write_bundled_corner_catalog
 
 pytestmark = allure.parent_suite('Unit Tests')
@@ -73,7 +73,7 @@ def test_gatpoly_limits_come_from_interconnect_tables_without_changing_other_row
 
 @pytest.mark.slow
 def test_selected_sheet_corner_preserves_recognized_resistor_devices(tmp_path: Path):
-    from klayout_pex.kpex_cli import KpexCLI
+    from kpex.kpex_cli import KpexCLI
     from tests.common.cli_runner import run_cli
     from tests.common.lvsdb_fixtures import lvsdb_fixture_path
     from tests.common.pdk_test_config import PDKName, PDKTestConfig

@@ -31,7 +31,7 @@ import tempfile
 from typing import *
 import unittest
 
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.common.capacitance_matrix import CapacitanceMatrix
 
 
 @allure.parent_suite("Unit Tests")

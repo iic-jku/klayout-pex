@@ -31,10 +31,10 @@ import pytest
 
 from tests.common.device_capacitance import DESIGN, PDK_CONFIG, reference_document, write_references
 
-from klayout_pex.env import Env
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.env import Env
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.cli_runner import run_cli
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 

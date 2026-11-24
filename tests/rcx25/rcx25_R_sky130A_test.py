@@ -28,13 +28,13 @@ import allure
 import pytest
 from unittest import mock
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.pdk_config import PDK
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.tech_info import TechInfo
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.pdk_config import PDK
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.tech_info import TechInfo
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
-import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+import kpex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode R]"
@@ -199,7 +199,7 @@ def test_nwell_joined_by_a_label_only():
     # Like r_nwell_pfet_ntap_li1, without the licon over the ntap, but with the label VPWR on the nwell,
     # which joins it to VPWR. So the nwell is a piece of the resistance network that joins nothing else,
     # and the extraction leaves it out, so that the bulk of the PMOS is on VPWR, without resistance
-    with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.r.r_extractor.warning') as warning_mock:
         pex_whiteboxed.assert_expected_matches_obtained(
             'test_patterns', 'r_nwell_pfet_label_li1.gds.gz',
             expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
@@ -219,7 +219,7 @@ R3;S;S.P0.psdm;;585.0"""
 def test_no_resistor_between_pins_with_the_same_label():
     # Output Y has two labels, which are one node in the netlist, so the resistance between them is shorted.
     # It used to be a resistor from Y to Y, with a warning "Invalid attempt to create resistor ... between same net"
-    with mock.patch('klayout_pex.rcx25.netlist_expander.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.netlist_expander.warning') as warning_mock:
         results, _ = pex_whiteboxed.run_rcx25d_single_cell('sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
     warning_mock.assert_not_called()
     assert [k for k in results.summarize().resistances.keys() if k.net1 == k.net2] == []
@@ -250,7 +250,7 @@ def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_onc
                                                               top_cell=cell_name,
                                                               tech=TechInfo(tech=tech, dielectric_filter=None),
                                                               blackbox_devices=False)
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         assert pex_context.devices_by_name
     assert [c.args[0] for c in warning_mock.call_args_list] == [
         "The resistance network has no nodes for these device terminals, "
@@ -277,7 +277,7 @@ def test_substrate_terminals_of_vpp_caps_and_rf_inductors_have_no_warnings(desig
 def test_licons_over_the_p_taps_are_known():
     # The licons over the p-taps join li1 to the substrate, which is no conductor of the resistance network,
     # so they are part of the p-taps (licon_ptap_con), rather than LVS shapes the tech info doesn't know (#294)
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell('inv', 'inv.gds.gz')
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
 
@@ -288,7 +288,7 @@ def test_device_terminals_without_a_net_stay_unconnected():
     # The bulk terminal W of the varactor is the gate on the hole of a ptap ring (varactor_bulk_lvt), but there's
     # no ring around it, so the LVS netlist leaves W unconnected (as in iic-sar-adc/adc_comp_latch).
     # The extraction crashed on it with an AttributeError
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'cap_var_lvt_without_ptap_ring.gds.gz')
     messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
     assert messages == [
@@ -303,7 +303,7 @@ def test_device_terminals_without_a_net_stay_unconnected():
 def test_via_without_conductor_below_is_an_error():
     # The via1 has no met1 below it, so it joins nothing there. The extraction report crashed on it with a KeyError,
     # as with gf180mcuD before #229, whose tech info put the layer below its vias on another GDS pair
-    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+    with mock.patch('kpex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_via1_without_met1.gds.gz')
     assert [c.args[0] for c in error_mock.call_args_list if 'vias' in c.args[0]] == [
         "These vias have no conductor to join on one side, "

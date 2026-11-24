@@ -28,14 +28,14 @@ from unittest.mock import patch
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.pex25d.accounting import SceneCapacitanceMap
-from klayout_pex.pex25d.electrical import BodyKind
-from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter, FasterCapModelOptions
-from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.plugin_api.v1 import ExportError, require_scene_capabilities
+from kpex import pex25d
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.pex25d.accounting import SceneCapacitanceMap
+from kpex.pex25d.electrical import BodyKind
+from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter, FasterCapModelOptions
+from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.plugin_api.v1 import ExportError, require_scene_capabilities
 from tests.pex25d.pex25d_fixtures import MINIMAL
 
 
@@ -133,7 +133,7 @@ def test_policy_export_uses_shared_geometry_and_writes_explicit_map(tmp_path: Pa
     assert scene.SerializeToString(deterministic=True) == before
     from types import SimpleNamespace
     generator = SimpleNamespace(write_fastcap=lambda **kwargs: [str(tmp_path/'input.lst')])
-    with patch('klayout_pex.fastercap.pex25d_exporter.build_fastercap_model', return_value=generator):
+    with patch('kpex.fastercap.pex25d_exporter.build_fastercap_model', return_value=generator):
         paths = FasterCapSceneExporter().export(scene, output_dir_path=str(tmp_path), prefix='case')
     import json
     artifact = json.loads((tmp_path/'caseaccounting.json').read_text(encoding='utf-8'))
@@ -159,8 +159,8 @@ def test_result_labels_cannot_silently_alias_unknown_charge_groups(duplicate: bo
 
 def test_direct_cli_persists_exact_replay_scene_and_keeps_geometry_location(tmp_path: Path):
     from types import SimpleNamespace
-    from klayout_pex.kpex_cli import KpexCLI
-    from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+    from kpex.kpex_cli import KpexCLI
+    from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
     scene = accounting_scene()
     args = SimpleNamespace(output_dir_path=str(tmp_path), k_void=3.5, delaunay_amax=1.,
                            delaunay_b=.5, geometry_check=False)
@@ -180,9 +180,9 @@ def test_direct_cli_persists_exact_replay_scene_and_keeps_geometry_location(tmp_
 
 def test_direct_cli_reports_export_failure_as_field_solver_error(tmp_path: Path):
     from types import SimpleNamespace
-    from klayout_pex.kpex_cli import KpexCLI
-    from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
-    from klayout_pex.fastercap.fastercap_error import FasterCapError
+    from kpex.kpex_cli import KpexCLI
+    from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+    from kpex.fastercap.fastercap_error import FasterCapError
     args = SimpleNamespace(output_dir_path=str(tmp_path), k_void=3.5, delaunay_amax=1.,
                            delaunay_b=.5, geometry_check=False)
     failure = ExportError('invalid physical scene')

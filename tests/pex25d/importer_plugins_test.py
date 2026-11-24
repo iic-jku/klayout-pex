@@ -35,8 +35,8 @@ from typing import Callable, List, Tuple
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.plugin_api.v1 import IMPORTER_ENTRY_POINT_GROUP, ImporterError
+from kpex import pex25d
+from kpex.plugin_api.v1 import IMPORTER_ENTRY_POINT_GROUP, ImporterError
 
 from .pex25d_fixtures import MINIMAL, STACK_ONLY
 
@@ -48,9 +48,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping, Optional
 
 if TYPE_CHECKING:
-    from klayout_pex_protobuf.kpex.pex25d.pex25d_file_pb2 import PEX25DFile
+    from kpex_protobuf.kpex.pex25d.pex25d_file_pb2 import PEX25DFile
 
-    from klayout_pex.pex25d.diagnostics import DiagnosticsReport
+    from kpex.pex25d.diagnostics import DiagnosticsReport
 
 class Importer:
     """Read PEX25D text split over named supporting files and the primary input."""
@@ -59,7 +59,7 @@ class Importer:
                     supporting_files: Optional[Mapping[str, str]] = None,
                     options: Optional[Mapping[str, Any]] = None,
                     report: Optional[DiagnosticsReport] = None) -> PEX25DFile:
-        from klayout_pex import pex25d
+        from kpex import pex25d
         text = ''.join(Path(path).read_text(encoding='utf-8')
                        for _, path in sorted((supporting_files or {}).items()))
         text += Path(input_file_path).read_text(encoding='utf-8')
@@ -91,7 +91,7 @@ def inputs(tmp_path: Path) -> Tuple[Path, Path]:
 
 
 def run_cli(arguments: List[str]) -> int:
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', *arguments])
@@ -101,7 +101,7 @@ def run_cli(arguments: List[str]) -> int:
 def test_discovery_lists_importers_without_loading_them(
         install_importer: Callable[..., str], capsys: pytest.CaptureFixture):
     module = install_importer('test-one', 'example', 'raise ImportError("missing parser")')
-    expected = ['klayout-pex:openrcx-uf', 'test-one:example']
+    expected = ['kpex:openrcx-uf', 'test-one:example']
     assert [info.qualified_name for info in pex25d.importer_registry().importers] == expected
     assert run_cli(['importers']) == pex25d.ExitCode.OK
     assert capsys.readouterr().out.split() == expected
@@ -216,10 +216,10 @@ def test_cli_rejects_missing_inputs_before_loading(
     ('unknown', IMPORTER_SOURCE),
     ('example', 'raise ImportError("missing parser")'),
     ('example', IMPORTER_SOURCE.replace(
-        "        from klayout_pex import pex25d\n",
-        "        from klayout_pex.plugin_api.v1 import ImporterError\n"
+        "        from kpex import pex25d\n",
+        "        from kpex.plugin_api.v1 import ImporterError\n"
         "        raise ImporterError('unsupported construct')\n")),
-    ('example', IMPORTER_SOURCE.replace("        from klayout_pex import pex25d\n",
+    ('example', IMPORTER_SOURCE.replace("        from kpex import pex25d\n",
                                         "        open(input_file_path + '.missing')\n")),
 ], ids=['unknown', 'unavailable', 'importer-error', 'os-error'])
 def test_expected_failures_keep_identity_and_exit_usage(
@@ -245,7 +245,7 @@ def test_importer_crash_or_wrong_result_exits_internal_error(
         install_importer: Callable[..., str], inputs: Tuple[Path, Path], tmp_path: Path,
         replacement: str, message: str):
     install_importer('test-one', 'example', IMPORTER_SOURCE.replace(
-        "        from klayout_pex import pex25d\n", replacement))
+        "        from kpex import pex25d\n", replacement))
     primary, _ = inputs
     with pytest.raises(pex25d.ImporterExecutionError, match=f"Importer 'test-one:example' {message}"):
         pex25d.import_file(str(primary), 'example')

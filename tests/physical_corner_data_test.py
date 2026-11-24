@@ -32,12 +32,12 @@ from types import SimpleNamespace
 import allure
 import pytest
 
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.protobuf import pex25d_file_pb2
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.tech_info import TechDefError, TechInfo
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDatasetFile
+from kpex.klayout.pex25d_builder import PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.pex25d.protobuf import pex25d_file_pb2
+from kpex.pex25d.resolver import resolve
+from kpex.tech_info import TechDefError, TechInfo
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDatasetFile
 from scripts.gen_tech_pb.corner_data import write_bundled_corner_catalog
 from scripts.gen_tech_pb.physical_corners import load_corner_process_stacks
 from tests.common.tech_catalog import add_scenario, read_catalog
@@ -109,8 +109,8 @@ def test_resolved_process_stack_keeps_corrected_coatings_and_source_materials(co
 @pytest.mark.parametrize('corner', ['low', 'high'])
 def test_nitride_field_slab_survives_above_oxide_when_top_metal_is_absent(corner: str):
     import klayout.db as kdb
-    from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapModelOptions, build_fastercap_model
+    from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+    from kpex.fastercap.pex25d_exporter import FasterCapModelOptions, build_fastercap_model
     file = physical_file(corner)
     file.conductors.add(name='plate', net='plate')
     shape = file.shapes.add(conductor='plate', layer='Metal1',
@@ -163,8 +163,8 @@ def test_physical_component_selection_requires_explicit_scenario_capability(tmp_
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
 @pytest.mark.parametrize('pdk', list(PDK))
 def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tmp_path: Path, pdk: PDK):
-    from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
+    from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+    from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
 
     results = {}
     for corner in ('low', 'high'):
@@ -176,7 +176,7 @@ def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tm
                                     kind=pex25d_file_pb2().ShapeRecord.SHAPE_KIND_BOX)
             shape.box.upper_right.x = shape.box.upper_right.y = 100000  # 10 um square
         from fractions import Fraction
-        from klayout_pex.klayout.physical_geometry import apply_width_bias, width_bias_offsets
+        from kpex.klayout.physical_geometry import apply_width_bias, width_bias_offsets
         apply_width_bias(file, width_bias_offsets(selected_stack(corner, pdk), Fraction('0.0001')))
         scene = resolve(file)
         directory = tmp_path / corner

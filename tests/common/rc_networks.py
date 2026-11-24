@@ -40,8 +40,8 @@ from typing import *
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.rc_network import RCNetwork
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
+from kpex.netlist.rc_network import RCNetwork
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
 
 
 def approx(expected: Any, rel: float = 1e-14) -> Any:

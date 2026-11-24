@@ -28,7 +28,7 @@ from __future__ import annotations
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.klayout.native_coordinates import is_supported_native_coordinate
+from kpex.klayout.native_coordinates import is_supported_native_coordinate
 
 
 @pytest.mark.parametrize('value,accepted', [

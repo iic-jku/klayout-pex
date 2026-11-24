@@ -32,8 +32,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.pex25d.exporters import validate_export_scene
+from kpex import pex25d
+from kpex.pex25d.exporters import validate_export_scene
 
 
 def contact_scene(zlow: int = 0, zhigh: int = 10, net: str = 'signal') -> Any:
@@ -122,9 +122,9 @@ def test_direct_builtin_export_calls_cannot_bypass_safeguard(target: str, tmp_pa
 
 
 def test_direct_model_build_rejects_before_meshing():
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapModelOptions
-    from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
-    from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+    from kpex.fastercap.pex25d_exporter import FasterCapModelOptions
+    from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+    from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
     with patch.object(FasterCapModelBuilder, 'generate') as generate:
         with pytest.raises(pex25d.InvalidSceneError):
             PEX25DFasterCapModelBuilder(contact_scene(), FasterCapModelOptions()).build()
@@ -133,7 +133,7 @@ def test_direct_model_build_rejects_before_meshing():
 
 def test_cli_reports_ground_contact_without_solver_output(tmp_path: Path):
     import json
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
     scene_path = tmp_path / 'contact.pex25d.scene.pb'
     pex25d.write(contact_scene(), str(scene_path))
     output = tmp_path / 'solver-input'

@@ -33,19 +33,19 @@ from unittest import mock
 import allure
 import pytest
 from typing import Any, Callable, Dict, List
-from klayout_pex.tech_info import TechInfo
+from kpex.tech_info import TechInfo
 
-from klayout_pex.calibration.artifacts import read_message, write_message, sha256_file
-from klayout_pex.calibration.patterns import read_patterns
-from klayout_pex.calibration.prepare import prepare_calibration
-from klayout_pex.calibration.prepared_input import read_preparation, validated_scenes
-from klayout_pex.calibration.solve import (solve_calibration, SolveOptions, MAX_MESH_MIN_ANGLE_DEG,
+from kpex.calibration.artifacts import read_message, write_message, sha256_file
+from kpex.calibration.patterns import read_patterns
+from kpex.calibration.prepare import prepare_calibration
+from kpex.calibration.prepared_input import read_preparation, validated_scenes
+from kpex.calibration.solve import (solve_calibration, SolveOptions, MAX_MESH_MIN_ANGLE_DEG,
                                            options_message, validate_options_message)
-from klayout_pex.calibration.collect import collect_calibration
-from klayout_pex.calibration.validation import CalibrationError
-from klayout_pex.fastercap.fastercap_runner import FasterCapRunResult
-from klayout_pex_protobuf.kpex.result.solver_execution_pb2 import SolverIdentity
-from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection, CalibrationCaseResult
+from kpex.calibration.collect import collect_calibration
+from kpex.calibration.validation import CalibrationError
+from kpex.fastercap.fastercap_runner import FasterCapRunResult
+from kpex_protobuf.kpex.result.solver_execution_pb2 import SolverIdentity
+from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection, CalibrationCaseResult
 
 pytestmark = allure.parent_suite('Unit Tests')
 
@@ -62,7 +62,7 @@ def fake_solver(monkeypatch: pytest.MonkeyPatch) -> Callable:
     executable = Path(sys.executable).resolve()
     identity = SolverIdentity(name='fastercap', version='6.2.1', executable_path=str(executable),
                               executable_sha256=sha256_file(executable), operating_system='test', architecture='test')
-    monkeypatch.setattr('klayout_pex.calibration.solve._solver_identity', lambda _: identity)
+    monkeypatch.setattr('kpex.calibration.solve._solver_identity', lambda _: identity)
 
     def run(exe: str, deck: str, log: str, *args: Any, **kwargs: Any) -> FasterCapRunResult:
         # Native order differs deliberately: projection must follow identities,
@@ -73,7 +73,7 @@ def fake_solver(monkeypatch: pytest.MonkeyPatch) -> Callable:
                              'g3_A -1e-9 -3e-9 7e-9\n'
                              'Solve statistics:\nNumber of panels after refinement: 123\n', encoding='utf-8')
         return FasterCapRunResult((str(exe), deck), 0, 0.1)
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
     return run
 
 
@@ -128,7 +128,7 @@ def test_unknown_schema_field_rejected(preparation: Path, tmp_path: Path):
 
 @pytest.mark.parametrize('status', ['exit', 'timeout', 'malformed'])
 def test_failed_solves_preserve_evidence(preparation: Path, fake_solver: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status: str):
-    from klayout_pex.fastercap.fastercap_error import FasterCapExecutionError, FasterCapTimeoutError
+    from kpex.fastercap.fastercap_error import FasterCapExecutionError, FasterCapTimeoutError
     def fail(exe: str, deck: str, log: str, *args: Any, **kwargs: Any):
         result = fake_solver(exe, deck, log, *args, **kwargs)
         if status == 'malformed':
@@ -137,7 +137,7 @@ def test_failed_solves_preserve_evidence(preparation: Path, fake_solver: Callabl
             return result
         error = FasterCapTimeoutError if status == 'timeout' else FasterCapExecutionError
         raise error('deliberate failure', result=FasterCapRunResult(result.arguments, 75, 0.1))
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', fail)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', fail)
     result = solve_calibration(preparation, tmp_path / 'runs')
     assert result.successful_cases == 0 and result.failed_cases == 2
     collection = read_message(result.collection_path, CalibrationCollection())
@@ -160,8 +160,8 @@ def test_cancelled_batch_is_collectable(preparation: Path, fake_solver: Callable
 
 
 def test_crash_checkpoint_remains_incomplete(preparation: Path, fake_solver: Callable, tmp_path: Path):
-    from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunCheckpoint
-    from klayout_pex_protobuf.kpex.result.solver_execution_pb2 import SolverExecution
+    from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunCheckpoint
+    from kpex_protobuf.kpex.result.solver_execution_pb2 import SolverExecution
     result = solve_calibration(preparation, tmp_path / 'runs')
     (tmp_path / 'runs/completed.pb.json').unlink()
     path = tmp_path / 'runs/cases/plates/checkpoint.pb.json'
@@ -187,7 +187,7 @@ def test_changed_completed_log_is_rejected(preparation: Path, fake_solver: Calla
 
 @pytest.mark.parametrize('name', ['../outside', '/absolute', 'a/../b', 'a\\b', 'C:drive', './a', 'a//b'])
 def test_artifact_paths_cannot_escape(tmp_path: Path, name: str):
-    from klayout_pex.calibration.artifacts import artifact_path
+    from kpex.calibration.artifacts import artifact_path
     with pytest.raises(CalibrationError, match='Invalid'):
         artifact_path(tmp_path, name, required=False)
 
@@ -197,7 +197,7 @@ def test_existing_output_is_untouched(preparation: Path, tmp_path: Path):
     output.mkdir()
     sentinel = output / 'notes.txt'
     sentinel.write_text('keep', encoding='utf-8')
-    with mock.patch('klayout_pex.calibration.solve._solver_identity') as detect:
+    with mock.patch('kpex.calibration.solve._solver_identity') as detect:
         with pytest.raises(CalibrationError, match='already exists'):
             solve_calibration(preparation, output)
     detect.assert_not_called()
@@ -212,7 +212,7 @@ import sys
 from pathlib import Path
 sys.modules['klayout'] = None
 sys.modules['klayout.db'] = None
-from klayout_pex.calibration.collect import collect_calibration
+from kpex.calibration.collect import collect_calibration
 collect_calibration(Path(sys.argv[1]), Path(sys.argv[2]))
 """
     completed = subprocess.run([sys.executable, '-c', code, str(result.manifest_path), str(tmp_path / 'offline')],
@@ -222,7 +222,7 @@ collect_calibration(Path(sys.argv[1]), Path(sys.argv[2]))
 
 def test_cli_commands_and_validation_before_loading(tmp_path: Path):
     from tests.common.cli_runner import run_cli
-    from klayout_pex.kpex_cli import KpexCLI
+    from kpex.kpex_cli import KpexCLI
     code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', '--help'])
     assert code == 0 and '{prepare,solve,collect}' in output, output
     for command, manifest_type in [('solve', 'CalibrationManifest'), ('collect', 'CalibrationRunManifest')]:
@@ -235,7 +235,7 @@ def test_cli_commands_and_validation_before_loading(tmp_path: Path):
 
 def test_cli_solve_and_collect(preparation: Path, fake_solver: Callable, tmp_path: Path):
     from tests.common.cli_runner import run_cli
-    from klayout_pex.kpex_cli import KpexCLI
+    from kpex.kpex_cli import KpexCLI
     for args in [['solve', '--manifest', str(preparation), '--out-dir', str(tmp_path / 'runs')],
                  ['collect', '--manifest', str(tmp_path / 'runs/manifest.json'), '--out-dir', str(tmp_path / 'copy')]]:
         code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', *args])
@@ -245,7 +245,7 @@ def test_cli_solve_and_collect(preparation: Path, fake_solver: Callable, tmp_pat
 
 @pytest.mark.parametrize('mutation', ['enum', 'unknown', 'version', 'case', 'log', 'report', 'duplicate'])
 def test_invalid_saved_contracts_fail_before_output(preparation: Path, fake_solver: Callable, tmp_path: Path, mutation: str):
-    from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunCheckpoint, CalibrationRunManifest
+    from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunCheckpoint, CalibrationRunManifest
     result = solve_calibration(preparation, tmp_path / 'runs')
     (tmp_path / 'runs/completed.pb.json').unlink()
     path = tmp_path / 'runs/cases/plates/checkpoint.pb.json'
@@ -276,7 +276,7 @@ def test_invalid_saved_contracts_fail_before_output(preparation: Path, fake_solv
 
 
 def test_solver_identity_is_checked_before_output(preparation: Path, tmp_path: Path):
-    from klayout_pex.tool_version_constraints import Tool
+    from kpex.tool_version_constraints import Tool
     with pytest.raises(CalibrationError, match='was not found'):
         solve_calibration(preparation, tmp_path / 'runs', executable='nonexistent-calibration-solver')
     with mock.patch.object(Tool, 'detect_version', return_value=None):
@@ -318,7 +318,7 @@ def test_parallel_results_keep_specification_order_and_thread_limits(preparation
                 active -= 1
             if case_id == 'wires':
                 wires_finished.set()
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
     result = solve_calibration(preparation, tmp_path / 'runs', options=SolveOptions(jobs=2, threads_per_job=2))
     assert result.successful_cases == 2 and result.failed_cases == 0
     assert maximum == 2
@@ -329,7 +329,7 @@ def test_parallel_results_keep_specification_order_and_thread_limits(preparation
 
 
 def test_export_order_does_not_define_primary_input(preparation: Path, fake_solver: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
+    from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
     export = FasterCapSceneExporter.export
     def reordered(self: Any, *args: Any, **kwargs: Any) -> Any:
         return list(reversed(export(self, *args, **kwargs)))
@@ -339,8 +339,8 @@ def test_export_order_does_not_define_primary_input(preparation: Path, fake_solv
 
 
 def test_unchanged_metadata_cannot_hide_changed_geometry(preparation: Path, tmp_path: Path):
-    from klayout_pex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
-    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+    from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
+    from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
     manifest = read_message(preparation, CalibrationManifest())
     scene_path = preparation.parent / manifest.cases[0].scene
     scene = PEX25DScene.FromString(scene_path.read_bytes())
@@ -353,14 +353,14 @@ def test_unchanged_metadata_cannot_hide_changed_geometry(preparation: Path, tmp_
 
 
 def test_public_klayout_context_imports_are_preserved():
-    import klayout_pex.klayout as bindings
-    from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
+    import kpex.klayout as bindings
+    from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
     assert bindings.KLayoutExtractionContext is KLayoutExtractionContext
     assert bindings.KLayoutExtractedLayerInfo is KLayoutExtractedLayerInfo
 
 
 def test_stale_catalog_selection_is_rejected(preparation: Path):
-    from klayout_pex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
+    from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
     manifest = read_message(preparation, CalibrationManifest())
     manifest.technology.selection.technology_id = 'another_technology'
     write_message(preparation, manifest, replace=True)
@@ -395,8 +395,8 @@ def test_relative_tolerances_accept_valid_bounds(field: str, value: float):
 def test_mesh_angle_keeps_existing_exporter_bounds(
         angle: float, preparation: Path, fake_solver: Callable, tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch):
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
-    from klayout_pex.util.number_range import DELAUNAY_B_MAX
+    from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
+    from kpex.util.number_range import DELAUNAY_B_MAX
     export = FasterCapSceneExporter.export
     observed = []
     def record(self: Any, *args: Any, **kwargs: Any) -> Any:
@@ -430,8 +430,8 @@ def test_mesh_angle_rejects_values_outside_mesher_limit(angle: float):
 ])
 def test_cli_invalid_controls_fail_before_reading_manifest(arguments: List[str], tmp_path: Path):
     from tests.common.cli_runner import run_cli
-    from klayout_pex.kpex_cli import KpexCLI
-    with mock.patch('klayout_pex.calibration.solve.read_preparation',
+    from kpex.kpex_cli import KpexCLI
+    with mock.patch('kpex.calibration.solve.read_preparation',
                     side_effect=AssertionError('validate controls before loading the manifest')):
         code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', 'missing.json',
                                               '--out-dir', str(tmp_path / 'out'), *arguments])
@@ -444,7 +444,7 @@ def test_cli_invalid_controls_fail_before_reading_manifest(arguments: List[str],
                                     '--delaunay-amax-um2', '--delaunay-b', '--mesh-min-angle'])
 def test_cli_rejects_removed_names_and_partial_options(option: str, tmp_path: Path):
     from tests.common.cli_runner import run_cli
-    from klayout_pex.kpex_cli import KpexCLI
+    from kpex.kpex_cli import KpexCLI
     code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', 'missing.json',
                                           '--out-dir', str(tmp_path / 'out'), option, '1'])
     assert code == 2 and 'unrecognized arguments' in output, output
@@ -456,8 +456,8 @@ def test_cli_rejects_removed_names_and_partial_options(option: str, tmp_path: Pa
 def test_cli_records_explicit_controls_and_refinement_mode(
         controls: List[str], automatic: Any, preparation: Path, fake_solver: Callable, tmp_path: Path):
     from tests.common.cli_runner import run_cli
-    from klayout_pex.kpex_cli import KpexCLI
-    from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest
+    from kpex.kpex_cli import KpexCLI
+    from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest
     run_dir = tmp_path / 'CLI run with spaces'
     code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', str(preparation),
         '--solver', 'fastercap', '--fastercap-exe', sys.executable, '--out-dir', str(run_dir),
@@ -482,7 +482,7 @@ def report_version(request: pytest.FixtureRequest) -> str:
 @pytest.fixture
 def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch, report_version: str) -> Callable:
     from tests.common.fastercap_report import numerical_report
-    from klayout_pex.calibration.solve import _solver_identity
+    from kpex.calibration.solve import _solver_identity
     identity = _solver_identity('unused')
     identity.version = report_version
 
@@ -496,15 +496,15 @@ def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch, report
         data['build']['version'] = f'FasterCap version {report_version}'
         Path(kwargs['report_path']).write_text(json.dumps(data), encoding='utf-8')
         return result
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
     return run
 
 
 def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
         preparation: Path, report_solver: Callable, report_version: str, tmp_path: Path):
     import shutil
-    from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest
-    from klayout_pex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
+    from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest
+    from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
     result = solve_calibration(preparation, tmp_path / 'runs')
     assert result.successful_cases == 2
     assert set(result.written_paths) == {p for p in (tmp_path / 'runs').rglob('*') if p.is_file()}
@@ -523,7 +523,7 @@ def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
     assert (tmp_path / 'runs/collection/runs/cases/plates/numerical-report.json').read_bytes() == raw.read_bytes()
     shutil.move(tmp_path / 'runs', tmp_path / 'relocated')
     with mock.patch('subprocess.Popen', side_effect=AssertionError('collection must never execute')), \
-            mock.patch('klayout_pex.calibration.solve._solver_identity',
+            mock.patch('kpex.calibration.solve._solver_identity',
                        side_effect=AssertionError('collection must not require an installed solver')):
         again = collect_calibration(tmp_path / 'relocated/manifest.json', tmp_path / 'again')
     assert read_message(again.manifest_path, CalibrationCollection()) == data
@@ -532,7 +532,7 @@ def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
 @pytest.mark.parametrize('failure', ['missing', 'truncated', 'status', 'identity', 'exit', 'timeout'])
 def test_report_failure_never_uses_successful_console_matrix(
         preparation: Path, report_solver: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str):
-    from klayout_pex.fastercap.fastercap_error import FasterCapExecutionError, FasterCapTimeoutError
+    from kpex.fastercap.fastercap_error import FasterCapExecutionError, FasterCapTimeoutError
     def run(exe: str, deck: str, log: str, *args: Any, **kwargs: Any) -> FasterCapRunResult:
         result = report_solver(exe, deck, log, *args, **kwargs)
         report = Path(kwargs['report_path'])
@@ -551,7 +551,7 @@ def test_report_failure_never_uses_successful_console_matrix(
             error = FasterCapTimeoutError if failure == 'timeout' else FasterCapExecutionError
             raise error('solver failed', result=FasterCapRunResult(result.arguments, 75, 0.1))
         return result
-    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
+    monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
     result = solve_calibration(preparation, tmp_path / 'runs')
     assert result.successful_cases == 0 and result.failed_cases == 2
     data = read_message(result.collection_path, CalibrationCollection())
@@ -576,8 +576,8 @@ def test_changed_numerical_report_is_rejected(preparation: Path, report_solver: 
     ('6.4.0', True), ('6.4.1', True),
 ])
 def test_calibration_requires_corrected_solver(version: str, accepted: bool, monkeypatch: pytest.MonkeyPatch):
-    from klayout_pex.calibration.solve import _solver_identity
-    from klayout_pex.tool_version_constraints import Tool
+    from kpex.calibration.solve import _solver_identity
+    from kpex.tool_version_constraints import Tool
     monkeypatch.setattr(Tool, 'detect_version', lambda *_: Tool.FASTERCAP.parse_version(f'FasterCap version {version}'))
     if accepted:
         assert _solver_identity(sys.executable).version == version

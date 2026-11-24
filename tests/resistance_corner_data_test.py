@@ -34,7 +34,7 @@ import allure
 import pytest
 from google.protobuf.json_format import MessageToDict
 
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from scripts.gen_tech_pb.resistance_corners import load_corner_resistances
 from tests.common.tech_catalog import small_technology, sample_provenance
 

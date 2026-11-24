@@ -30,11 +30,11 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.log import (
+from kpex.log import (
     LogLevel,
     set_log_level,
 )
-from klayout_pex.netlistsvg.netlist_json import NetlistJSONWriter
+from kpex.netlistsvg.netlist_json import NetlistJSONWriter
 
 
 @allure.parent_suite("Unit Tests")

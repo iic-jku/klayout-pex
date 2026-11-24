@@ -28,8 +28,8 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
 
 
 def solve_fastercap(deck: str, log: Path, mesh: float) -> CapacitanceMatrix:

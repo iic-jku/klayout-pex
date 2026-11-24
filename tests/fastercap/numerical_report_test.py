@@ -36,10 +36,10 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.fastercap.fastercap_error import FasterCapError, FasterCapExecutionError
-from klayout_pex.fastercap.fastercap_runner import run_fastercap
-from klayout_pex.fastercap.numerical_report import read_numerical_report
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.fastercap.fastercap_error import FasterCapError, FasterCapExecutionError
+from kpex.fastercap.fastercap_runner import run_fastercap
+from kpex.fastercap.numerical_report import read_numerical_report
 
 pytestmark = allure.parent_suite('Unit Tests')
 
@@ -148,7 +148,7 @@ def test_runner_returns_created_report_even_when_solver_fails(tmp_path: Path, ex
         assert arguments[-1] == 'geometry.lst'
         report.write_text('{"incomplete":', encoding='utf-8')
         return process
-    with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen', side_effect=launch):
+    with mock.patch('kpex.fastercap.fastercap_runner.subprocess.Popen', side_effect=launch):
         arguments = dict(exe_path='FasterCap', lst_file_path='geometry.lst',
                          log_path=str(tmp_path / 'solver.log'), tolerance=0.05, d_coeff=0.5,
                          ooc_condition=None, auto_preconditioner=False, galerkin_scheme=False,
@@ -176,7 +176,7 @@ def test_runner_rejects_unsafe_report_path_before_starting_or_truncating_log(tmp
         value = ''
     elif invalid == 'quoted':
         value = str(tmp_path / 'a"b.json')
-    with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen') as launch:
+    with mock.patch('kpex.fastercap.fastercap_runner.subprocess.Popen') as launch:
         with pytest.raises(FasterCapError):
             run_fastercap('FasterCap', 'geometry.lst', str(log), 0.05, 0.5, None,
                           False, False, False, report_path=value)
@@ -198,9 +198,9 @@ def extraction_args(tmp_path: Path) -> Namespace:
 def test_extraction_selects_report_by_version_and_replaces_previous_output(
         tmp_path: Path, report_data: Dict[str, Any], extraction_args: Namespace, version: Optional[str]):
     from packaging.version import Version
-    from klayout_pex.kpex_cli import KpexCLI
-    from klayout_pex.tool_version_constraints import Tool
-    from klayout_pex.fastercap.fastercap_runner import FasterCapRunResult
+    from kpex.kpex_cli import KpexCLI
+    from kpex.tool_version_constraints import Tool
+    from kpex.fastercap.fastercap_runner import FasterCapRunResult
     raw = tmp_path / 'test_FasterCap_Result_Matrix_Raw.csv'
     report = tmp_path / 'test_FasterCap_Report.json'
     report.write_text('stale report', encoding='utf-8')
@@ -235,7 +235,7 @@ def test_extraction_selects_report_by_version_and_replaces_previous_output(
     cli = KpexCLI()
     cli.run_result = mock.Mock()
     with mock.patch.object(Tool, 'detect_version', return_value=Version(version) if version else None), \
-         mock.patch('klayout_pex.kpex_cli.run_fastercap', side_effect=run), \
+         mock.patch('kpex.kpex_cli.run_fastercap', side_effect=run), \
          mock.patch.object(CapacitanceMatrix, 'averaged_off_diagonals', observe), \
          mock.patch.dict('os.environ', {}):
         for _ in range(2):
@@ -247,9 +247,9 @@ def test_extraction_selects_report_by_version_and_replaces_previous_output(
 def test_extraction_keeps_failure_report_without_writing_matrix(
         tmp_path: Path, extraction_args: Namespace, failed_exit: bool):
     from packaging.version import Version
-    from klayout_pex.kpex_cli import KpexCLI
-    from klayout_pex.tool_version_constraints import Tool
-    from klayout_pex.fastercap.fastercap_runner import FasterCapRunResult
+    from kpex.kpex_cli import KpexCLI
+    from kpex.tool_version_constraints import Tool
+    from kpex.fastercap.fastercap_runner import FasterCapRunResult
 
     def run(**kwargs: Any) -> FasterCapRunResult:
         report = Path(kwargs['report_path'])
@@ -263,7 +263,7 @@ def test_extraction_keeps_failure_report_without_writing_matrix(
     cli = KpexCLI()
     cli.run_result = mock.Mock()
     with mock.patch.object(Tool, 'detect_version', return_value=Version('6.3.0')), \
-         mock.patch('klayout_pex.kpex_cli.run_fastercap', side_effect=run), \
+         mock.patch('kpex.kpex_cli.run_fastercap', side_effect=run), \
          mock.patch.dict('os.environ', {}):
         with pytest.raises(FasterCapError):
             cli.run_fastercap_extraction(extraction_args, mock.Mock(), 'geometry.lst', None)
@@ -276,7 +276,7 @@ def test_extraction_keeps_failure_report_without_writing_matrix(
 @pytest.mark.parametrize('input_path', ['plain.lst', 'directory with spaces/geometry.lst', 'tab\tname.lst'])
 def test_input_argument_survives_fastercap_tokenizer(tmp_path: Path, input_path: str):
     process = mock.Mock(returncode=0, stdout=io.StringIO(''))
-    with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen', return_value=process) as launch:
+    with mock.patch('kpex.fastercap.fastercap_runner.subprocess.Popen', return_value=process) as launch:
         result = run_fastercap('FasterCap', input_path, str(tmp_path / 'solver.log'),
                                0.05, 0.5, 0, True, False, False)
     argument = result.arguments[-1]
@@ -286,7 +286,7 @@ def test_input_argument_survives_fastercap_tokenizer(tmp_path: Path, input_path:
 
 
 def test_literal_quote_in_input_is_rejected_before_creating_log(tmp_path: Path):
-    with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen') as launch:
+    with mock.patch('kpex.fastercap.fastercap_runner.subprocess.Popen') as launch:
         with pytest.raises(FasterCapError, match='double quotes'):
             run_fastercap('FasterCap', 'a"b.lst', str(tmp_path / 'solver.log'),
                           0.05, 0.5, 0, True, False, False)

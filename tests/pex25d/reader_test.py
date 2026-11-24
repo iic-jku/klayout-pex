@@ -29,8 +29,8 @@ import os
 import tempfile
 import unittest
 
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport, Severity
-from klayout_pex.pex25d.reader import ReadError, read_pex25d_text
+from kpex.pex25d.diagnostics import DiagnosticsReport, Severity
+from kpex.pex25d.reader import ReadError, read_pex25d_text
 
 from .pex25d_fixtures import (
     HEADER, MINIMAL, STACK_ONLY, codes, read, read_codes, replacing,

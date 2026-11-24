@@ -34,8 +34,8 @@ import allure
 import klayout.db as kdb
 import klayout.rdb as rdb
 
-from klayout_pex.magic.magic_ext_file_parser import parse_magic_pex_run
-from klayout_pex.magic.magic_log_analyzer import MagicLogAnalyzer
+from kpex.magic.magic_ext_file_parser import parse_magic_pex_run
+from kpex.magic.magic_log_analyzer import MagicLogAnalyzer
 
 CELL = 'r_wire_voltage_divider_li1'
 

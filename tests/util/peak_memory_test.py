@@ -35,7 +35,7 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.util.peak_memory import PeakMemory, format_bytes, log_peak_memory
+from kpex.util.peak_memory import PeakMemory, format_bytes, log_peak_memory
 from tests.common.cli_runner import run_python_script
 
 MIB = 1 << 20
@@ -47,7 +47,7 @@ def test_peak_memory_is_in_bytes():
     # NOTE: in a fresh process, whose subprocess takes 128 MiB, and then itself, as ru_maxrss is in bytes on macOS,
     #       in KiB on Linux, which also carries it over to a subprocess, e.g. from this test runner (see PeakMemory)
     script = ("import subprocess, sys\n"
-              "from klayout_pex.util.peak_memory import peak_memory\n"
+              "from kpex.util.peak_memory import peak_memory\n"
               "subprocess.run([sys.executable, '-c', \"data = b'x' * (128 << 20)\"], check=True)\n"
               "data = b'x' * (128 << 20)\n"
               "memory = peak_memory()\n"
@@ -75,7 +75,7 @@ def test_peak_memory_is_in_bytes():
 ], ids=['larger subprocess', 'smaller subprocess', 'Windows'])
 def test_log_names_the_largest_subprocess_only_if_larger(memory: PeakMemory, logged: str,
                                                          caplog: pytest.LogCaptureFixture):
-    with mock.patch('klayout_pex.util.peak_memory.peak_memory', return_value=memory):
+    with mock.patch('kpex.util.peak_memory.peak_memory', return_value=memory):
         log_peak_memory('LVS')
     assert ('__kpex__', logging.INFO, logged) in caplog.record_tuples
 

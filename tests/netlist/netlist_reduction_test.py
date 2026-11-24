@@ -36,10 +36,10 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.netlist_reduction import NetworkSize, UnknownNodesError, reduce_spice_netlist
-from klayout_pex.netlist.admittance_check import AdmittanceCheckOptions
-from klayout_pex.netlist.rc_reduction import ReductionOptions, ReductionStatistics
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.netlist.netlist_reduction import NetworkSize, UnknownNodesError, reduce_spice_netlist
+from kpex.netlist.admittance_check import AdmittanceCheckOptions
+from kpex.netlist.rc_reduction import ReductionOptions, ReductionStatistics
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
 from tests.common.rc_networks import (
     LINE_NETLIST,
     node_names,

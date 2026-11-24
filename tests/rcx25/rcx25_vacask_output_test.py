@@ -29,9 +29,9 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.netlist.netlist_format import NetlistFormat
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.netlist.netlist_format import NetlistFormat
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.ngspice import read_wrdata, requires_ngspice, run_ngspice, write_spiceinit
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.vacask import (

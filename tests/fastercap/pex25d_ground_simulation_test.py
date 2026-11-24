@@ -31,11 +31,11 @@ from typing import Dict, List
 import klayout.db as kdb
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
-from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
+from kpex import pex25d
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
 from tests.common.pex25d_ground import GROUND_CUTOUT_TEXT
 
 

@@ -25,9 +25,9 @@
 
 from typing import Dict, List, Tuple
 
-from klayout_pex_protobuf.kpex.tech.device_models_pb2 import DeviceCapacitanceModel
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologySource
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex_protobuf.kpex.tech.device_models_pb2 import DeviceCapacitanceModel
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologySource
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 
 
 SKY130_REVISION = '29b55153fd9f4badef05a02667184b81789d1f61'

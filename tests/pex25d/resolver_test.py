@@ -29,9 +29,9 @@ import math
 from typing import *
 import unittest
 
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
-from klayout_pex.pex25d.protobuf import pex25d_scene_pb2
-from klayout_pex.pex25d.resolver import ResolveError, resolve
+from kpex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.protobuf import pex25d_scene_pb2
+from kpex.pex25d.resolver import ResolveError, resolve
 
 from .pex25d_fixtures import MINIMAL, codes, read, replacing
 

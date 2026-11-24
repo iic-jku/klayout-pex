@@ -33,17 +33,17 @@ from unittest import mock
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.lvsdb_extractor import (
+from kpex.klayout.lvsdb_extractor import (
     KLayoutExtractedLayerInfo,
     KLayoutExtractionContext,
     KLayoutMergedExtractedLayerInfo,
     LVSDBError,
     subcell_label_name
 )
-from klayout_pex.pdk_config import PDK
-from klayout_pex.types import LVSLayerName, NetName
-from klayout_pex.tech_info import TechInfo
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+from kpex.pdk_config import PDK
+from kpex.types import LVSLayerName, NetName
+from kpex.tech_info import TechInfo
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
     @property
     def tech_info_json_path(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                             'klayout_pex_protobuf', 'ihp-sg13g2_tech.pb.json'))
+                                             'kpex_protobuf', 'ihp-sg13g2_tech.pb.json'))
 
     def tech_info(self,
                   renamed_layers_derived_from: Optional[str] = None,
@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
 
     def test_unnamed_layer_partly_covered_by_derived_layers_is_a_warning(self):
         # the contacts to the taps (e.g. the guard ring) have no layer in the tech info
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+        with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning:
             pex_context = self.prepare_extraction()
         self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
                       "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, "
@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
 
     def test_layers_within_devices_are_known_but_not_extracted(self):
         # e.g. the contacts and the emitter windows of bipolar transistors, whose models have their resistances
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+        with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning:
             pex_context = self.prepare_extraction(tech=self.tech_info(device_internal_layers=['cont_nsd_con']))
         lvs_layer_names = {sl.lvs_layer_name for layer in pex_context.extracted_layers.values()
                            for sl in layer.source_layers}
@@ -118,7 +118,7 @@ class Test(unittest.TestCase):
                       [call.args[0] for call in warning.call_args_list])
 
     def test_leftover_top_cells_are_ignored_with_a_warning(self):
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+        with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning:
             pex_context = self.prepare_extraction()
         messages = [call.args[0] for call in warning.call_args_list]
         self.assertTrue(any('D$rfnmos' in m for m in messages), messages)
@@ -181,10 +181,10 @@ class NetNameTest(unittest.TestCase):
             if net.name.startswith('$'):
                 net.name = ''
         tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
-                            __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
+                            __file__, '..', '..', '..', 'kpex_protobuf', 'sky130A_tech.pb.json'))),
                         dielectric_filter=None)
 
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+        with mock.patch('kpex.klayout.lvsdb_extractor.warning'):
             pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux',
                                                                       lvsdb=lvsdb,
                                                                       tech=tech,
@@ -205,9 +205,9 @@ class NetNameTest(unittest.TestCase):
         lvsdb = kdb.LayoutVsSchematic()
         lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_reordered_lvs_layers.lvsdb.gz'))
         tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
-                            __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
+                            __file__, '..', '..', '..', 'kpex_protobuf', 'sky130A_tech.pb.json'))),
                         dielectric_filter=None)
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+        with mock.patch('kpex.klayout.lvsdb_extractor.warning'):
             pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux',
                                                                       lvsdb=lvsdb,
                                                                       tech=tech,
@@ -258,7 +258,7 @@ def pattern_context(pdk_name: PDKName,
             options.dbu = source_dbu
             layout.read(PDKTestConfig(pdk_name).gds_path('test_patterns', f"{cell_name}.gds.gz"), options)
         source_top_cell = layout.cell(cell_name)
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning:
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name, lvsdb=lvsdb, tech=tech,
                                                                   blackbox_devices=False,
                                                                   source_top_cell=source_top_cell,
@@ -424,10 +424,10 @@ def lvsdb_context(cell_name: str, tech_name: str) -> KLayoutExtractionContext:
     lvsdb = kdb.LayoutVsSchematic()
     lvsdb.read(os.path.join(repo_dir, 'testdata', 'klayout', 'lvs', f"{cell_name}.lvsdb.gz"))
     tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.join(
-                        repo_dir, 'klayout_pex_protobuf', f"{tech_name}_tech.pb.json")),
+                        repo_dir, 'kpex_protobuf', f"{tech_name}_tech.pb.json")),
                     dielectric_filter=None)
 
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning'):
         return KLayoutExtractionContext.prepare_extraction(top_cell=cell_name,
                                                            lvsdb=lvsdb,
                                                            tech=tech,

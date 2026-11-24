@@ -34,14 +34,14 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.pdk_config import PDK
-from klayout_pex.rcx25.c.device_capacitance_references import (
+from kpex.kpex_cli import KpexCLI
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.pdk_config import PDK
+from kpex.rcx25.c.device_capacitance_references import (
     DeviceCapacitanceCheckError, DeviceCapacitanceReference, tech_device_capacitance_references,
 )
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyDatasetFile
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyDatasetFile
 from scripts.gen_tech_pb.corner_data import write_bundled_corner_catalog
 from scripts.gen_tech_pb.device_reference_corners import load_corner_device_references
 from tests.common.cli_runner import run_cli

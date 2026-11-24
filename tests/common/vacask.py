@@ -41,7 +41,7 @@ import pytest
 if TYPE_CHECKING:
     import numpy as np
 
-from klayout_pex.netlist.spice_netlist import SpiceNetlist
+from kpex.netlist.spice_netlist import SpiceNetlist
 
 
 VACASK_EXE = shutil.which('vacask')
@@ -102,7 +102,7 @@ def vacask_port_admittance(netlist_path: str,
                            work_dir: str) -> Tuple["np.ndarray", "np.ndarray"]:
     """Convert SPICE and measure all port admittances, one sample per decade."""
     import numpy as np
-    from klayout_pex.netlist.netlist_convert import convert_to_vacask
+    from kpex.netlist.netlist_convert import convert_to_vacask
     from tests.common.port_admittance_bench import port_admittance_from_currents
 
     name = os.path.splitext(os.path.basename(netlist_path))[0]

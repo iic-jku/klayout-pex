@@ -33,8 +33,8 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.rc_network import RCNetwork
-from klayout_pex.netlist.rc_reduction import (
+from kpex.netlist.rc_network import RCNetwork
+from kpex.netlist.rc_reduction import (
     TIE_RESISTANCE,
     ReductionOptions,
     eliminate_capacitor_only_node,

@@ -34,7 +34,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.pdk_config import PDK
+from kpex.pdk_config import PDK
 
 if TYPE_CHECKING:
     from .conftest import InstalledWheel  # NOTE: the `installed_wheel` fixture

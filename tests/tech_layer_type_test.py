@@ -31,10 +31,10 @@ from pathlib import Path
 import allure
 import pytest
 
-from klayout_pex.tech_catalog import load_technology_catalog
-from klayout_pex.tech_info import TechDefError, TechInfo
-from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex.tech_catalog import load_technology_catalog
+from kpex.tech_info import TechDefError, TechInfo
+from kpex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from tests.common.tech_catalog import edit_dataset, small_catalog
 
 

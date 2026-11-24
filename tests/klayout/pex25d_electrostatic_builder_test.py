@@ -30,12 +30,12 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.klayout.pex25d_builder import BuildError, BuilderOptions, GeometryScope, PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.util.multiple_choice import MultipleChoicePattern
-from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
+from kpex.klayout.pex25d_builder import BuildError, BuilderOptions, GeometryScope, PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.pex25d.resolver import resolve
+from kpex.tech_info import TechInfo
+from kpex.util.multiple_choice import MultipleChoicePattern
+from kpex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
 from tests.common.fastercap_geometry import context_from_shapes
 from tests.klayout.pex25d_builder_test import TerminalFixture
 

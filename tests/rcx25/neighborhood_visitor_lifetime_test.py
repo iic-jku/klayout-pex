@@ -32,13 +32,13 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
-from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
-from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
-from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
-from klayout_pex.rcx25.extraction_results import CellExtractionResults
-from klayout_pex.tech_info import TechInfo
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+from kpex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from kpex.rcx25.c.overlap_extractor import OverlapExtractor
+from kpex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
+from kpex.rcx25.extraction_reporter import ExtractionReporter
+from kpex.rcx25.extraction_results import CellExtractionResults
+from kpex.tech_info import TechInfo
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 
 @allure.parent_suite('Unit Tests')

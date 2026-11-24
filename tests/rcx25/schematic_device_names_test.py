@@ -31,10 +31,10 @@ import unittest
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.netlist_printer import NetlistHeader, NetlistPrinter
-from klayout_pex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.schematic_device_names import use_schematic_device_names
+from kpex.klayout.netlist_printer import NetlistHeader, NetlistPrinter
+from kpex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.schematic_device_names import use_schematic_device_names
 from tests.common.device_model_mappings import NMOS, RPPD, device_models
 
 

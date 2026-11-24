@@ -35,9 +35,9 @@ from typing import Dict
 import allure
 import pytest
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_catalog import load_technology_catalog
-from klayout_pex.tech_info import TechDefError, TechInfo
+from kpex.pdk_config import PDK
+from kpex.tech_catalog import load_technology_catalog
+from kpex.tech_info import TechDefError, TechInfo
 from tests.common.tech_catalog import read_catalog
 
 pytestmark = allure.parent_suite('Unit Tests')

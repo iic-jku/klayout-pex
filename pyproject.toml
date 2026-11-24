@@ -1,6 +1,6 @@
 [project]
-name = "klayout-pex"
-version = "0.11.1"
+name = "kpex"
+version = "0.12.0"
 description = "Parasitic Extraction Tool for KLayout"
 authors = [{ name = "Martin Köhler", email = "info@martinjankoehler.com" }]
 license = "GPL-3.0-or-later"
@@ -27,14 +27,14 @@ dependencies = [
 dynamic = ["classifiers"]
 
 [project.urls]
-Homepage = "https://iic-jku.github.io/klayout-pex-website/"
-Repository = "https://github.com/iic-jku/klayout-pex.git"
-"Bug Tracker" = "https://github.com/iic-jku/klayout-pex/issues"
+Homepage = "https://iic-jku.github.io/kpex-website/"
+Repository = "https://github.com/iic-jku/kpex.git"
+"Bug Tracker" = "https://github.com/iic-jku/kpex/issues"
 
 [project.scripts]
-kpex = 'klayout_pex.__main__:main'
-netlist = 'klayout_pex.netlist.__main__:main'
-pex25d = 'klayout_pex.pex25d.__main__:main'
+kpex = 'kpex.__main__:main'
+netlist = 'kpex.netlist.__main__:main'
+pex25d = 'kpex.pex25d.__main__:main'
 
 [tool.poetry]
 classifiers = [
@@ -51,9 +51,9 @@ classifiers = [
 ]
 
 packages = [
-    { include = "klayout_pex" },
-    { include = "pdk", to = "klayout_pex" },
-    { include = "klayout_pex_protobuf" }
+    { include = "kpex" },
+    { include = "pdk", to = "kpex" },
+    { include = "kpex_protobuf" }
 ]
 include = [
     "kpex",
@@ -61,53 +61,53 @@ include = [
     # NOTE: build-backend (backend-path) is needed to build a wheel from the sdist
     { path = "scripts/build/kpex_build_backend.py", format = ["sdist"] },
     { path = "scripts/build/kpex_symlinks.py", format = ["sdist"] },
-    "klayout_pex_protobuf/__init__.py",
+    "kpex_protobuf/__init__.py",
     # NOTE: explicitly mention generated protobuf files,
     #       otherwise the .gitignore entries would suppress them
-    { path = "klayout_pex_protobuf/tech/**/*.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/gf180mcuD_tech.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/ihp-sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/ihp-sg13cmos5l_tech.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/sky130A_tech.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/calibration/targets_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/calibration/patterns_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/calibration/preparation_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/result/capacitance_matrix_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/result/solver_execution_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/calibration/solving_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/geometry/shapes_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_source_ref_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_units_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_geometry_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_ground_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_capabilities_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_capacitance_accounting_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_meta_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_diagnostics_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_dielectric_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_resistance_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_terminal_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_domain_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_file_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/pex25d/pex25d_scene_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/layout/location_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/layout/device_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/layout/layer_ref_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/layout/layer_region_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/layout/pin_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/klayout/r_extractor_tech_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/klayout/lvs_input_fingerprint_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/c/capacitance_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/r/r_network_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/request/pex_request_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/result/pex_result_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/tech_catalog_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/tech_selection_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/tech_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/device_models_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/process_stack_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/kpex/tech/substrate_pb2.py", format = ["sdist", "wheel"] }
+    { path = "kpex_protobuf/tech/**/*.pb.json", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/gf180mcuD_tech.pb.json", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/ihp-sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/ihp-sg13cmos5l_tech.pb.json", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/sky130A_tech.pb.json", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/calibration/targets_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/calibration/patterns_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/calibration/preparation_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/result/capacitance_matrix_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/result/solver_execution_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/calibration/solving_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/geometry/shapes_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_source_ref_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_units_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_geometry_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_ground_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_capabilities_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_capacitance_accounting_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_meta_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_diagnostics_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_dielectric_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_resistance_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_terminal_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_domain_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_file_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/pex25d/pex25d_scene_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/layout/location_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/layout/device_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/layout/layer_ref_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/layout/layer_region_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/layout/pin_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/klayout/r_extractor_tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/klayout/lvs_input_fingerprint_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/c/capacitance_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/r/r_network_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/request/pex_request_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/result/pex_result_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/tech_catalog_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/tech_selection_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/device_models_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/process_stack_pb2.py", format = ["sdist", "wheel"] },
+    { path = "kpex_protobuf/kpex/tech/substrate_pb2.py", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.group.test.dependencies]
@@ -125,7 +125,7 @@ pylint-json2html = ">= 0.5.0"
 licenseheaders = ">= 0.8.8"
 
 [tool.poetry.group.build.dependencies]
-# NOTE: bundles protoc, which generates the protobuf python modules (klayout_pex_protobuf/**/*_pb2.py).
+# NOTE: bundles protoc, which generates the protobuf python modules (kpex_protobuf/**/*_pb2.py).
 #       Their gencode version must not be newer than the protobuf runtime (see protobuf above),
 #       grpcio-tools >= 1.82.1 generates code for protobuf 7.
 grpcio-tools = ">= 1.81, < 1.82"
@@ -141,7 +141,7 @@ backend-path = ["scripts/build"]
 [tool.coverage.run]
 # NOTE: KPEX and its plugins (CI's plugin tests), not the tests, the modules they generate (e.g. broken plugins,
 #       whose sources are gone when the report is generated) or the generated protobuf modules
-source_pkgs = ["klayout_pex", "klayout_pex_plugins"]
+source_pkgs = ["kpex", "klayout_pex_plugins"]
 # NOTE: the plugins are only installed for the plugin tests
 disable_warnings = ["module-not-imported"]
 
@@ -165,9 +165,9 @@ markers = [
 # NOTE: text I/O names its encoding, as the locale's is cp1252 on Windows: Python warns where it doesn't,
 #       on every platform, with PYTHONWARNDEFAULTENCODING=1 (CI, _run_tests.sh); those of other packages stay warnings
 filterwarnings = [
-    'error::EncodingWarning:klayout_pex\b',
+    'error::EncodingWarning:kpex\b',
     'error::EncodingWarning:tests\b',
 ]
 
-[tool.poetry_bumpversion.file."klayout_pex/version.py"]
+[tool.poetry_bumpversion.file."kpex/version.py"]
 

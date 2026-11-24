@@ -33,8 +33,8 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.run_result import FileKind
+from kpex.kpex_cli import KpexCLI
+from kpex.run_result import FileKind
 from tests.common.cli_runner import run_cli
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig

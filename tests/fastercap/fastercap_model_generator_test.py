@@ -28,7 +28,7 @@ from typing import *
 from unittest import mock
 
 import klayout.db as kdb
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 
 
 @allure.parent_suite("Unit Tests")
@@ -151,7 +151,7 @@ def test_conductors_of_a_group_have_no_surfaces_between_them():
 @allure.parent_suite("Unit Tests")
 @allure.tag("Capacitance", "FasterCap")
 def test_geometry_check_takes_the_conductors_of_a_group_as_one_surface():
-    with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as error_mock:
+    with mock.patch('kpex.fastercap.fastercap_model_generator.error') as error_mock:
         touching_conductors('N').check()
     assert [c.args[0] for c in error_mock.call_args_list] == []
 
@@ -183,6 +183,6 @@ def test_ending_inner_dielectric_reveals_only_first_surviving_material(start: fl
             a, b, c = triangle
             top_areas[adjacent] += abs((b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x))/2
     assert top_areas == pytest.approx({'middle': middle_width/1000, 'outer': 1-middle_width/1000})
-    with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as errors:
+    with mock.patch('kpex.fastercap.fastercap_model_generator.error') as errors:
         generator.check()
     assert not errors.call_args_list

@@ -26,9 +26,9 @@ import allure
 import pytest
 from unittest import mock
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.pdk_config import PDK
+from kpex.tech_info import TechInfo
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
@@ -546,7 +546,7 @@ def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
                 for top, ocs in overlap_cap_by_layer_names(tech_info).items() if top != 'capm'}
 
     with mock.patch.object(TechInfo, 'overlap_cap_by_layer_names', property(without_capm)), \
-         mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+         mock.patch('kpex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         pex_whiteboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     assert [c.args[0] for c in error_mock.call_args_list if 'overlap' in c.args[0]] == [
         "The tech info has no overlap capacitance for these layer pairs of the layout, "
@@ -572,7 +572,7 @@ def test_sideoverlap_without_side_overlap_cap_is_an_error():
                 for inside, socs in caps.items()}
 
     with mock.patch.object(TechInfo, 'side_overlap_cap_by_layer_names', property(without_li1_to_met1)), \
-         mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+         mock.patch('kpex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz')
     assert [c.args[0] for c in error_mock.call_args_list if 'side overlap' in c.args[0]] == [
         "The tech info has no side overlap capacitance for these layer pairs of the layout, "

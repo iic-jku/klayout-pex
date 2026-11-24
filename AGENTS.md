@@ -211,7 +211,7 @@
   Return a primary checkout to the merge target instead of deleting it. Use managed
   worktree archiving where applicable, respect ownership and protection guards, and
   report any retained branch or worktree with the verified reason.
-- Issues end with the versions used, e.g. `klayout-pex 0.4.4, KLayout 0.30.12,
+- Issues end with the versions used, e.g. `kpex 0.12.0, KLayout 0.30.14,
   IIC-OSIC-TOOLS image 83ae1840458f`, plus the versions of the plugins involved. Give both
   KLayout versions when the binary and the Python module differ.
 - Aim for the sweet spot, not minimal length: too terse makes the reader guess the why;

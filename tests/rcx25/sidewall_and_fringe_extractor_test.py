@@ -30,21 +30,21 @@ from unittest import mock
 
 import klayout.db as kdb
 
-from klayout_pex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
-from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
-from klayout_pex.rcx25.c.device_capacitance_references import DeviceCapacitanceReference
-from klayout_pex.rcx25.c.device_capacitance_checks import (
+from kpex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
+from kpex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from kpex.rcx25.c.device_capacitance_references import DeviceCapacitanceReference
+from kpex.rcx25.c.device_capacitance_checks import (
     CHECK_DEVICE_PROPERTY, DeviceCapacitanceChecks, _DeviceMarker,
 )
-from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
-from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor, sidewall_separation
-from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
-from klayout_pex.rcx25.extraction_results import CellExtractionResults
-from klayout_pex.rcx25.types import EdgeNeighborhood
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.pdk_config import PDK
-from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+from kpex.rcx25.c.geometry_restorer import GeometryRestorer
+from kpex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor, sidewall_separation
+from kpex.rcx25.extraction_reporter import ExtractionReporter
+from kpex.rcx25.extraction_results import CellExtractionResults
+from kpex.rcx25.types import EdgeNeighborhood
+from kpex.tech_info import TechInfo
+from kpex.pdk_config import PDK
+from kpex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 DBU = 0.001  # µm
 SIDE_HALO = 8.0  # µm
@@ -317,7 +317,7 @@ class FringeCapTest(unittest.TestCase):
         neighborhood[0][1][len(visitor.all_layer_names)] = [
             kdb.PolygonWithProperties(kdb.Box(0, 1800, 2000, 2000), {'net': 'inside_net'})]
         layout = kdb.Layout()
-        with mock.patch('klayout_pex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
+        with mock.patch('kpex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
                         wraps=kdb.Region) as region_factory:
             visitor.on_edge(layout, layout.create_cell('TOP'), edge, neighborhood)
         # Two empty-region constructions per interval suffice for the running
@@ -382,7 +382,7 @@ class FringeCapTest(unittest.TestCase):
                     # A full-width rectangular shield only cuts the vertical
                     # interval. It must not allocate a general polygon region
                     # for every candidate in a large edge neighborhood (#501).
-                    with mock.patch('klayout_pex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
+                    with mock.patch('kpex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
                                     wraps=kdb.Region) as region_factory:
                         visitor.emit_fringe('inside', 'outside',
                                             kdb.EdgeWithProperties(kdb.Edge(0, 0, 200000, 0), {'net': 'inside_net'}),
@@ -411,7 +411,7 @@ class FringeCapTest(unittest.TestCase):
                 reference = kdb.Region(polygon) - shield
                 expected = math.fsum(emitted_fringe(fringe_visitor(30.0, True), part)
                                      for part in reference.each())
-                with mock.patch('klayout_pex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
+                with mock.patch('kpex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
                                 wraps=kdb.Region) as region_factory:
                     actual = emitted_fringe(fringe_visitor(30.0, True), polygon, shield)
                 self.assertAlmostEqual(actual, expected, delta=expected * 1e-14)

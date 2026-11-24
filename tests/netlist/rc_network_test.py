@@ -29,7 +29,7 @@ import math
 import allure
 import pytest
 
-from klayout_pex.netlist.rc_network import RCNetwork
+from kpex.netlist.rc_network import RCNetwork
 from tests.common.rc_networks import approx, build_network
 
 parent_suite = "Unit Tests"

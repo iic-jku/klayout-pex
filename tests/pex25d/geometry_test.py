@@ -37,7 +37,7 @@ from __future__ import annotations
 import allure
 import unittest
 
-from klayout_pex.pex25d.validator import (
+from kpex.pex25d.validator import (
     Polygon, polygons_overlap, ring_is_collinear, ring_is_simple,
     ring_strictly_inside, rings_meet,
 )

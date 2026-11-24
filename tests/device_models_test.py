@@ -27,8 +27,8 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModelError, DeviceModels, rectangle_sides
-from klayout_pex.netlist.spice_netlist import SpiceElement
+from kpex.device_models import DeviceModelError, DeviceModels, rectangle_sides
+from kpex.netlist.spice_netlist import SpiceElement
 from tests.common.device_model_mappings import MIM, MOM, NMOS, NPN, RPPD, device_models
 
 

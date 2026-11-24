@@ -31,7 +31,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.netlist.spice_syntax import (
+from kpex.netlist.spice_syntax import (
     SpiceLine,
     SpiceSyntaxError,
     element_terminals,

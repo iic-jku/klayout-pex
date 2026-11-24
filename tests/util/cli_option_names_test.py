@@ -37,12 +37,12 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.env import Env
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.log import LogLevel
-from klayout_pex.magic import magic_log_analyzer
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+from kpex.env import Env
+from kpex.kpex_cli import KpexCLI
+from kpex.log import LogLevel
+from kpex.magic import magic_log_analyzer
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.pex25d.pex25d_cli import Pex25DCLI
 from tests.common.cli_runner import run_cli
 from tests.common.rc_networks import LINE_NETLIST, write
 

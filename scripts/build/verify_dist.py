@@ -69,7 +69,7 @@ def verify_wheel(wheel_path: Path, links: List[Link], package_dirs: PackageDirs)
 def verify_sdist(sdist_path: Path, links: List[Link]) -> List[str]:
     errors = []
     with tarfile.open(sdist_path) as sdist:
-        root = sdist.getnames()[0].split('/')[0]  # e.g. klayout_pex-0.4.4
+        root = sdist.getnames()[0].split('/')[0]  # e.g. kpex-0.12.0
         for link, target in links:
             name = f"{root}/{link}"
             try:

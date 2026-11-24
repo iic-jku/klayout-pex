@@ -34,14 +34,14 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.fastercap.pex25d_exporter import FasterCapModelOptions, build_fastercap_model
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.protobuf import pex25d_file_pb2
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.tech_catalog import load_technology_catalog
-from klayout_pex.tech_info import TechInfo
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.fastercap.pex25d_exporter import FasterCapModelOptions, build_fastercap_model
+from kpex.klayout.pex25d_builder import PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.pex25d.protobuf import pex25d_file_pb2
+from kpex.pex25d.resolver import resolve
+from kpex.tech_catalog import load_technology_catalog
+from kpex.tech_info import TechInfo
 from tests.common.fastercap_geometry import context_from_shapes, fastercap_input
 
 

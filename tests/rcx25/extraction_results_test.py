@@ -29,8 +29,8 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.rcx25.extraction_results import *
-import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+from kpex.rcx25.extraction_results import *
+import kpex_protobuf.kpex.layout.location_pb2 as location_pb2
 
 
 @allure.parent_suite("Unit Tests")

@@ -31,7 +31,7 @@ import allure
 import klayout.rdb as rdb
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
+from kpex.kpex_cli import KpexCLI
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 

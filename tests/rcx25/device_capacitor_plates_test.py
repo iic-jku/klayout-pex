@@ -28,8 +28,8 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
-from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from kpex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
+from kpex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 
 
 def netlist() -> kdb.Netlist:

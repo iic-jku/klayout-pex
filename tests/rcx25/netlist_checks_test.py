@@ -29,14 +29,14 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModels
-from klayout_pex.klayout.parasitic_device_classes import (
+from kpex.device_models import DeviceModels
+from kpex.klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_RESISTOR_CLASS_NAME,
 )
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
-from klayout_pex.rcx25.netlist_checks import (
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
+from kpex.rcx25.netlist_checks import (
     bulk_terminal_name,
     check_rc_netlist,
     check_schematic_device_classes,
@@ -45,9 +45,9 @@ from klayout_pex.rcx25.netlist_checks import (
     undriven_nets,
     undriven_nets_warning,
 )
-from klayout_pex.schematic_devices import SchematicDevice, SchematicDevices, schematic_devices
+from kpex.schematic_devices import SchematicDevice, SchematicDevices, schematic_devices
 from tests.common.device_model_mappings import NMOS, RPPD, device_models
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 def lvs_netlist(mim_cap: bool = False, wire: bool = False) -> kdb.Netlist:

@@ -33,17 +33,17 @@ from unittest import mock
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.device_models import DeviceModels
-from klayout_pex.klayout.netlist_printer import NetlistHeader, NetlistPrinter
-from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist
-from klayout_pex.netlist.rc_reduction import ReductionOptions
-from klayout_pex.netlist.spice_netlist import SpiceNetlist
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.extraction_results import ExtractionResults, ExtractionSummary, NetCoupleKey
-from klayout_pex.rcx25.netlist_checks import check_schematic_pins
-from klayout_pex.rcx25.netlist_expander import RCX25NetlistExpander
+from kpex.device_models import DeviceModels
+from kpex.klayout.netlist_printer import NetlistHeader, NetlistPrinter
+from kpex.netlist.netlist_reduction import reduce_spice_netlist
+from kpex.netlist.rc_reduction import ReductionOptions
+from kpex.netlist.spice_netlist import SpiceNetlist
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.extraction_results import ExtractionResults, ExtractionSummary, NetCoupleKey
+from kpex.rcx25.netlist_checks import check_schematic_pins
+from kpex.rcx25.netlist_expander import RCX25NetlistExpander
 from tests.common.ngspice import ngspice_operating_point, requires_ngspice
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 MODELS = DeviceModels(device_models_pb2.DeviceModelsInfo())
@@ -120,7 +120,7 @@ def test_empty_single_and_lexically_sorted_interfaces(order: Tuple[str, ...], ex
 ])
 def test_schematic_top_selection_and_case_matching(
         text: str, expected: Sequence[str], ambiguous: bool, tmp_path: Path):
-    with mock.patch('klayout_pex.rcx25.netlist_expander.warning') as warn:
+    with mock.patch('kpex.rcx25.netlist_expander.warning') as warn:
         _, expanded = expand_ports(('B', 'A', 'C'), SpiceReader().parse(text))
     assert write_netlist(expanded, tmp_path / 'selected.cir').subcircuits[0].ports == list(expected)
     assert bool(warn.call_count) == ambiguous

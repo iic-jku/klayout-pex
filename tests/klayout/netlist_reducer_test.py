@@ -28,12 +28,12 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.log import (
+from kpex.log import (
     LogLevel,
     set_log_level,
 )
-from klayout_pex.klayout.netlist_reducer import NetlistReducer
-from klayout_pex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
+from kpex.klayout.netlist_reducer import NetlistReducer
+from kpex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 
 
 @allure.parent_suite("Unit Tests")

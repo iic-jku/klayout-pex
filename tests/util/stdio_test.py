@@ -34,7 +34,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.pex25d.diagnostics import ExitCode
+from kpex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli_process
 
 CP1252_PIPE = {'PYTHONIOENCODING': 'cp1252', 'COLUMNS': '300'}  # NOTE: no line breaks within the texts
@@ -43,9 +43,9 @@ CP1252_PIPE = {'PYTHONIOENCODING': 'cp1252', 'COLUMNS': '300'}  # NOTE: no line 
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI")
 @pytest.mark.parametrize('module, argv, text', [
-    ('klayout_pex', ['extract', '-h'], "log_level ∈ {"),
-    ('klayout_pex.pex25d', ['-h'], "log_level ∈ {"),
-    ('klayout_pex.netlist', ['reduce', '-h'], "an integer ≥ 1"),
+    ('kpex', ['extract', '-h'], "log_level ∈ {"),
+    ('kpex.pex25d', ['-h'], "log_level ∈ {"),
+    ('kpex.netlist', ['reduce', '-h'], "an integer ≥ 1"),
 ], ids=['kpex', 'pex25d', 'netlist'])
 def test_help_in_utf8(module: str, argv: List[str], text: str):
     result = run_cli_process(module, argv, env=CP1252_PIPE)
@@ -56,7 +56,7 @@ def test_help_in_utf8(module: str, argv: List[str], text: str):
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI")
 def test_messages_in_utf8(tmp_path):
-    result = run_cli_process('klayout_pex.netlist', ['reduce', str(tmp_path / 'line.spice'), '--ticer-max-degree', 'x'],
+    result = run_cli_process('kpex.netlist', ['reduce', str(tmp_path / 'line.spice'), '--ticer-max-degree', 'x'],
                              env=CP1252_PIPE)
     assert result.returncode == ExitCode.USAGE, result.stderr
     assert "must be an integer ≥ 1, got 'x'" in result.stderr

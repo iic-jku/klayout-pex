@@ -27,7 +27,7 @@ from __future__ import annotations
 import allure
 import unittest
 
-from klayout_pex.util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
+from kpex.util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 
 
 @allure.parent_suite("Unit Tests")

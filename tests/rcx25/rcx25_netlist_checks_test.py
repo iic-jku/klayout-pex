@@ -35,13 +35,13 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.rcx25.netlist_checks import check_schematic_device_totals
-from klayout_pex.schematic_devices import schematic_devices
-from klayout_pex.tech_info import TechInfo
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.pdk_config import PDK
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.rcx25.netlist_checks import check_schematic_device_totals
+from kpex.schematic_devices import schematic_devices
+from kpex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs'))
@@ -272,8 +272,8 @@ PROBLEMS = ['port Y touches nothing']
 def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
     # NOTE: --check is on by default in RC mode (#215)
     with tempfile.TemporaryDirectory() as out_dir, \
-         mock.patch('klayout_pex.kpex_cli.check_rc_netlist', return_value=PROBLEMS), \
-         mock.patch('klayout_pex.kpex_cli.error') as error_mock, \
+         mock.patch('kpex.kpex_cli.check_rc_netlist', return_value=PROBLEMS), \
+         mock.patch('kpex.kpex_cli.error') as error_mock, \
          pytest.raises(SystemExit) as exit_info:
         try:
             KpexCLI().main(['main', 'extract', '--pdk', PDK.SKY130A, '--mode', 'RC',
@@ -294,8 +294,8 @@ def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
                                        ['--mode', 'R']])  # NOTE: --check is off by default but in RC mode
 def test_inconsistent_netlist_only_warns_without_check(arguments: list):
     with tempfile.TemporaryDirectory() as out_dir, \
-         mock.patch('klayout_pex.kpex_cli.check_rc_netlist', return_value=PROBLEMS), \
-         mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
+         mock.patch('kpex.kpex_cli.check_rc_netlist', return_value=PROBLEMS), \
+         mock.patch('kpex.kpex_cli.warning') as warning_mock:
         cli = KpexCLI()
         cli.main(['main', 'extract', '--pdk', PDK.SKY130A, '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, INV_1_GDS),
                   '--out-dir', out_dir, '--2.5D', *arguments])
@@ -318,7 +318,7 @@ def test_nets_without_device_terminal_and_port_are_a_warning(mode: str, listed_n
     # NOTE: nothing drives the wires A and B, with labels on the text layer only (#407), nor the substrate sub!
     #       (without taps), which the warning leaves out, and --check passes (on by default in RC mode)
     with tempfile.TemporaryDirectory() as out_dir, \
-         mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
+         mock.patch('kpex.kpex_cli.warning') as warning_mock:
         cli = KpexCLI()
         cli.main(['main', 'extract', '--pdk', PDK.IHP_SG13G2, '--mode', mode,
                   '--lvsdb', lvsdb_fixture_path(PDK.IHP_SG13G2, WIRES_NO_PIN_GDS), '--out-dir', out_dir, '--2.5D'])

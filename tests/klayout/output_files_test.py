@@ -32,7 +32,7 @@ from typing import *
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.output_files import write_output_file
+from kpex.klayout.output_files import write_output_file
 
 
 def recording_layout_writer(written_paths: List[str]) -> Callable[[str], object]:

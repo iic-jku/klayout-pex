@@ -32,16 +32,16 @@ from google.protobuf.json_format import MessageToJson
 import klayout.db as kdb
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.calibration.patterns import read_patterns
-from klayout_pex.calibration.prepare import prepare_calibration
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
-from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.calibration.patterns_pb2 import PatternSetSpecification
-from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo as Stack
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex import pex25d
+from kpex.calibration.patterns import read_patterns
+from kpex.calibration.prepare import prepare_calibration
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.fastercap.output_interpreter import FasterCapOutputInterpreter
+from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.calibration.patterns_pb2 import PatternSetSpecification
+from kpex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo as Stack
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from tests.common.fastercap_simulation import solve_fastercap
 
 

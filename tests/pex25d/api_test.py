@@ -31,7 +31,7 @@ import allure
 
 # The point of this test: everything the format's consumers need comes from
 # one import. Nothing below may reach into a submodule.
-from klayout_pex import pex25d
+from kpex import pex25d
 
 from .pex25d_fixtures import MINIMAL
 

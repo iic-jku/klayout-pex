@@ -32,11 +32,11 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist import admittance_check
-from klayout_pex.netlist.admittance_check import (
+from kpex.netlist import admittance_check
+from kpex.netlist.admittance_check import (
     AdmittanceCheck, AdmittanceCheckOptions, check_reduction_admittance, terminal_admittance,
 )
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
 from tests.common.rc_networks import build_network, port_admittance, random_extracted_network, write
 
 

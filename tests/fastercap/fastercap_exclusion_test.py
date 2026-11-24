@@ -38,7 +38,7 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
+from kpex.kpex_cli import KpexCLI
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import pair
@@ -130,7 +130,7 @@ def test_parts_of_a_net_add_up_to_the_net_for_the_wires_around_a_cut_cell():
 @pytest.mark.slow
 @pytest.mark.fastercap
 def test_warns_of_ports_that_its_netlist_cannot_have():
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         capacitances('exclusion_wire_end', '--exclusion-markers', 'ports')
     assert any('The netlist of a field solver has one node per net' in c.args[0] for c in warning_mock.call_args_list)
 

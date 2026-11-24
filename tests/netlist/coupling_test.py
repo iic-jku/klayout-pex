@@ -31,7 +31,7 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.coupling import ground_capacitances
+from kpex.netlist.coupling import ground_capacitances
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('Netlist', 'Grounding')]
 

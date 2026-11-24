@@ -37,8 +37,8 @@ from unittest import mock
 
 from packaging.version import Version
 
-from klayout_pex.kpex_cli import InputMode, KpexCLI
-from klayout_pex.klayout.lvs_cache import (
+from kpex.kpex_cli import InputMode, KpexCLI
+from kpex.klayout.lvs_cache import (
     FINGERPRINT_FORMAT_VERSION,
     LVSCacheEntry,
     LVSInputFingerprint,
@@ -48,7 +48,7 @@ from klayout_pex.klayout.lvs_cache import (
     read_fingerprint,
     write_fingerprint,
 )
-from klayout_pex.tool_version_constraints import Tool
+from kpex.tool_version_constraints import Tool
 
 
 TESTDATA_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata'))
@@ -262,8 +262,8 @@ class KpexCLILVSCacheTest(TempDirTestCase):
 
     def create_lvsdb(self) -> Tuple[Any, FakeKLayoutLVS, mock.Mock]:
         fake_klayout = FakeKLayoutLVS()
-        with mock.patch('klayout_pex.klayout.lvs_runner.subprocess.Popen', fake_klayout), \
-             mock.patch('klayout_pex.kpex_cli.info') as info_mock:
+        with mock.patch('kpex.klayout.lvs_runner.subprocess.Popen', fake_klayout), \
+             mock.patch('kpex.kpex_cli.info') as info_mock:
             lvsdb = KpexCLI().create_lvsdb(self.args)
         return lvsdb, fake_klayout, info_mock
 

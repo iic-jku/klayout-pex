@@ -33,10 +33,10 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.coupling import CouplingPolicyError
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.netlist.netlist_grounding import GroundingOptions, ground_spice_netlist
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.netlist.coupling import CouplingPolicyError
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.netlist.netlist_grounding import GroundingOptions, ground_spice_netlist
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
 from tests.common.cli_runner import assert_netlist_cli_loads_neither_klayout_nor_protobuf, run_cli
 from tests.common.rc_networks import scope_named
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice

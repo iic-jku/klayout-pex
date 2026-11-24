@@ -31,9 +31,9 @@ from typing import Tuple
 import klayout.db as kdb
 import klayout.pex as klp
 
-from klayout_pex.netlist.rc_network import RCNetwork
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import LayerInfo
+from kpex.netlist.rc_network import RCNetwork
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.tech.tech_pb2 import LayerInfo
 from tests.common.rc_networks import build_network
 
 

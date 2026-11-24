@@ -36,7 +36,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.pdk_config import PDK
+from kpex.pdk_config import PDK
 from tests.common.lvsdb_fixtures import klayout_exe_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 

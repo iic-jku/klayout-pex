@@ -32,8 +32,8 @@ from __future__ import annotations
 
 from typing import Dict, Tuple
 
-from klayout_pex.tech_catalog import COMPONENT_KINDS
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyProvenance, TechnologySource
+from kpex.tech_catalog import COMPONENT_KINDS
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyProvenance, TechnologySource
 
 
 OPEN_PDKS_REVISION = '5740c4a81c42f9fe4af5ef2ee258a99151053d28'

@@ -30,9 +30,9 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.pex25d.protobuf import pex25d_terminal_pb2
-from klayout_pex.pex25d.reader import read_pex25d_text
+from kpex.kpex_cli import KpexCLI
+from kpex.pex25d.protobuf import pex25d_terminal_pb2
+from kpex.pex25d.reader import read_pex25d_text
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
@@ -89,7 +89,7 @@ def test_mim_cap_terminals_of_ihp_sg13g2():
 @allure.tag(*tags)
 def test_rf_mim_cap_terminals_of_ihp_sg13g2():
     # NOTE: its terminal on the substrate (bn, on rfmim_sub) is on the ground plane, which needs no node
-    with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+    with mock.patch('kpex.tech_info.warning') as warning_mock:
         layers = device_terminal_layers(PDKName.IHP_SG13G2, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
     assert layers == [('mim_btm', 'metal5_cap'), ('mim_top', 'cmim_top')]
     assert [c.args for c in warning_mock.call_args_list if 'rfmim_sub' in str(c.args)] == []

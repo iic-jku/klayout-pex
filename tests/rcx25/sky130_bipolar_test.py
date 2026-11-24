@@ -38,13 +38,13 @@ from unittest import mock
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.netlist.spice_netlist import SpiceSubcircuit
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.pdk_config import PDK
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.shapes_pb2_converter import ShapesConverter
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.netlist.spice_netlist import SpiceSubcircuit
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.tech_info import TechInfo
+from kpex.pdk_config import PDK
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.ngspice import ngspice_operating_point, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
@@ -143,8 +143,8 @@ def test_bjt_contacts_are_complete_and_disjoint_from_external_contacts(cell_name
 
 def extract_netlist(cell_name: str, mode: PEXMode) -> Tuple[Path, SpiceSubcircuit]:
     extraction = RCX25Extraction(PDK_CONFIG, mode, False)
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warnings, \
-            mock.patch('klayout_pex.kpex_cli.warning') as cli_warnings:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warnings, \
+            mock.patch('kpex.kpex_cli.warning') as cli_warnings:
         cli = extraction.run_kpex('bipolar_transistors', cell_name + '.gds.gz')
     assert not [call.args[0] for call in warnings.call_args_list
                 if 'leaves out these LVS layers' in call.args[0] or 'has no nodes' in call.args[0]]

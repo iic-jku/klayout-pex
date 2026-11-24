@@ -31,9 +31,9 @@ import unittest
 
 import allure
 
-from klayout_pex.netlist.spice_hierarchy import SpiceEvaluationError, SpiceHierarchy
-from klayout_pex.netlist.spice_netlist import SpiceElement
-from klayout_pex.netlist.spice_reader import SpiceReader
+from kpex.netlist.spice_hierarchy import SpiceEvaluationError, SpiceHierarchy
+from kpex.netlist.spice_netlist import SpiceElement
+from kpex.netlist.spice_reader import SpiceReader
 from tests.common.ngspice import ngspice_operating_point, requires_ngspice
 
 

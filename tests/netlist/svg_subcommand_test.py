@@ -35,9 +35,9 @@ from typing import *
 import allure
 import pytest
 
-import klayout_pex
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.pex25d.diagnostics import ExitCode
+import kpex
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
 from tests.common.rc_networks import write
 
@@ -102,7 +102,7 @@ def test_draws_next_to_the_input_with_the_packaged_skin(divider_netlist: str, tm
     assert code == ExitCode.OK, output
     with open(os.path.splitext(divider_netlist)[0] + '.svg', encoding='utf-8') as f:
         netlistsvg_call = json.load(f)
-    package_dir = os.path.dirname(os.path.abspath(klayout_pex.__file__))
+    package_dir = os.path.dirname(os.path.abspath(kpex.__file__))
     assert os.path.commonpath([netlistsvg_call['skin'], package_dir]) == package_dir
     assert netlistsvg_call['skin_exists']
     assert netlistsvg_call['modules'] == ['DIVIDER']

@@ -28,7 +28,7 @@ from unittest.mock import patch
 import allure
 import pytest
 
-from klayout_pex.common.path_validation import validate_files
+from kpex.common.path_validation import validate_files
 
 
 @allure.parent_suite('Unit Tests')
@@ -51,7 +51,7 @@ class TestFileValidation:
         path = tmp_path / 'unreadable'
         path.touch()
         # Simulate I/O failure independently of platform and test-user privileges.
-        with patch('klayout_pex.common.path_validation.open', side_effect=failure):
+        with patch('kpex.common.path_validation.open', side_effect=failure):
             result = validate_files([path])
         assert result.working_files == []
         assert len(result.failures) == 1

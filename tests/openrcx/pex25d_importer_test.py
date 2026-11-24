@@ -31,11 +31,11 @@ from typing import TYPE_CHECKING, Tuple
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.openrcx.pex25d_importer import OpenRCXUFImporter
+from kpex import pex25d
+from kpex.openrcx.pex25d_importer import OpenRCXUFImporter
 
 if TYPE_CHECKING:
-    from klayout_pex_protobuf.kpex.pex25d.pex25d_file_pb2 import PEX25DFile
+    from kpex_protobuf.kpex.pex25d.pex25d_file_pb2 import PEX25DFile
 
 
 def assert_valid(pex25d_file: PEX25DFile):
@@ -76,7 +76,7 @@ def write_uf_pattern(tmp_path: Path, dielectrics: str = UF_DIELECTRIC,
 
 
 def test_import_uf_pattern(tmp_path: Path):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     source = write_uf_pattern(tmp_path)
     pex25d_file = pex25d.import_file(str(source), 'openrcx-uf')
@@ -97,7 +97,7 @@ def test_import_uf_pattern(tmp_path: Path):
 
     output = tmp_path / 'pattern.pex25d'
     with pytest.raises(SystemExit) as completion:
-        Pex25DCLI().main(['pex25d', 'import', str(source), '--from', 'klayout-pex:openrcx-uf',
+        Pex25DCLI().main(['pex25d', 'import', str(source), '--from', 'kpex:openrcx-uf',
                           '-o', str(output)])
     assert completion.value.code == pex25d.ExitCode.OK
     assert output.exists()

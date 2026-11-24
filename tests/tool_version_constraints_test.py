@@ -34,8 +34,8 @@ import allure
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tool_version_constraints import (
+from kpex.pdk_config import PDK
+from kpex.tool_version_constraints import (
     TOOL_VERSION_CONSTRAINTS,
     FASTERCAP_NUMERICAL_REPORT,
     Severity,
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         assert FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version('6.3.0'))
 
     def test_a_fastercap_prerelease_warns_at_the_stable_version_boundary(self):
-        with mock.patch('klayout_pex.tool_version_constraints.warning') as warning, \
+        with mock.patch('kpex.tool_version_constraints.warning') as warning, \
                 mock.patch.object(Tool, 'detect_version', return_value=Version('6.3.0rc1')):
             assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'})
         assert any('Upgrading is recommended' in call.args[0]
@@ -146,8 +146,8 @@ def test_terminal_polygon_minimum_checks_executable_and_module_independently(
     # Below/at/above the fixed release, for each component independently:
     # upgrading the wheel does not update the executable, and an LVSDB-only
     # run still uses the Python module. Warn is an explicit override.
-    with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error, \
+    with mock.patch('kpex.tool_version_constraints.warning') as warn, \
+            mock.patch('kpex.tool_version_constraints.error') as error, \
             mock.patch.object(Tool, 'detect_version', return_value=Version(binary) if binary else None):
         accepted = check_tool_versions({Tool.KLAYOUT: '/klayout'} if binary else {},
                                        klayout_python_version=module, mode=mode)
@@ -177,8 +177,8 @@ def test_older_requirements_keep_their_individual_diagnostics(
         version: str, missing_features: Tuple[str, ...], mode: VersionCheckMode):
     # New minima must not erase why earlier releases were insufficient.
     # Cross each historical boundary and retain the recommendation's severity.
-    with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+    with mock.patch('kpex.tool_version_constraints.warning') as warn, \
+            mock.patch('kpex.tool_version_constraints.error') as error:
         accepted = check_tool_versions({}, mode=mode, klayout_python_version=version)
     unsupported = Version(version) < Version('0.30.14')
     assert accepted == (not unsupported or mode == VersionCheckMode.WARN)
@@ -199,7 +199,7 @@ def test_older_requirements_keep_their_individual_diagnostics(
 @pytest.mark.parametrize('tool', [Tool.KLAYOUT, Tool.MAGIC])
 def test_off_disables_tools_and_python_module_without_detecting_versions(tool: Tool):
     with mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('must not detect')), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
+            mock.patch('kpex.tool_version_constraints.warning') as warn:
         assert check_tool_versions({tool: '/missing'}, mode=VersionCheckMode.OFF,
                                    klayout_python_version='unknown')
     warn.assert_not_called()
@@ -208,7 +208,7 @@ def test_off_disables_tools_and_python_module_without_detecting_versions(tool: T
 @pytest.mark.parametrize('tool,label', [(Tool.KLAYOUT, 'KLayout executable'), (Tool.MAGIC, 'MAGIC')])
 def test_unknown_versions_are_reported_as_unchecked(tool: Tool, label: str):
     with mock.patch.object(Tool, 'detect_version', return_value=None), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
+            mock.patch('kpex.tool_version_constraints.warning') as warn:
         assert check_tool_versions({tool: '/tool'}, klayout_python_version='unknown')
     assert len(warn.call_args_list) == 2
     assert all('unchecked' in call.args[0] for call in warn.call_args_list)
@@ -224,8 +224,8 @@ def test_magic_requires_correct_sidewall_counting(version: str, supported: bool,
     # The old minimum still halved twice. Check the last affected revision,
     # the first fixed one, and newer revisions without imposing an upper bound.
     with mock.patch.object(Tool, 'detect_version', return_value=Version(version)), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+            mock.patch('kpex.tool_version_constraints.warning') as warn, \
+            mock.patch('kpex.tool_version_constraints.error') as error:
         assert check_tool_versions({Tool.MAGIC: '/magic'}, mode=mode) == \
                (supported or mode == VersionCheckMode.WARN)
     assert error.call_count == int(not supported and mode == VersionCheckMode.ON)
@@ -251,8 +251,8 @@ def test_fastercap_history_retains_separate_warning_reasons(version: str, expect
     # Old baselines remain recommendations; preserving them must not turn
     # formerly accepted extraction into an error or erase intermediate fixes.
     with mock.patch.object(Tool, 'detect_version', return_value=Version(version)), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+            mock.patch('kpex.tool_version_constraints.warning') as warn, \
+            mock.patch('kpex.tool_version_constraints.error') as error:
         assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'})
     error.assert_not_called()
     messages = [call.args[0] for call in warn.call_args_list]
@@ -264,8 +264,8 @@ def test_fastercap_history_retains_separate_warning_reasons(version: str, expect
 def test_magic_comparison_baseline_keeps_warning_severity(version: str, comparison_warning: bool):
     # The old comparison baseline does not replace the later correctness fix.
     with mock.patch.object(Tool, 'detect_version', return_value=Version(version)), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+            mock.patch('kpex.tool_version_constraints.warning') as warn, \
+            mock.patch('kpex.tool_version_constraints.error') as error:
         assert not check_tool_versions({Tool.MAGIC: '/magic'})
     assert warn.call_count == int(comparison_warning)
     assert all('MAGIC_REFERENCE_REVISION' in call.args[0] for call in warn.call_args_list)
@@ -274,7 +274,7 @@ def test_magic_comparison_baseline_keeps_warning_severity(version: str, comparis
 
 
 def test_report_separates_required_and_recommended_ranges():
-    with mock.patch('klayout_pex.tool_version_constraints.subproc') as printed, \
+    with mock.patch('kpex.tool_version_constraints.subproc') as printed, \
             mock.patch.object(Tool, 'detect_version', return_value=Version('6.4.0')):
         assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'}, klayout_python_version='0.30.14')
     header, *rows = [call.args[0] for call in printed.call_args_list]
@@ -297,13 +297,13 @@ def test_fastercap_keeps_complete_version_token(version: str):
 def test_calibration_rejects_banners_below_stable_minimum(version: str):
     import subprocess
     import sys
-    from klayout_pex.calibration.solve import _solver_identity
-    from klayout_pex.calibration.validation import CalibrationError
+    from kpex.calibration.solve import _solver_identity
+    from kpex.calibration.validation import CalibrationError
 
     # Exercise detection and the actual calibration gate, not a pre-parsed mock.
     # FasterCap may report its version while returning an unsupported-option code.
     response = subprocess.CompletedProcess([], 64, f'FasterCap version {version}', '')
-    with mock.patch('klayout_pex.tool_version_constraints.subprocess.run', return_value=response):
+    with mock.patch('kpex.tool_version_constraints.subprocess.run', return_value=response):
         with pytest.raises(CalibrationError, match='Calibration requires FasterCap'):
             _solver_identity(sys.executable)
 
@@ -338,8 +338,8 @@ def test_fastercap_corrected_solver_is_recommended_without_blocking_extraction(
     parsed = Tool.FASTERCAP.parse_version(f'FasterCap version {version}')
     assert parsed == Version(version)
     with mock.patch.object(Tool, 'detect_version', return_value=parsed), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
-            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+            mock.patch('kpex.tool_version_constraints.warning') as warn, \
+            mock.patch('kpex.tool_version_constraints.error') as error:
         assert check_tool_versions({Tool.FASTERCAP: '/fastercap'}, mode=mode)
     error.assert_not_called()
     assert warn.call_count == int(upgrade)

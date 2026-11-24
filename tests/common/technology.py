@@ -22,8 +22,8 @@
 # --------------------------------------------------------------------------------
 #
 
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
-import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+import kpex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
 def tech_with_two_metals() -> tech_pb2.Technology:

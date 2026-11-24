@@ -34,17 +34,17 @@ import google.protobuf.json_format
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.device_models import DeviceModelError, DeviceModels
-from klayout_pex.klayout.netlist_printer import NetlistHeader, NetlistPrinter, UnmappedDevicePolicy
-from klayout_pex.klayout.parasitic_device_classes import (
+from kpex.device_models import DeviceModelError, DeviceModels
+from kpex.klayout.netlist_printer import NetlistHeader, NetlistPrinter, UnmappedDevicePolicy
+from kpex.klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_RESISTOR_CLASS_NAME,
 )
-from klayout_pex.netlist.netlist_convert import convert_to_vacask
+from kpex.netlist.netlist_convert import convert_to_vacask
 from tests.common.ngspice import ngspice_operating_point, requires_ngspice
 from tests.common.vacask import read_ascii_raw, requires_vacask, run_vacask
 from tests.common.xyce import read_prn, requires_xyce, run_xyce
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 HEADER = NetlistHeader(kpex_version='1.2.3',
@@ -166,7 +166,7 @@ class Test(unittest.TestCase):
     def test_header_is_written_as_comments(self):
         self.assertEqual([
             '*********************************************************',
-            '*** NGSPICE file created by KLayout-PEX 1.2.3',
+            '*** NGSPICE file created by KPEX 1.2.3',
             '*** -----------------------------------------------------',
             '***     Extraction Engine: KPEX/2.5D',
             '***     Technology: ihp_sg13g2',
@@ -221,7 +221,7 @@ class Test(unittest.TestCase):
     def test_keep_preserves_native_mos_terminals_geometry_and_parasitics(self):
         # W/L alone could hide a unit error: also assert the absolute SI geometry.
         printer = self.printer(policy=UnmappedDevicePolicy.KEEP)
-        with mock.patch('klayout_pex.klayout.netlist_printer.warning') as warn:
+        with mock.patch('kpex.klayout.netlist_printer.warning') as warn:
             lines = self.lines(printer, lvs_netlist())
         self.assertIn('MM1 drain gate source bulk rfnmos L=0.72U W=1U AS=0P AD=0P PS=0U PD=0U', lines)
         self.assertIn('Cext_1 a b 1f', lines)
@@ -232,7 +232,7 @@ class Test(unittest.TestCase):
         self.assertNotIn('rppd', warn.call_args.args[0])  # Unused classes need no models.
 
     def test_keep_does_not_override_valid_mapping_or_warn_for_known_devices(self):
-        with mock.patch('klayout_pex.klayout.netlist_printer.warning') as warn:
+        with mock.patch('kpex.klayout.netlist_printer.warning') as warn:
             self.assertEqual(self.device_lines(self.printer(RFNMOS), lvs_netlist()),
                              self.device_lines(self.printer(RFNMOS, policy=UnmappedDevicePolicy.KEEP), lvs_netlist()))
         warn.assert_not_called()
@@ -240,7 +240,7 @@ class Test(unittest.TestCase):
     def test_reused_printer_does_not_report_previously_unmapped_devices(self):
         printer = self.printer(policy=UnmappedDevicePolicy.KEEP)
         self.lines(printer, lvs_netlist())
-        with mock.patch('klayout_pex.klayout.netlist_printer.warning') as warn:
+        with mock.patch('kpex.klayout.netlist_printer.warning') as warn:
             lines = self.lines(printer, netlist_with_parasitics())
         warn.assert_not_called()
         self.assertFalse(any('Unmapped LVS device' in line for line in lines))

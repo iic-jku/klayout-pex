@@ -31,14 +31,14 @@ import allure
 import pytest
 
 import klayout.db as kdb
-import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
+import kpex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
-from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.rcx25.exclusion import Exclusions
-from klayout_pex.tech_info import TechInfo
+from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.kpex_cli import KpexCLI
+from kpex.rcx25.exclusion import Exclusions
+from kpex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.fastercap_geometry import context_from_shapes, fastercap_input, dielectric_at
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
@@ -136,7 +136,7 @@ def test_net_across_a_block_has_a_conductor_per_part_which_have_one_surface():
     assert sorted(generator.net_names) == ['W', 'W#x0', 'sub!#substrate']
     assert exclusions.conductor_parts['W#x0'].net_name == 'W'
     assert exclusions.conductor_parts['sub!#substrate'].is_substrate
-    with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as error_mock:
+    with mock.patch('kpex.fastercap.fastercap_model_generator.error') as error_mock:
         generator.check()
     assert [c.args[0] for c in error_mock.call_args_list] == []
 

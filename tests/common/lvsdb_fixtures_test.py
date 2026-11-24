@@ -31,7 +31,7 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.klayout.lvs_cache import read_fingerprint, write_fingerprint
+from kpex.klayout.lvs_cache import read_fingerprint, write_fingerprint
 import tests.common.lvsdb_fixtures as lvsdb_fixtures
 from tests.common.lvsdb_fixtures import LVSDBFixture, committed_fixtures
 

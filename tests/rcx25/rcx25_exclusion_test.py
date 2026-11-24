@@ -41,15 +41,15 @@ import klayout.db as kdb
 import numpy as np
 import pytest
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.rcx25.exclusion import CutLayers, CutRequest, ExclusionMarkerMode, Exclusions
-from klayout_pex.rcx25.extractor import add_filled_diffusion_to_cut_cells, devices_of_cut_cells
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.types import GDSPair
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.kpex_cli import KpexCLI
+from kpex.pdk_config import PDK
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.rcx25.exclusion import CutLayers, CutRequest, ExclusionMarkerMode, Exclusions
+from kpex.rcx25.extractor import add_filled_diffusion_to_cut_cells, devices_of_cut_cells
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.tech_info import TechInfo
+from kpex.types import GDSPair
 from tests.common.cli_runner import run_cli
 from tests.common.lvsdb_fixtures import committed_fixtures, lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
@@ -455,7 +455,7 @@ def test_warns_of_ports_that_a_netlist_without_nodes_cannot_have(cell_name: str,
                                                                  marker_mode: ExclusionMarkerMode,
                                                                  arguments: Tuple[str, ...]):
     def warnings_of(mode: PEXMode) -> List[str]:
-        with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+        with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
             Extraction(cell_name, mode).run(marker_mode, *arguments)
         return [c.args[0] for c in warning_mock.call_args_list]
 
@@ -466,12 +466,12 @@ def test_warns_of_ports_that_a_netlist_without_nodes_cannot_have(cell_name: str,
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_warns_of_nets_across_markers():
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         Extraction('exclusion_wire_through', PEXMode.CC).run()
     assert any('partly within exclusion markers' in c.args[0] and 'A,B: Metal3' in c.args[0]
                for c in warning_mock.call_args_list)
 
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         Extraction('exclusion_plate_neighbor', PEXMode.CC).run()
     assert not any('partly within exclusion markers' in c.args[0] for c in warning_mock.call_args_list)
 
@@ -969,7 +969,7 @@ def test_devices_of_a_cut_cell_are_left_out():
 @allure.tag(*tags)
 def test_devices_of_a_class_the_tech_info_does_not_know_stay_with_a_warning():
     with mock.patch.object(TechInfo, 'device_gds_pairs', return_value=None), \
-         mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+         mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         cut = Extraction('cut_block_with_mos', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
     assert cut.rcx25_netlist_problems == []
     assert [device[5] for device in devices_of(cut)] == ['sg13_lv_nmos']
@@ -1283,7 +1283,7 @@ def test_label_of_a_cut_cell_and_the_top_cell_stays_a_pin(mode: PEXMode):
 @allure.tag(*tags)
 def test_no_warning_of_lost_plates_if_a_cut_cell_only_draws_wires_on_one():
     extraction = Extraction('cap_cmim_20um_x_20um_metal5_routes_in_cells', PEXMode.RC)
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'ROUTE*')
     assert not [c.args[0] for c in warning_mock.call_args_list if 'capacitances of their plates' in c.args[0]]
 
@@ -1447,7 +1447,7 @@ def test_net_of_a_pin_and_a_port_only_the_substrate_joins_stays_on_the_pin(cell_
 def test_failure_of_the_resistance_extraction_names_the_net(tmp_path):
     pdk = PDKTestConfig(PDKName.IHP_SG13G2)
     gds_path = pdk.gds_path('test_patterns', 'exclusion_wire_end.gds.gz')
-    with mock.patch('klayout_pex.rcx25.r.r_extractor.klp.RNetExtractor') as extractor_mock:
+    with mock.patch('kpex.rcx25.r.r_extractor.klp.RNetExtractor') as extractor_mock:
         extractor_mock.return_value.extract.side_effect = RuntimeError('Internal error')
         code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--mode', 'R', '--gds', gds_path,
                                                         '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path)))
@@ -1466,7 +1466,7 @@ def test_net_entirely_within_a_marker_has_a_port_at_its_pin():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_warns_of_a_net_through_abutting_cut_cells():
-    with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.r.r_extractor.warning') as warning_mock:
         cli = Extraction('cut_abutting_wires', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', 'seg')
     assert cli.rcx25_netlist_problems == []
     assert any('seg_0, seg_1, where they abut' in c.args[0] for c in warning_mock.call_args_list)
@@ -1554,7 +1554,7 @@ def test_bulk_within_a_marker_does_not_bypass_its_model(pdk_name: PDKName, label
     arguments = ('--exclusion-marker-layer', '200/0')
     tied = effective_resistance(resistances(extraction.run(ExclusionMarkerMode.TIE, *arguments)), 'A', label)
 
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         ported = extraction.run(ExclusionMarkerMode.PORTS, *arguments)
     assert not [c.args[0] for c in warning_mock.call_args_list if 'joins pieces' in c.args[0]]
     assert ported.rcx25_netlist_problems == []
@@ -1723,7 +1723,7 @@ def test_layout_without_markers_has_the_values_without_the_option_and_a_warning(
     extraction = Extraction('exclusion_via_stack_no_marker', PEXMode.RC)
     ignored = extraction.run(ExclusionMarkerMode.IGNORE)
     ignored_values = resistances(ignored), capacitances(ignored)
-    with mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
+    with mock.patch('kpex.kpex_cli.warning') as warning_mock:
         honored = extraction.run()
     assert (resistances(honored), capacitances(honored)) == ignored_values
     assert any('no shapes on the exclusion markers' in c.args[0] for c in warning_mock.call_args_list)
@@ -1737,8 +1737,8 @@ def test_warns_of_whiteboxed_devices_within_markers():
     pdk = PDKTestConfig(PDKName.IHP_SG13G2)
     path_components = (cell_name, f"{cell_name}.gds.gz")
     layout_path = pdk.gds_path(*path_components)
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock, \
-         mock.patch('klayout_pex.kpex_cli.Exclusions.from_layout', side_effect=_marker_over_layout):
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock, \
+         mock.patch('kpex.kpex_cli.Exclusions.from_layout', side_effect=_marker_over_layout):
         RCX25Extraction(pdk=pdk, pex_mode=PEXMode.CC, blackbox=False) \
             .run_kpex(*path_components, extra_args=['--gds', layout_path, '--exclusion-markers', 'tie'])
     assert any('loses these devices' in c.args[0] for c in warning_mock.call_args_list)
@@ -1816,7 +1816,7 @@ def test_lvsdb_of_another_cell_than_the_gds_is_an_error(tmp_path):
 def test_lvsdb_bypasses_lvs_also_with_gds(tmp_path):
     pdk = PDKTestConfig(PDKName.IHP_SG13G2)
     gds_path = pdk.gds_path('test_patterns', 'exclusion_wire_end.gds.gz')
-    with mock.patch('klayout_pex.kpex_cli.LVSRunner.run_klayout_lvs') as lvs_mock:
+    with mock.patch('kpex.kpex_cli.LVSRunner.run_klayout_lvs') as lvs_mock:
         code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--gds', gds_path,
                                                         '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path)))
     assert code == 0, output

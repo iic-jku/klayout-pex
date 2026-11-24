@@ -26,10 +26,10 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModels
-from klayout_pex.rcx25.extraction_results import ExtractionSummary, NetCoupleKey
-from klayout_pex.rcx25.netlist_expander import RCX25NetlistExpander
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+from kpex.device_models import DeviceModels
+from kpex.rcx25.extraction_results import ExtractionSummary, NetCoupleKey
+from kpex.rcx25.netlist_expander import RCX25NetlistExpander
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 class Results:

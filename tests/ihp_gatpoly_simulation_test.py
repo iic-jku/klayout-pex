@@ -32,10 +32,10 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_info import TechInfo
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
+from kpex.pdk_config import PDK
+from kpex.tech_info import TechInfo
 from tests.common.cli_runner import run_cli
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.rc_networks import port_admittance

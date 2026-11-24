@@ -31,8 +31,8 @@ from typing import Dict, Optional
 import allure
 import pytest
 
-from klayout_pex.rcx25.coupling import CouplingPolicy, CouplingPolicyError, apply_coupling_policy
-from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
+from kpex.rcx25.coupling import CouplingPolicy, CouplingPolicyError, apply_coupling_policy
+from kpex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('RCX25', 'Capacitance Modes')]
 

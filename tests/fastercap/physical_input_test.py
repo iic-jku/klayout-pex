@@ -35,18 +35,18 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.fastercap.fastercap_error import FasterCapError
-from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder, BuilderOptions
-from klayout_pex.klayout.physical_geometry import shape_region
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.klayout.pex25d_exclusions import attach_layout_accounting, scaled_region
-from klayout_pex.klayout.pex25d_ground import region_of
-from klayout_pex.pex25d import resolve
-from klayout_pex.pex25d.accounting import SceneCapacitanceMap
-from klayout_pex.rcx25.exclusion import Exclusions, ExcludedBlock, BlockKind
+from kpex.fastercap.fastercap_error import FasterCapError
+from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.pex25d_builder import PEX25DBuilder, BuilderOptions
+from kpex.klayout.physical_geometry import shape_region
+from kpex.tech_info import TechInfo
+from kpex.klayout.pex25d_exclusions import attach_layout_accounting, scaled_region
+from kpex.klayout.pex25d_ground import region_of
+from kpex.pex25d import resolve
+from kpex.pex25d.accounting import SceneCapacitanceMap
+from kpex.rcx25.exclusion import Exclusions, ExcludedBlock, BlockKind
 from tests.common.pdk_test_config import PDKName
 from tests.common.technology import tech_with_two_metals
 from tests.pex25d.pex25d_fixtures import STACK_ONLY, read
@@ -293,7 +293,7 @@ def test_scaled_bounds_cannot_round_onto_native_endpoint(target: float, accepted
 def test_field_halo_range_is_checked_before_exclusion_partitioning(
         axis: str, side: str, offset: int, accepted: bool):
     from tests.klayout.physical_geometry_test import biased_fixture
-    from klayout_pex.klayout.native_coordinates import NATIVE_COORDINATE_MAX, NATIVE_COORDINATE_MIN
+    from kpex.klayout.native_coordinates import NATIVE_COORDINATE_MAX, NATIVE_COORDINATE_MIN
 
     fixture = biased_fixture(0.0)
     fixture.context.top_cell_bbox = lambda: kdb.Box(0, 0, 100, 20)
@@ -314,7 +314,7 @@ def test_field_halo_range_is_checked_before_exclusion_partitioning(
     exclusions = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 20)))
     original = FasterCapInputBuilder(fixture.context, fixture.tech, 'subs', exclusions=exclusions)
     with patch.object(PEX25DBuilder, 'build_conductors', conductors_at_boundary), \
-            patch('klayout_pex.klayout.pex25d_exclusions.attach_layout_accounting') as masks:
+            patch('kpex.klayout.pex25d_exclusions.attach_layout_accounting') as masks:
         if accepted:
             original.build_scene()
             masks.assert_called_once()
@@ -329,7 +329,7 @@ def test_field_halo_range_is_checked_before_exclusion_partitioning(
 @pytest.mark.fastercap
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
 def test_direct_solver_preserves_expected_capacitance_order_under_physical_width_bias(tmp_path: Path):
-    from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+    from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 
     context, technology = context_of_layout(PDKName.IHP_SG13G2, 'test_patterns', 'r_single_wire_m1.gds.gz')
     capacitances = []

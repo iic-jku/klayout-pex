@@ -33,13 +33,13 @@ from unittest import mock
 import klayout.db as kdb
 import numpy as np
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.netlist_format import NetlistFormat
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
-from klayout_pex.rcx25.extraction_results import CellExtractionResults
-from klayout_pex.pdk_config import PDK
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.util.disjoint_sets import DisjointSets
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.netlist_format import NetlistFormat
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.rcx25.extraction_results import CellExtractionResults
+from kpex.pdk_config import PDK
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.util.disjoint_sets import DisjointSets
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
 from tests.common.lvsdb_fixtures import LVSDBFixture
@@ -114,7 +114,7 @@ class RCX25Extraction:
         Extracts the single cell and returns the warnings about the LVS layers it leaves out
         and the device terminals the resistance network has no nodes for
         """
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
             self.run_rcx25d_single_cell(*path_components)
         return [c.args[0] for c in warning_mock.call_args_list
                 if 'leaves out these LVS layers' in c.args[0] or 'has no nodes for these device terminals' in c.args[0]]

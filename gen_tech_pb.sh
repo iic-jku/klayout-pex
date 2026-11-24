@@ -24,9 +24,9 @@
 ##
 
 # Generates the files KPEX needs besides its sources (both are .gitignore'd, but packaged):
-#   - the protobuf python modules klayout_pex_protobuf/**/*_pb2.py, from protos/**/*.proto,
+#   - the protobuf python modules kpex_protobuf/**/*_pb2.py, from protos/**/*.proto,
 #     using the protoc bundled with grpcio-tools (see the build dependency group in pyproject.toml)
-#   - the tech info of the bundled PDKs klayout_pex_protobuf/*_tech.pb.json (see scripts/gen_tech_pb)
+#   - the tech info of the bundled PDKs kpex_protobuf/*_tech.pb.json (see scripts/gen_tech_pb)
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 cd "$DIR" || exit 1
@@ -40,9 +40,6 @@ fi
 set -x
 set -e
 
-poetry run python -m grpc_tools.protoc \
-	--proto_path=protos \
-	--python_out=klayout_pex_protobuf \
-	$(find protos -name '*.proto')
+poetry run python scripts/build/generate_protobuf.py
 
-poetry run python scripts/gen_tech_pb klayout_pex_protobuf
+poetry run python scripts/gen_tech_pb kpex_protobuf

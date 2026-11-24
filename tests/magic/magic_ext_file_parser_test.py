@@ -27,8 +27,8 @@ from pathlib import Path
 import allure
 import pytest
 
-from klayout_pex.magic.magic_ext_data_structures import Device, DeviceType, Node, Port, ResNode, Resistor
-from klayout_pex.magic.magic_ext_file_parser import (
+from kpex.magic.magic_ext_data_structures import Device, DeviceType, Node, Port, ResNode, Resistor
+from kpex.magic.magic_ext_file_parser import (
     parse_magic_ext_file, parse_magic_pex_run, parse_magic_res_ext_file,
 )
 

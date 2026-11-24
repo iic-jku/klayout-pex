@@ -30,8 +30,8 @@ from __future__ import annotations
 
 import google.protobuf.json_format
 
-from klayout_pex.device_models import DeviceModels
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+from kpex.device_models import DeviceModels
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 def device_models(*mappings: dict) -> DeviceModels:

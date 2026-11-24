@@ -50,8 +50,8 @@ from typing import *
 
 import klayout.db as kdb
 
-from klayout_pex.env import Env, EnvVar
-from klayout_pex.klayout.lvs_cache import (
+from kpex.env import Env, EnvVar
+from kpex.klayout.lvs_cache import (
     LVSInputFingerprint,
     file_sha256,
     fingerprint_differences,
@@ -59,9 +59,9 @@ from klayout_pex.klayout.lvs_cache import (
     read_fingerprint,
     write_fingerprint,
 )
-from klayout_pex.klayout.lvs_runner import LVSRunner
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tool_version_constraints import Tool
+from kpex.klayout.lvs_runner import LVSRunner
+from kpex.pdk_config import PDK
+from kpex.tool_version_constraints import Tool
 from tests.common.build_scripts import kpex_symlinks
 
 REPO_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..'))

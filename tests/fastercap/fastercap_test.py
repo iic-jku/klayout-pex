@@ -27,10 +27,10 @@ import allure
 import pytest
 from typing import *
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.util.multiple_choice import MultipleChoicePattern
+from kpex.kpex_cli import KpexCLI
+from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+from kpex.tech_info import TechInfo
+from kpex.util.multiple_choice import MultipleChoicePattern
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path

@@ -111,7 +111,7 @@ def add_symlinks_to_sdist(sdist_path: Path, links: List[Link]):
     tmp_path = sdist_path.with_name(sdist_path.name + '.tmp')
     with tarfile.open(sdist_path, 'r:gz') as src:
         members = src.getmembers()
-        root = members[0].name.split('/')[0]  # e.g. klayout_pex-0.4.4
+        root = members[0].name.split('/')[0]  # e.g. kpex-0.12.0
         by_name = {m.name: m for m in members}
         link_names = {f"{root}/{link}" for link, _ in links}
 
