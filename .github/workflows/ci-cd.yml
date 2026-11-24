@@ -245,12 +245,21 @@ jobs:
 
     # NOTE: the same paths as in publish-reports-github-pages.yml, which needs
     #       the sources for the coverage report
-    - name: "Checkout plugins"
+    - name: "Checkout plugin rename commits"
+      # Test the renamed imports together until the plugin rename PRs reach main.
       run: |
-        for plugin in gmsh palace elmer kqcircuits; do
-          git clone --depth 1 "https://github.com/iic-jku/kpex-plugin-$plugin.git" \
-                    "plugins/kpex-plugin-$plugin"
-        done
+        while read -r plugin commit; do
+          directory="plugins/kpex-plugin-$plugin"
+          git init --quiet "$directory"
+          git -C "$directory" fetch --depth=1 --no-tags "https://github.com/iic-jku/kpex-plugin-$plugin.git" "$commit"
+          git -C "$directory" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$directory" rev-parse HEAD)" = "$commit"
+        done <<'PLUGIN_COMMITS'
+        gmsh 0d6ed1d6653efae4d452c8564d7689c5210b4a0d
+        palace a206c53125ffc8dbf4e4fd2d67f269ebe6b168ea
+        elmer 7e46ba9b059fa18bf418e30f6d43c5299dbf02a8
+        kqcircuits 0eed3bd0ed14efce42a1ae08a950a58fea1f852c
+        PLUGIN_COMMITS
 
     - name: Configure Ubuntu package downloads
       if: runner.os == 'Linux'
