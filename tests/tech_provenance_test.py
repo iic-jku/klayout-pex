@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ import allure
 import pytest
 from google.protobuf.json_format import MessageToDict
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_catalog import COMPONENT_KINDS, load_technology_catalog, write_nominal_catalog
-from klayout_pex.tech_info import TechDefError
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset
+from kpex.pdk_config import PDK
+from kpex.tech_catalog import COMPONENT_KINDS, load_technology_catalog, write_nominal_catalog
+from kpex.tech_info import TechDefError
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset
 from tests.common.tech_catalog import (
     add_scenario, edit_dataset, read_catalog, sample_provenance, small_catalog, small_technology,
     write_message,

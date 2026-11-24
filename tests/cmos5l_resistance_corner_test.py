@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@ from pathlib import Path
 import allure
 import pytest
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_catalog import load_technology_catalog
-from klayout_pex.tech_info import TechDefError, TechInfo
+from kpex.pdk_config import PDK
+from kpex.tech_catalog import load_technology_catalog
+from kpex.tech_info import TechDefError, TechInfo
 from tests.common.tech_catalog import read_catalog
 
 

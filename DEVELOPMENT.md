@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 Johannes Kepler University, Institute for Integrated Circuits.
 
 This file is part of KPEX 
-(see https://github.com/iic-jku/klayout-pex).
+(see https://github.com/iic-jku/kpex).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ packages symlinks as regular files.
 
 For a new clone:
 ```bash
-git clone -c core.symlinks=true https://github.com/iic-jku/klayout-pex.git
+git clone -c core.symlinks=true https://github.com/iic-jku/kpex.git
 ```
 
 For an existing clone (NOTE: discards uncommitted changes in `pdk/`):
@@ -85,18 +85,26 @@ poetry run pip install --no-deps .
 
 Calling `./gen_tech_pb.sh` will:
 - create the Python Protobuffer APIs for the given schema (present in `protos`),
-  i.e. `klayout_pex_protobuf/**/*_pb2.py`, using the `protoc` bundled with `grpcio-tools`
+  i.e. `kpex_protobuf/**/*_pb2.py`, using the `protoc` bundled with `grpcio-tools`
 - generate the KPEX tech info JSON files (see below)
+
+### Package publishing
+
+On both PyPI and TestPyPI, the GitHub Trusted Publisher for the `kpex` project
+uses owner `iic-jku`, repository `kpex` and workflow filename `ci-cd.yml`. Leave
+the environment field empty for the current jobs. The workflow uploads the
+smoke-tested distributions to TestPyPI after a branch push covered by CI and
+to PyPI after a GitHub release is published.
 
 ### Generating KPEX Tech Info JSON files
 
 The tech info of each bundled PDK (layers, process stack, parasitics) is defined in `scripts/gen_tech_pb`.
-Calling `poetry run python scripts/gen_tech_pb klayout_pex_protobuf` (the last step of `./gen_tech_pb.sh`)
+Calling `poetry run python scripts/gen_tech_pb kpex_protobuf` (the last step of `./gen_tech_pb.sh`)
 will create the JSON tech info files:
-   - `klayout_pex_protobuf/gf180mcuD_tech.pb.json`
-   - `klayout_pex_protobuf/ihp-sg13cmos5l_tech.pb.json`
-   - `klayout_pex_protobuf/ihp-sg13g2_tech.pb.json`
-   - `klayout_pex_protobuf/sky130A_tech.pb.json`
+   - `kpex_protobuf/gf180mcuD_tech.pb.json`
+   - `kpex_protobuf/ihp-sg13cmos5l_tech.pb.json`
+   - `kpex_protobuf/ihp-sg13g2_tech.pb.json`
+   - `kpex_protobuf/sky130A_tech.pb.json`
 
 ### Technology scenarios and datasets
 
@@ -689,7 +697,7 @@ The terminal-polygon correction is included in
 ## Exporter plugins
 
 Install plugins into the Python environment running KPEX. Register a zero-argument
-factory returning a `PEX25DSceneExporter` from `klayout_pex.plugin_api.v1`:
+factory returning a `PEX25DSceneExporter` from `kpex.plugin_api.v1`:
 
 ```toml
 [project.entry-points."klayout_pex.exporters.v1"]
@@ -703,7 +711,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, List, Mapping, Optional
 
 if TYPE_CHECKING:
-    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+    from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 
 def export(self, scene: PEX25DScene, *, output_dir_path: str,
            prefix: str = '', options: Optional[Mapping[str, Any]] = None) -> List[str]:
@@ -714,7 +722,7 @@ Write solver inputs from the resolved scene and return only paths written by thi
 call, primary input first. Do not run the solver or mutate the scene or options.
 Validate option names and values; raise `ExportError` for invalid or unsupported
 input and `ExporterUnavailable` for missing dependencies. Both errors come from
-`klayout_pex.plugin_api.v1`. Import optional dependencies only when needed.
+`kpex.plugin_api.v1`. Import optional dependencies only when needed.
 The entry-point group versions the Python contract independently of the PEX25D format.
 `v1` is provisional: it may still change until it is declared stable.
 
@@ -755,7 +763,7 @@ traceback with `--log-level debug`); `ExportError` and `OSError` exit 2.
 
 Importers translate another tool's scene description into one unresolved `PEX25DFile`.
 Register a zero-argument factory returning a `PEX25DImporter` from
-`klayout_pex.plugin_api.v1` in the `klayout_pex.importers.v1` group.
+`kpex.plugin_api.v1` in the `klayout_pex.importers.v1` group.
 
 `import_file(input_file_path, *, supporting_files, options, report)`:
 - reads the primary input and the named supporting files the importer defines

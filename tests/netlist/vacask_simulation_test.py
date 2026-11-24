@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.netlist.netlist_convert import convert_to_vacask
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.netlist.netlist_convert import convert_to_vacask
 from tests.common.vacask import read_ascii_raw, requires_vacask, run_vacask, vacask_port_admittance
 
 

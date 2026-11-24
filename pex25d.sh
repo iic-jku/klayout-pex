@@ -5,7 +5,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -25,4 +25,4 @@
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 export PYTHONPATH=$DIR:$PYTHONPATH
-/usr/bin/env python3 -m klayout_pex.pex25d $*
+/usr/bin/env python3 -m kpex.pex25d $*

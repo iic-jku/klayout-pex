@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from typing import Callable, List, Mapping, Sequence
 
 import pytest
 
-from klayout_pex.util.argparse_helpers import (
+from kpex.util.argparse_helpers import (
     SectionedHelpFormatter,
     add_help_subcommand,
     add_subcommand_sections,
@@ -78,17 +78,17 @@ def run(main: Callable[[List[str]], None], argv: List[str], capsys: pytest.Captu
 
 
 def pex25d_main(argv: List[str]):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
     Pex25DCLI().main(argv)
 
 
 def kpex_main(argv: List[str]):
-    from klayout_pex.kpex_cli import KpexCLI
+    from kpex.kpex_cli import KpexCLI
     KpexCLI().main(argv)
 
 
 def netlist_main(argv: List[str]):
-    from klayout_pex.netlist.netlist_cli import NetlistCLI
+    from kpex.netlist.netlist_cli import NetlistCLI
     NetlistCLI().main(argv)
 
 

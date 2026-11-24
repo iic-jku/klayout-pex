@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,16 +38,16 @@ from typing import Any
 
 import pytest
 
-from klayout_pex.pex25d.accounting_validation import validate_capacitance_accounting
-from klayout_pex.pex25d.capability_validation import validate_required_capabilities
-from klayout_pex.pex25d.artifact import ArtifactFormat, ArtifactKind, ArtifactSpec
-from klayout_pex.pex25d.codec import load_artifact, save_artifact
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
-from klayout_pex.pex25d.protobuf import pex25d_capacitance_accounting_pb2, pex25d_capabilities_pb2
-from klayout_pex.pex25d.reader import ReadError
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.pex25d.validator import validate
-from klayout_pex.pex25d.writer import WriteError, write_pex25d_text
+from kpex.pex25d.accounting_validation import validate_capacitance_accounting
+from kpex.pex25d.capability_validation import validate_required_capabilities
+from kpex.pex25d.artifact import ArtifactFormat, ArtifactKind, ArtifactSpec
+from kpex.pex25d.codec import load_artifact, save_artifact
+from kpex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.protobuf import pex25d_capacitance_accounting_pb2, pex25d_capabilities_pb2
+from kpex.pex25d.reader import ReadError
+from kpex.pex25d.resolver import resolve
+from kpex.pex25d.validator import validate
+from kpex.pex25d.writer import WriteError, write_pex25d_text
 from .pex25d_fixtures import MINIMAL, codes, read
 
 
@@ -342,14 +342,14 @@ import importlib.abc
 import sys
 class Forbidden(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
-        if fullname.split('.')[0] in {'klayout', 'klayout_pex_protobuf'}:
+        if fullname.split('.')[0] in {'klayout', 'kpex_protobuf'}:
             raise AssertionError('eager dependency: ' + fullname)
 sys.meta_path.insert(0, Forbidden())
-import klayout_pex.pex25d.accounting_validation
-import klayout_pex.pex25d.reader
-import klayout_pex.pex25d.writer
-import klayout_pex.pex25d.validator
-import klayout_pex.pex25d.codec
+import kpex.pex25d.accounting_validation
+import kpex.pex25d.reader
+import kpex.pex25d.writer
+import kpex.pex25d.validator
+import kpex.pex25d.codec
 '''
     result = subprocess.run([sys.executable, '-c', script], capture_output=True,
                             text=True, encoding='utf-8')
@@ -396,10 +396,10 @@ class Forbidden(importlib.abc.MetaPathFinder):
         if fullname.split('.')[0] == 'klayout':
             raise AssertionError('geometry kernel imported: ' + fullname)
 sys.meta_path.insert(0, Forbidden())
-from klayout_pex.pex25d.accounting_validation import validate_capacitance_accounting
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.pex25d.writer import write_pex25d_text
+from kpex.pex25d.accounting_validation import validate_capacitance_accounting
+from kpex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.pex25d.writer import write_pex25d_text
 original = read_pex25d_text(sys.stdin.buffer.read())
 assert validate_capacitance_accounting(original, DiagnosticsReport())
 assert read_pex25d_text(write_pex25d_text(original)) == original

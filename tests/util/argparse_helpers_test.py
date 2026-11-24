@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ import contextlib
 import io
 from unittest import mock
 
-from klayout_pex.log import LogLevel
-from klayout_pex.util.argparse_helpers import (
+from kpex.log import LogLevel
+from kpex.util.argparse_helpers import (
     add_argument_with_former_name,
     add_log_level_argument,
     render_enum_help,
@@ -156,7 +156,7 @@ class FormerOptionNameTest(unittest.TestCase):
 
     def test_warnings_name_the_new_option(self):
         args, _ = parse(parser_with_former_names(), '--output', 'x', '--pre_flatten')
-        with mock.patch('klayout_pex.util.argparse_helpers.warning') as warning_mock:
+        with mock.patch('kpex.util.argparse_helpers.warning') as warning_mock:
             warn_deprecated_options(args)
         self.assertEqual(['--output is deprecated, use --out-file', '--pre_flatten is deprecated, use --pre-flatten'],
                          [c.args[0] for c in warning_mock.call_args_list])

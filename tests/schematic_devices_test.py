@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ import unittest
 
 import allure
 
-from klayout_pex.device_totals import DeviceTotalParameters
-from klayout_pex.netlist.spice_hierarchy import SpiceEvaluationError
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.pdk_config import PDK
-from klayout_pex.schematic_devices import schematic_devices
-from klayout_pex.tech_info import TechInfo
+from kpex.device_totals import DeviceTotalParameters
+from kpex.netlist.spice_hierarchy import SpiceEvaluationError
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.pdk_config import PDK
+from kpex.schematic_devices import schematic_devices
+from kpex.tech_info import TechInfo
 from tests.common.device_model_mappings import NMOS, RPPD, W_L, device_models
 
 DEVICE_MODELS = device_models({**NMOS, 'model_name': 'sg13_lv_nmos'}, RPPD)

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ from __future__ import annotations
 
 from typing import *
 
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
-from klayout_pex.pex25d.reader import ReadError, read_pex25d_text
+from kpex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.reader import ReadError, read_pex25d_text
 
 HEADER = """\
 PEX25D 1.0-rc1

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from typing import Any, Callable, FrozenSet, List
 
 import pytest
 
-from klayout_pex import pex25d
+from kpex import pex25d
 from tests.common.pex25d_ground import GROUND_CUTOUT_TEXT as BASE
 
 
@@ -102,7 +102,7 @@ def test_exporter_without_capability_support_receives_no_cutout_scene(tmp_path: 
 
 
 def test_typed_ground_capability_reaches_updated_exporter(tmp_path: Path):
-    from klayout_pex.plugin_api.v1 import SceneCapability
+    from kpex.plugin_api.v1 import SceneCapability
     class UpdatedExporter:
         @classmethod
         def supported_capabilities(cls) -> FrozenSet[SceneCapability]:
@@ -116,7 +116,7 @@ def test_typed_ground_capability_reaches_updated_exporter(tmp_path: Path):
 
 
 def test_disambiguation_cannot_collide_with_other_connected_net():
-    from klayout_pex.plugin_api.v1 import conductor_body, solver_body_names
+    from kpex.plugin_api.v1 import conductor_body, solver_body_names
     text = BASE.replace('CONDUCTOR pin signal', 'CONDUCTOR VSS FLOATING').replace('CONDUCTOR pin LAYER', 'CONDUCTOR VSS LAYER')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
     scene.conductors.add(name='another-net', net='FLOATING:VSS')
@@ -127,7 +127,7 @@ def test_disambiguation_cannot_collide_with_other_connected_net():
 
 
 def test_unchanged_labels_write_no_mapping_file(tmp_path: Path):
-    from klayout_pex.plugin_api.v1 import write_solver_body_map
+    from kpex.plugin_api.v1 import write_solver_body_map
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     path = tmp_path / 'body_names.json'
     assert write_solver_body_map(scene, path) is None
@@ -137,7 +137,7 @@ def test_unchanged_labels_write_no_mapping_file(tmp_path: Path):
 
 @pytest.mark.parametrize('capability', [None, Ellipsis, frozenset({'ground-isolation'})])
 def test_unimplemented_protocol_capability_is_not_support(capability: Any, tmp_path: Path):
-    from klayout_pex.plugin_api.v1 import PEX25DSceneExporter
+    from kpex.plugin_api.v1 import PEX25DSceneExporter
     class OldSubclass(PEX25DSceneExporter):
         @classmethod
         def supported_capabilities(cls) -> Any:
@@ -153,7 +153,7 @@ def test_unimplemented_protocol_capability_is_not_support(capability: Any, tmp_p
 
 @pytest.mark.parametrize('feature', ['cutout', 'net'])
 def test_each_ground_contract_independently_requires_consumer_support(feature: str, tmp_path: Path):
-    from klayout_pex.plugin_api.v1 import PEX25DSceneExporter
+    from kpex.plugin_api.v1 import PEX25DSceneExporter
     class OldSubclass(PEX25DSceneExporter):
         def export(self, scene: Any, **kwargs: Any) -> List[str]:
             pytest.fail('An old Protocol subclass must refuse new geometry or ownership')
@@ -170,7 +170,7 @@ def test_each_ground_contract_independently_requires_consumer_support(feature: s
 
 
 def test_floating_collision_alone_requires_electrical_identity_support(tmp_path: Path):
-    from klayout_pex.plugin_api.v1 import PEX25DSceneExporter
+    from kpex.plugin_api.v1 import PEX25DSceneExporter
     class OlderExporter(PEX25DSceneExporter):
         def export(self, scene: Any, **kwargs: Any) -> List[str]:
             pytest.fail('A collision-only scene still needs typed electrical identity')
@@ -194,7 +194,7 @@ class BlockNativeGeometry(importlib.abc.MetaPathFinder):
         if fullname.split('.')[0] == 'klayout':
             raise ImportError('native geometry deliberately unavailable')
 sys.meta_path.insert(0, BlockNativeGeometry())
-from klayout_pex import pex25d
+from kpex import pex25d
 file = pex25d.read_text({BASE.encode('utf-8')!r})
 assert not pex25d.validate(file).num_errors
 report = pex25d.validate(file, strict=True)

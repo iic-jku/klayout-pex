@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,12 +35,12 @@ import klayout.db as kdb
 import numpy as np
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
+from kpex.pdk_config import PDK
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset
 from tests.common.cli_runner import run_cli
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice

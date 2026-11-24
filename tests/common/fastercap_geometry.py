@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@ from unittest import mock
 
 import klayout.db as kdb
 
-from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.rcx25.exclusion import Exclusions
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.types import GDSPair
+from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.rcx25.exclusion import Exclusions
+from kpex.tech_info import TechInfo
+from kpex.types import GDSPair
 
 
 def context_from_shapes(shapes_by_gds: Dict[GDSPair, Optional[kdb.Region]], bbox: kdb.Box,

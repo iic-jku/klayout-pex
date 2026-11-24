@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ import allure
 import klayout.db as kdb
 import klayout.rdb as rdb
 
-from klayout_pex.magic.magic_ext_file_parser import parse_magic_pex_run
-from klayout_pex.magic.magic_log_analyzer import MagicLogAnalyzer
+from kpex.magic.magic_ext_file_parser import parse_magic_pex_run
+from kpex.magic.magic_log_analyzer import MagicLogAnalyzer
 
 CELL = 'r_wire_voltage_divider_li1'
 

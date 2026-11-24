@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,17 +25,17 @@ import unittest
 
 import allure
 
-from klayout_pex.netlist.expression.ngspice import NGSPICE_SYNTAX
-from klayout_pex.netlist.expression.nodes import Expression
-from klayout_pex.netlist.expression.parser import ExpressionParser
-from klayout_pex.netlist.spice_netlist import (
+from kpex.netlist.expression.ngspice import NGSPICE_SYNTAX
+from kpex.netlist.expression.nodes import Expression
+from kpex.netlist.expression.parser import ExpressionParser
+from kpex.netlist.spice_netlist import (
     SpiceElement,
     SpiceNetlist,
     SpiceSource,
     SpiceSourceFunction,
     SpiceSubcircuit,
 )
-from klayout_pex.netlist.spice_reader import SpiceReader, SpiceReaderError
+from kpex.netlist.spice_reader import SpiceReader, SpiceReaderError
 
 
 def parse(text: str) -> SpiceNetlist:

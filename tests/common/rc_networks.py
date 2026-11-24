@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@ from typing import *
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.rc_network import RCNetwork
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
+from kpex.netlist.rc_network import RCNetwork
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
 
 
 def approx(expected: Any, rel: float = 1e-14) -> Any:

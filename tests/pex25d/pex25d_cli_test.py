@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ import tempfile
 from typing import *
 import unittest
 
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.pex25d.pex25d_cli import Pex25DCLI
 
 from tests.common.cli_runner import run_cli_process
 
@@ -143,7 +143,7 @@ class Pex25DCLITest(unittest.TestCase):
         # NOTE: the deprecation warning goes to stderr, as all messages do when the artifact goes to stdout
         workspace = self.workspace()
         assert workspace.run('convert', workspace.input_path, '-o', workspace.path('out.pex25d')) == ExitCode.OK
-        result = run_cli_process('klayout_pex.pex25d', ['convert', workspace.input_path, '--output', '-'],
+        result = run_cli_process('kpex.pex25d', ['convert', workspace.input_path, '--output', '-'],
                                  env={'COLUMNS': '300'})  # NOTE: a message per line
         assert result.returncode == 0, result.stderr
         with open(workspace.path('out.pex25d'), encoding='utf-8') as f:

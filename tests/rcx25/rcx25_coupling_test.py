@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.netlist_format import NetlistFormat
-from klayout_pex.netlist.netlist_grounding import GroundingOptions, ground_spice_netlist
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.rcx25.coupling import CouplingPolicy, apply_coupling_policy
-from klayout_pex.rcx25.extraction_results import ExtractionSummary, NetCoupleKey
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.netlist_format import NetlistFormat
+from kpex.netlist.netlist_grounding import GroundingOptions, ground_spice_netlist
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.rcx25.coupling import CouplingPolicy, apply_coupling_policy
+from kpex.rcx25.extraction_results import ExtractionSummary, NetCoupleKey
 from tests.common.cli_runner import run_cli
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.rc_networks import build_network, spice_subcircuit, write
@@ -248,8 +248,8 @@ def test_multi_engine_run_changes_only_analytical_capacitance(
     lvsdb = extraction.read_lvsdb('test_patterns', PLATES)
     cli = KpexCLI()
     with mock.patch.object(cli, 'create_lvsdb', return_value=lvsdb), \
-            mock.patch('klayout_pex.kpex_cli.run_magic') as run_magic, \
-            mock.patch('klayout_pex.kpex_cli.parse_magic_pex_run'):
+            mock.patch('kpex.kpex_cli.run_magic') as run_magic, \
+            mock.patch('kpex.kpex_cli.parse_magic_pex_run'):
         code, output = run_cli(cli.main, [
             'kpex', 'extract', '--pdk', PDK.name, '--gds', PDK.gds_path('test_patterns', PLATES),
             '--2.5D', '--mode', mode.value, *arguments, '--blackbox', 'y', '--halo', '10000', '--scale', 'n',
@@ -269,7 +269,7 @@ def test_multi_engine_run_changes_only_analytical_capacitance(
 @pytest.mark.parametrize('mode', [PEXMode.C, PEXMode.RC])
 def test_unnamed_layout_float_is_eliminated_and_reported(tmp_path: Path, mode: PEXMode):
     from tests.rcx25.rcx25_exclusion_test import Extraction, ExclusionMarkerMode
-    with mock.patch('klayout_pex.kpex_cli.warning') as warning:
+    with mock.patch('kpex.kpex_cli.warning') as warning:
         cli = Extraction('exclusion_floating_plate_neighbor', mode).run(
             ExclusionMarkerMode.IGNORE, '--out-dir', str(tmp_path), '--coupling', 'grounded')
     # Independent series calculation from the released coupled fixture's values:

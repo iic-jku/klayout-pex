@@ -1,0 +1,78 @@
+#
+# --------------------------------------------------------------------------------
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+# Johannes Kepler University, Institute for Integrated Circuits.
+#
+# This file is part of KPEX
+# (see https://github.com/iic-jku/kpex).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# --------------------------------------------------------------------------------
+#
+
+"""Version 1 PEX25D importer and scene exporter plugin API.
+
+Entry points reference zero-argument factories returning protocol implementations;
+inheritance is optional. Each group versions its Python interface independently
+of PEX25D; version 1 is provisional and may change until it is declared stable.
+Factories and public re-exports live here; each protocol and its related errors
+live in their own module.
+
+This package imports neither KLayout nor generated protobuf code at runtime.
+"""
+
+from typing import Callable
+
+from .pex25d_importer import ImporterError, ImporterUnavailable, PEX25DImporter
+from .pex25d_scene_exporter import ExportError, ExporterUnavailable, PEX25DSceneExporter, SceneCapability, require_scene_capabilities
+
+
+IMPORTER_ENTRY_POINT_GROUP = 'klayout_pex.importers.v1'
+EXPORTER_ENTRY_POINT_GROUP = 'klayout_pex.exporters.v1'
+
+ImporterFactory = Callable[[], PEX25DImporter]
+ExporterFactory = Callable[[], PEX25DSceneExporter]
+
+from .pex25d_scene_tools import (
+    BodyKind, ElectricalBody, conductor_body, ground_body,
+    solver_body_names, write_solver_body_map, GroundGeometryError,
+    check_native_ground_coordinate, retained_ground_region, region_of,
+)
+
+
+__all__ = [
+    'IMPORTER_ENTRY_POINT_GROUP',
+    'EXPORTER_ENTRY_POINT_GROUP',
+    'ImporterFactory',
+    'ExporterFactory',
+    'ImporterError',
+    'ImporterUnavailable',
+    'PEX25DImporter',
+    'ExportError',
+    'ExporterUnavailable',
+    'PEX25DSceneExporter',
+    'SceneCapability',
+    'require_scene_capabilities',
+    'BodyKind',
+    'ElectricalBody',
+    'conductor_body',
+    'ground_body',
+    'solver_body_names',
+    'write_solver_body_map',
+    'GroundGeometryError',
+    'check_native_ground_coordinate',
+    'retained_ground_region',
+    'region_of',
+]

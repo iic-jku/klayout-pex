@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import allure
 from fractions import Fraction
 import unittest
 
-from klayout_pex.pex25d.writer import (
+from kpex.pex25d.writer import (
     CONTINUATION, WRAP_COLUMN, WriteError, format_exact, write_pex25d_text,
 )
 

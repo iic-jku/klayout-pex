@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ def run_cli_process(module: str,
                     argv: Sequence[str],
                     env: Mapping[str, str] = {}) -> subprocess.CompletedProcess:
     """
-    Runs a command line tool (e.g. klayout_pex.netlist) in a fresh process, as its console script does
+    Runs a command line tool (e.g. kpex.netlist) in a fresh process, as its console script does
 
     :param env: variables to set besides those of this process
     :return: the result, with the output decoded as UTF-8, which the tools write
@@ -92,12 +92,12 @@ def assert_netlist_cli_loads_neither_klayout_nor_protobuf(argv: Sequence[str]):
     without loading KLayout or the generated protobuf code, as format-only paths must (AGENTS.md)
     """
     script = ("import sys\n"
-              "from klayout_pex.netlist.netlist_cli import NetlistCLI\n"
+              "from kpex.netlist.netlist_cli import NetlistCLI\n"
               "try:\n"
               f"    NetlistCLI().main({list(argv)!r})\n"
               "except SystemExit as exit:\n"
               "    assert exit.code == 0, exit.code\n"
-              "loaded = sorted(m for m in sys.modules if m.split('.')[0] in ('klayout', 'klayout_pex_protobuf'))\n"
+              "loaded = sorted(m for m in sys.modules if m.split('.')[0] in ('klayout', 'kpex_protobuf'))\n"
               "assert not loaded, loaded\n")
     result = run_python_script(script)
     assert result.returncode == 0, result.stderr

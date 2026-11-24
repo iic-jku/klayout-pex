@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,14 +41,14 @@ from unittest.mock import patch
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.klayout.pex25d_accounting import (AccountingGridError, partition_accounting,
+from kpex.klayout.pex25d_accounting import (AccountingGridError, partition_accounting,
                                                  validate_accounting_geometry)
-from klayout_pex.klayout.pex25d_ground import region_of
-from klayout_pex.klayout.native_coordinates import NATIVE_COORDINATE_MIN, NATIVE_COORDINATE_MAX
-from klayout_pex.pex25d.accounting_validation import validate_capacitance_accounting
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.pex25d.resolver import resolve, ResolveError
+from kpex.klayout.pex25d_ground import region_of
+from kpex.klayout.native_coordinates import NATIVE_COORDINATE_MIN, NATIVE_COORDINATE_MAX
+from kpex.pex25d.accounting_validation import validate_capacitance_accounting
+from kpex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.pex25d.resolver import resolve, ResolveError
 
 
 HEADER = '''\
@@ -304,9 +304,9 @@ class Forbidden(importlib.abc.MetaPathFinder):
         if fullname.split('.')[0] == 'klayout':
             raise ImportError('test backend unavailable')
 sys.meta_path.insert(0, Forbidden())
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.pex25d.resolver import resolve, ResolveError
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.pex25d.resolver import resolve, ResolveError
+from kpex.pex25d.diagnostics import DiagnosticsReport
 message = read_pex25d_text(sys.stdin.buffer.read())
 report = DiagnosticsReport()
 try:

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ from typing import Dict, Optional
 import allure
 import pytest
 
-from klayout_pex.rcx25.coupling import CouplingPolicy, CouplingPolicyError, apply_coupling_policy
-from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
+from kpex.rcx25.coupling import CouplingPolicy, CouplingPolicyError, apply_coupling_policy
+from kpex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('RCX25', 'Capacitance Modes')]
 

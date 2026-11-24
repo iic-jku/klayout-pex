@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ from unittest import mock
 import allure
 import pytest
 
-from klayout_pex.klayout.lvs_cache import read_fingerprint, write_fingerprint
+from kpex.klayout.lvs_cache import read_fingerprint, write_fingerprint
 import tests.common.lvsdb_fixtures as lvsdb_fixtures
 from tests.common.lvsdb_fixtures import LVSDBFixture, committed_fixtures
 

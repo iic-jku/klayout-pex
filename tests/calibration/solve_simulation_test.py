@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,15 +32,15 @@ from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 import pytest
-from klayout_pex.tech_info import TechInfo
+from kpex.tech_info import TechInfo
 
-from klayout_pex.calibration.artifacts import read_message
-from klayout_pex.calibration.patterns import read_patterns
-from klayout_pex.calibration.prepare import prepare_calibration
-from klayout_pex.calibration.solve import SolveOptions, solve_calibration
-from klayout_pex.calibration.collect import collect_calibration
-from klayout_pex.fastercap.result_collection import collect_fastercap_matrix
-from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection
+from kpex.calibration.artifacts import read_message
+from kpex.calibration.patterns import read_patterns
+from kpex.calibration.prepare import prepare_calibration
+from kpex.calibration.solve import SolveOptions, solve_calibration
+from kpex.calibration.collect import collect_calibration
+from kpex.fastercap.result_collection import collect_fastercap_matrix
+from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 from tests.common.vacask import vacask_port_admittance, requires_vacask
@@ -64,7 +64,7 @@ def test_all_pattern_families_solve_and_recollect(tmp_path: Path, tech_info: Tec
         jobs=1, mesh_refinement=0.05, gmres_tolerance=1e-7, solver_timeout_seconds=180))
     data = read_message(result.collection_path, CalibrationCollection())
     assert result.successful_cases == 5, data
-    from klayout_pex.fastercap.numerical_report import read_numerical_report
+    from kpex.fastercap.numerical_report import read_numerical_report
     for case in data.cases:
         report = tmp_path / 'runs with spaces/cases' / case.case_id / 'numerical-report.json'
         parsed = read_numerical_report(report)

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.log import (
+from kpex.log import (
     LogLevel,
     set_log_level,
 )
-from klayout_pex.klayout.netlist_reducer import NetlistReducer
-from klayout_pex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
+from kpex.klayout.netlist_reducer import NetlistReducer
+from kpex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 
 
 @allure.parent_suite("Unit Tests")

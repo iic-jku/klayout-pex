@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import allure
 
 # The point of this test: everything the format's consumers need comes from
 # one import. Nothing below may reach into a submodule.
-from klayout_pex import pex25d
+from kpex import pex25d
 
 from .pex25d_fixtures import MINIMAL
 

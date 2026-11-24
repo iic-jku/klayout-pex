@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
 
 
 def solve_fastercap(deck: str, log: Path, mesh: float) -> CapacitanceMatrix:

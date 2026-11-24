@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ from pathlib import Path
 import allure
 import pytest
 
-from klayout_pex.magic.magic_ext_data_structures import Device, DeviceType, Node, Port, ResNode, Resistor
-from klayout_pex.magic.magic_ext_file_parser import (
+from kpex.magic.magic_ext_data_structures import Device, DeviceType, Node, Port, ResNode, Resistor
+from kpex.magic.magic_ext_file_parser import (
     parse_magic_ext_file, parse_magic_pex_run, parse_magic_res_ext_file,
 )
 

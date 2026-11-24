@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,16 +36,16 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.netlist.netlist_format import NetlistFormat
-from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist, reduced_netlist_path
-from klayout_pex.netlist.rc_network import RCNetwork
-from klayout_pex.netlist.rc_reduction import ReductionOptions, ReductionStatistics, reduce_network
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.run_result import FileKind
-from klayout_pex.pex25d.diagnostics import ExitCode
+from kpex.kpex_cli import KpexCLI
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.netlist.netlist_format import NetlistFormat
+from kpex.netlist.netlist_reduction import reduce_spice_netlist, reduced_netlist_path
+from kpex.netlist.rc_network import RCNetwork
+from kpex.netlist.rc_reduction import ReductionOptions, ReductionStatistics, reduce_network
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.run_result import FileKind
+from kpex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
 from tests.common.rc_networks import (
     approx,
@@ -231,7 +231,7 @@ def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: 
 def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], message: str):
     # NOTE: found by the argument validation, before LVS
     invalid = RCX25Extraction(pdk=extraction.pdk, pex_mode=mode, blackbox=False)
-    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+    with mock.patch('kpex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         invalid.run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=reduce_args)
     # NOTE: among others, e.g. a missing KLayout executable (as in CI, which has the Python module only)
     assert [c.args[0] for c in error_mock.call_args_list if '--reduce' in c.args[0]] == [message]
@@ -241,7 +241,7 @@ def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], messag
 @allure.tag(*tags)
 def test_kpex_reduce_needs_the_2_5d_engine():
     pdk = extraction.pdk
-    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+    with mock.patch('kpex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         KpexCLI().main(['main', 'extract', '--pdk', pdk.name, '--gds', pdk.gds_path('test_patterns', 'nfet_li1.gds.gz'),
                         '--out-dir', pdk.output_dir, '--reduce', 'floating'])
     assert "--reduce floating reduces the netlist of the 2.5D engine, it needs --2.5D" in \
@@ -296,7 +296,7 @@ def test_requested_reduction_check_detects_a_bad_reducer_even_with_check_disable
 
     cli = KpexCLI()
     fixture = extraction.lvsdb_fixture('test_patterns', 'nfet_li1.gds.gz').up_to_date_lvsdb_path()
-    with mock.patch('klayout_pex.netlist.netlist_reduction.reduce_network', side_effect=faulty_reduction):
+    with mock.patch('kpex.netlist.netlist_reduction.reduce_network', side_effect=faulty_reduction):
         code, output = run_cli(cli.main, ['main', 'extract', '--pdk', extraction.pdk.name,
                                           '--mode', 'RC', '--lvsdb', fixture, '--out-dir', str(tmp_path),
                                           '--2.5D', '--reduce', 'ticer', '--check', 'n', *check_args])
@@ -315,7 +315,7 @@ def test_requested_reduction_check_detects_a_bad_reducer_even_with_check_disable
     ['--check-frequency-range', '1', '10', '--check-points-per-decade', '1001'],
 ])
 def test_invalid_extraction_check_options_fail_before_loading_technology(check_args: List[str], tmp_path: Path):
-    with mock.patch('klayout_pex.kpex_cli.TechInfo.from_json') as load_technology:
+    with mock.patch('kpex.kpex_cli.TechInfo.from_json') as load_technology:
         code, output = run_cli(KpexCLI().main, ['main', 'extract', '--pdk', extraction.pdk.name,
                                                '--gds', str(tmp_path / 'missing.gds'), '--2.5D',
                                                '--mode', 'RC', '--reduce', 'ticer', *check_args])

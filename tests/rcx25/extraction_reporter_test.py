@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ import unittest
 import allure
 import klayout.rdb as rdb
 
-from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
-import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
+from kpex.rcx25.extraction_reporter import ExtractionReporter
+import kpex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
 
 
 def category_names(categories: Iterable[rdb.RdbCategory]) -> List[str]:

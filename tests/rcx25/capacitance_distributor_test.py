@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ import unittest
 from unittest import mock
 
 import klayout.db as kdb
-from klayout_pex.rcx25.c.capacitance_integrals import EdgeCapacitanceProfile
+from kpex.rcx25.c.capacitance_integrals import EdgeCapacitanceProfile
 
-from klayout_pex.rcx25.capacitance_distributor import (
+from kpex.rcx25.capacitance_distributor import (
     CapacitanceDistributor,
     Area,
     NodeSite,
@@ -39,8 +39,8 @@ from klayout_pex.rcx25.capacitance_distributor import (
     edge_parts,
     clip,
 )
-import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
-import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+import kpex_protobuf.kpex.layout.location_pb2 as location_pb2
+import kpex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 
 def distributor(sites: Dict[Tuple[str, str], List[Tuple[float, float, str]]],
@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
         area = Area([([(0, 0), (0, 10), (10, 10), (10, 0)], -1.0)])
         sites = [NodeSite(0, 5, 'A'), NodeSite(10, 5, 'B')]
         sites.extend(NodeSite(x, 5, str(x)) for x in range(11, 101))
-        with mock.patch('klayout_pex.rcx25.capacitance_distributor.clip', wraps=clip) as clipping:
+        with mock.patch('kpex.rcx25.capacitance_distributor.clip', wraps=clip) as clipping:
             cell = area.clipped_to_cell(sites, 0, kdb.Point())
         self.assertEqual([([(5.0, 0.0), (0, 0), (0, 10), (5.0, 10.0)], -1.0)], cell.contours)
         self.assertEqual(50, cell.area())

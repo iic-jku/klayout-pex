@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ import os
 import tempfile
 import unittest
 
-from klayout_pex.pex25d.artifact import (
+from kpex.pex25d.artifact import (
     ArtifactFormat, ArtifactKind, ArtifactNamingError, ArtifactSpec, STDIO_PATH,
     infer_artifact_spec, named_kind_and_format,
 )
-from klayout_pex.pex25d.codec import load_artifact, save_artifact
-from klayout_pex.pex25d.resolver import resolve
+from kpex.pex25d.codec import load_artifact, save_artifact
+from kpex.pex25d.resolver import resolve
 
 from .pex25d_fixtures import MINIMAL, read
 

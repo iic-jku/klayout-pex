@@ -4,7 +4,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ jobs:
       uses: actions/cache@v6
       with:
         path: .venv
-        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        key: venv-kpex-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: "[🐍] Install dependencies"
       run: poetry install --no-interaction --no-root
@@ -102,21 +102,17 @@ jobs:
 
     # NOTE: the same steps as gen_tech_pb.sh
     - name: "[🐍] Generate protobuf python modules"
-      run: >
-        poetry run python -m grpc_tools.protoc
-        --proto_path=protos
-        --python_out=klayout_pex_protobuf
-        $(find protos -name '*.proto')
+      run: poetry run python scripts/build/generate_protobuf.py
       shell: bash    # NOTE: required for windows poetry calls
 
     - name: "[🐍] Verify python protobuf generation"
       run: |
         # check if protobuf python modules were created
-        ls klayout_pex_protobuf/kpex/tech/tech_pb2.py
+        ls kpex_protobuf/kpex/tech/tech_pb2.py
       shell: bash
 
     - name: "[🐍] Generate PB Tech"
-      run: poetry run python scripts/gen_tech_pb klayout_pex_protobuf
+      run: poetry run python scripts/gen_tech_pb kpex_protobuf
       shell: bash    # NOTE: required for windows poetry calls
 
     - name: "[🐍] Install project"
@@ -129,12 +125,12 @@ jobs:
 
     - name: "[🐍] Verify wheel contains generation tech protobuf json messages"
       run: |
-        unzip -l dist/*.whl | grep klayout_pex_protobuf | grep .pb.json
+        unzip -l dist/*.whl | grep kpex_protobuf | grep .pb.json
       shell: bash
 
     - name: "[🐍] Verify wheel contains generation protobuf python modules"
       run: |
-        unzip -l dist/*.whl | grep klayout_pex_protobuf | grep _pb2.py
+        unzip -l dist/*.whl | grep kpex_protobuf | grep _pb2.py
       shell: bash
 
     # NOTE: see scripts/build/kpex_build_backend.py and issue #210
@@ -193,8 +189,7 @@ jobs:
         retention-days: 1
         if-no-files-found: error
 
-  # The plugin repositories' tests, against this checkout rather than the klayout-pex
-  # release they pin: a change that breaks a plugin fails here. Their results join
+  # Test the plugins against this KPEX checkout so API regressions fail here. Their results join
   # the Allure and coverage pages.
   plugin-tests:
     name: Plugin Tests ${{ matrix.plugin }}
@@ -228,38 +223,43 @@ jobs:
         installer-parallel: true
 
     # NOTE: a key of its own: this venv also holds the plugins, whose entry points
-    #       would show up in klayout-pex's own tests
+    #       would show up in KPEX's own tests
     - name: "[🐍] Load cached venv"
       uses: actions/cache@v6
       with:
         path: .venv
-        key: venv-plugin-tests-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        key: venv-kpex-plugin-tests-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: "[🐍] Install dependencies"
       run: poetry install --no-interaction --no-root
 
     # NOTE: the same steps as gen_tech_pb.sh
     - name: "[🐍] Generate protobuf python modules"
-      run: >
-        poetry run python -m grpc_tools.protoc
-        --proto_path=protos
-        --python_out=klayout_pex_protobuf
-        $(find protos -name '*.proto')
+      run: poetry run python scripts/build/generate_protobuf.py
 
     - name: "[🐍] Generate PB Tech"
-      run: poetry run python scripts/gen_tech_pb klayout_pex_protobuf
+      run: poetry run python scripts/gen_tech_pb kpex_protobuf
 
     - name: "[🐍] Install project"
       run: poetry install --no-interaction
 
     # NOTE: the same paths as in publish-reports-github-pages.yml, which needs
     #       the sources for the coverage report
-    - name: "Checkout plugins"
+    - name: "Checkout plugin rename commits"
+      # Test the renamed imports together until the plugin rename PRs reach main.
       run: |
-        for plugin in gmsh palace elmer kqcircuits; do
-          git clone --depth 1 "https://github.com/iic-jku/klayout-pex-plugin-$plugin.git" \
-                    "plugins/klayout-pex-plugin-$plugin"
-        done
+        while read -r plugin commit; do
+          directory="plugins/kpex-plugin-$plugin"
+          git init --quiet "$directory"
+          git -C "$directory" fetch --depth=1 --no-tags "https://github.com/iic-jku/kpex-plugin-$plugin.git" "$commit"
+          git -C "$directory" checkout --quiet --detach FETCH_HEAD
+          test "$(git -C "$directory" rev-parse HEAD)" = "$commit"
+        done <<'PLUGIN_COMMITS'
+        gmsh 0d6ed1d6653efae4d452c8564d7689c5210b4a0d
+        palace a206c53125ffc8dbf4e4fd2d67f269ebe6b168ea
+        elmer 7e46ba9b059fa18bf418e30f6d43c5299dbf02a8
+        kqcircuits 0eed3bd0ed14efce42a1ae08a950a58fea1f852c
+        PLUGIN_COMMITS
 
     - name: Configure Ubuntu package downloads
       if: runner.os == 'Linux'
@@ -272,15 +272,15 @@ jobs:
         sudo apt-get update
         sudo apt-get install --yes libgl1 libglu1-mesa libgomp1 libxcursor1 libxft2 libxinerama1 libxrender1
 
-    # --no-deps: keep this checkout of klayout-pex, whatever release the plugins pin
+    # --no-deps: test this checkout without installing a released core alongside it
     - name: "[🐍] Install plugins"
       run: |
         poetry run pip install gmsh
         poetry run pip install --no-deps \
-          -e plugins/klayout-pex-plugin-gmsh \
-          -e plugins/klayout-pex-plugin-palace \
-          -e plugins/klayout-pex-plugin-elmer \
-          -e plugins/klayout-pex-plugin-kqcircuits
+          -e plugins/kpex-plugin-gmsh \
+          -e plugins/kpex-plugin-palace \
+          -e plugins/kpex-plugin-elmer \
+          -e plugins/kpex-plugin-kqcircuits
 
     - name: "Install Elmer FEM"
       timeout-minutes: 5
@@ -293,7 +293,7 @@ jobs:
     - name: "[🐍] Run plugin tests"
       run: >
         poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }}
-        -m pytest plugins/klayout-pex-plugin-${{ matrix.plugin }}
+        -m pytest plugins/kpex-plugin-${{ matrix.plugin }}
         --alluredir ${{ env.ALLURE_RESULTS_PATH }}
         --color no
         -rA
@@ -324,14 +324,46 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/smoke-tests.yml
 
-  call-publish-pypi:
-    name: "Publish distribution 📦s to PyPI/TestPyPI"
-    # NOTE: don't publish a wheel that fails for any bundled PDK (#210)
+  # PyPI Trusted Publishing requires the publishing jobs in the top-level
+  # workflow. Register ci-cd.yml on both indexes under iic-jku/kpex.
+  publish-test-pypi:
+    name: Publish distribution to TestPyPI
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
     needs: [build_and_test, call-smoke-tests]
-    concurrency:
-      group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-pypi
-      cancel-in-progress: true
-    uses: ./.github/workflows/publish-pypi.yml
+    continue-on-error: true
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions verified by smoke tests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: python-dist-ubuntu-latest*
+          merge-multiple: true
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          attestations: false
+
+  publish-production-pypi:
+    name: Publish distribution to PyPI
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    needs: [build_and_test, call-smoke-tests]
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions verified by smoke tests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: python-dist-ubuntu-latest*
+          merge-multiple: true
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: false
 
   call-integration-tests:
     name: "Integration Tests"

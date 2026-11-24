@@ -4,7 +4,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 ##
 
 # NOTE: runs the smoke test suite (tests/smoke) against the *installed* wheel
-#       (the wheel that gets published, see publish-pypi.yml),
+#       (the wheel that the publishing jobs in ci-cd.yml upload),
 #       see https://github.com/iic-jku/klayout-pex/issues/210
 name: "Smoke tests"
 
@@ -71,7 +71,7 @@ jobs:
       uses: actions/cache@v6
       with:
         path: .venv
-        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        key: venv-kpex-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: "[🐍] Install dependencies"
       # NOTE: only for pytest itself, the wheel is installed into a fresh venv by the tests
@@ -111,14 +111,14 @@ jobs:
     - name: "Download Python dist artifacts"
       uses: actions/download-artifact@v8
       with:
-        pattern: python-dist-ubuntu-latest*   # NOTE: same as publish-pypi.yml
+        pattern: python-dist-ubuntu-latest*   # NOTE: same as the publishing jobs in ci-cd.yml
         merge-multiple: true
         path: dist   # destination
 
     # NOTE: unlike integration-tests.yml, do NOT unpack the dist into the checkout
     - name: "[🐍] Run smoke tests"
       run: >
-        KPEX_SMOKE_TEST_WHEEL=$(ls dist/klayout_pex-*.whl)
+        KPEX_SMOKE_TEST_WHEEL=$(ls dist/kpex-*.whl)
         poetry run pytest tests/smoke
         --alluredir ${{ env.ALLURE_RESULTS_PATH }}
         --color no

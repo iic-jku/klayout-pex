@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 Johannes Kepler University, Institute for Integrated Circuits.
 
 This file is part of KPEX 
-(see https://github.com/iic-jku/klayout-pex).
+(see https://github.com/iic-jku/kpex).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,25 +21,38 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 SPDX-License-Identifier: GPL-3.0-or-later
 --------------------------------------------------------------------------------
 -->
-[![PyPi](https://img.shields.io/pypi/v/klayout-pex)](https://pypi.org/project/klayout-pex/)
-[![CI](https://github.com/iic-jku/klayout-pex/actions/workflows/ci-cd.yml/badge.svg?branch=main&event=push)](https://github.com/iic-jku/klayout-pex/actions/workflows/ci-cd.yml?query=branch%3Amain)
-[![Coverage](https://img.shields.io/badge/coverage-report-blue.svg)](https://iic-jku.github.io/klayout-pex/pycov/)
-[![GitHub issues](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/iic-jku/klayout-pex/issues)
+[![PyPi](https://img.shields.io/pypi/v/kpex)](https://pypi.org/project/kpex/)
+[![CI](https://github.com/iic-jku/kpex/actions/workflows/ci-cd.yml/badge.svg?branch=main&event=push)](https://github.com/iic-jku/kpex/actions/workflows/ci-cd.yml?query=branch%3Amain)
+[![Coverage](https://img.shields.io/badge/coverage-report-blue.svg)](https://iic-jku.github.io/kpex/pycov/)
+[![GitHub issues](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/iic-jku/kpex/issues)
 [![DOI](https://zenodo.org/badge/897408519.svg)](https://doi.org/10.5281/zenodo.17822625)
 
-# KLayout-PEX
+# KPEX
 
-KLayout-PEX is a parasitic extraction tool for [KLayout](https://klayout.org).
+KPEX is a parasitic extraction tool for [KLayout](https://klayout.org).
 There a multiple engines supported:
   - FasterCap (requires [FasterCap](https://github.com/iic-jku/FasterCap) installation)
   - MAGIC wrapper (requires [MAGIC](https://github.com/RTimothyEdwards/magic) installation)
   - 2.5D engine (**under development**)
 
-Check out the [documentation website](https://iic-jku.github.io/klayout-pex-website) for more information.
+Check out the [documentation website](https://iic-jku.github.io/kpex-website) for more information.
 
 ## Install
 
-`pip install klayout-pex`
+`pip install kpex`
+
+Starting with version `0.12.0`, the PyPI distribution is named `kpex`.
+If upgrading an environment that already has `klayout-pex`, uninstall it
+before installing `kpex`, or create a fresh environment. Both distributions
+install the `kpex`, `pex25d` and `netlist` commands.
+
+For Python callers, change imports from `klayout_pex` to `kpex` and from
+`klayout_pex_protobuf` to `kpex_protobuf`. The protobuf schema names and
+serialized formats stay the same.
+
+The renamed plugin distributions use the `kpex-plugin-*` prefix. Use releases
+that depend on `kpex` in the new environment. Earlier `klayout-pex-plugin-*`
+releases still require `klayout-pex` and belong in a separate environment.
 
 After that, you should be able to run `kpex --help`.
 
@@ -258,26 +271,26 @@ Funded by the European Union. Views and opinions expressed are however those of 
 
 <p align="center">
   <a href="https://iic.jku.at" target="_blank">
-    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/iic-jku.svg" alt="Johannes Kepler University: Institute for Integrated Circuits and Quantum Computing" width="300"/>
+    <img src="https://github.com/iic-jku/kpex-website/raw/main/figures/funding/iic-jku.svg" alt="Johannes Kepler University: Institute for Integrated Circuits and Quantum Computing" width="300"/>
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://silicon-austria-labs.com" target="_blank">
-    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/silicon-austria-labs-logo.svg" alt="Silicon Austria Labs" width="300"/>
+    <img src="https://github.com/iic-jku/kpex-website/raw/main/figures/funding/silicon-austria-labs-logo.svg" alt="Silicon Austria Labs" width="300"/>
   </a>
 </p>
 
 <p align="center">
   <a href="https://www.elektronikforschung.de/projekte/fmd-qnc" target="_blank">
-    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/bfmtr-bund-de-logo.svg" alt="Bundesministerium für Forschung, Technologie und Raumfahrt" width="300">
+    <img src="https://github.com/iic-jku/kpex-website/raw/main/figures/funding/bfmtr-bund-de-logo.svg" alt="Bundesministerium für Forschung, Technologie und Raumfahrt" width="300">
   </a>
 </p>
 
 <p align="center">
   <a href="https://ode4ec.eu/projects/ams/" target="_blank">
-    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/eu-cofunded.svg" alt="Co-funded by the European Union" width="300"/>
+    <img src="https://github.com/iic-jku/kpex-website/raw/main/figures/funding/eu-cofunded.svg" alt="Co-funded by the European Union" width="300"/>
   </a>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://www.chips-ju.europa.eu" target="_blank">
-    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/chips-ju.png" alt="Chips Joint Undertaking" width="300"/>
+    <img src="https://github.com/iic-jku/kpex-website/raw/main/figures/funding/chips-ju.png" alt="Chips Joint Undertaking" width="300"/>
   </a>
 </p>

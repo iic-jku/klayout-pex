@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,15 +31,15 @@ import pytest
 import klayout.pex as klp
 
 import klayout.db as kdb
-import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
-from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
-from klayout_pex.netlist.rc_network import RCNetwork
+import kpex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
+from kpex.klayout.shapes_pb2_converter import ShapesConverter
+from kpex.netlist.rc_network import RCNetwork
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 from tests.common.vacask import vacask_port_admittance, requires_vacask
 from tests.common.rc_networks import build_network, port_admittance, spice_subcircuit
 
-from klayout_pex.log import (
+from kpex.log import (
     LogLevel,
     set_log_level,
 )

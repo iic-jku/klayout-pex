@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,23 +41,23 @@ from unittest.mock import Mock
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.plugin_api.v1 import (
+from kpex import pex25d
+from kpex.plugin_api.v1 import (
     EXPORTER_ENTRY_POINT_GROUP,
     ExportError,
     ExporterUnavailable,
     PEX25DSceneExporter,
 )
-from klayout_pex.plugin.exporter_registry import ExporterRegistry
+from kpex.plugin.exporter_registry import ExporterRegistry
 
 from .pex25d_fixtures import MINIMAL, STACK_ONLY
 
 if TYPE_CHECKING:
-    from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelGenerator
-    from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapExporterOptions
+    from kpex.fastercap.fastercap_model_generator import FasterCapModelGenerator
+    from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+    from kpex.fastercap.pex25d_exporter import FasterCapExporterOptions
 
-    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+    from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 
 
 PLUGIN_SOURCE = '''
@@ -67,7 +67,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Mapping, Optional
 
 if TYPE_CHECKING:
-    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+    from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 
 class Exporter:
     def export(self, scene: PEX25DScene, *, output_dir_path: str,
@@ -107,7 +107,7 @@ def test_discovery_does_not_import_plugins_and_ignores_other_api_versions(
 
     registry = pex25d.exporter_registry()
     assert {info.qualified_name for info in registry.exporters} == {
-        'klayout-pex:fastercap', 'klayout-pex:fastcap2', 'klayout-pex:stl', 'test-one:example',
+        'kpex:fastercap', 'kpex:fastcap2', 'kpex:stl', 'test-one:example',
     }
     assert module not in sys.modules
     assert other not in sys.modules
@@ -141,7 +141,7 @@ def test_public_api_exports_no_invalid_scene(
 
 def test_cli_exports_no_invalid_scene(
         install_exporter: Callable[..., str], tmp_path: Path, scene: PEX25DScene):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     install_exporter('test-one', 'example')
     scene.layers[0].zhigh = scene.layers[0].zlow
@@ -161,8 +161,8 @@ def test_cli_exports_no_invalid_scene(
 @pytest.mark.parametrize('selector', ['example', 'TEST_One:example'])
 def test_cli_exports_with_an_installed_plugin(
         install_exporter: Callable[..., str], tmp_path: Path, selector: str):
-    from klayout_pex.pex25d.diagnostics import ExitCode
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.diagnostics import ExitCode
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     module = install_exporter('test-one', 'example')
     input_path = tmp_path / 'cell.pex25d'
@@ -197,8 +197,8 @@ def test_cli_exports_with_an_installed_plugin(
 def test_cli_passes_only_explicit_export_options(
         install_exporter: Callable[..., str], tmp_path: Path,
         extra_arguments: List[str], expected: Dict[str, Any]):
-    from klayout_pex.pex25d.diagnostics import ExitCode
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.diagnostics import ExitCode
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     source = PLUGIN_SOURCE.replace(
         '''f"{scene.conductors[0].name}:{options.get('mesh_size', 0.25)}"''', 'repr(options)')
@@ -224,8 +224,8 @@ def test_cli_passes_only_explicit_export_options(
 def test_cli_rejects_malformed_options_before_loading(
         install_exporter: Callable[..., str], tmp_path: Path,
         caplog: pytest.LogCaptureFixture, extra_arguments: List[str], message: str):
-    from klayout_pex.pex25d.diagnostics import ExitCode
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.diagnostics import ExitCode
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     module = install_exporter('test-one', 'example')
     input_path = tmp_path / 'cell.pex25d'
@@ -251,8 +251,8 @@ def test_cli_rejects_export_flags_out_of_range_before_loading(
         tmp_path: Path, capsys: pytest.CaptureFixture, option: str, value: str, expected: str):
     # NOTE: a --delaunay-b of 1.5 kept the triangulation from finishing, a negative --field-margin drew
     #       the unbounded materials inside the geometry, the others were ignored or crashed the exporter (#432)
-    from klayout_pex.pex25d.diagnostics import ExitCode
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.diagnostics import ExitCode
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     input_path = tmp_path / 'cell.pex25d'
     input_path.write_text(MINIMAL, encoding='utf-8')
@@ -278,9 +278,9 @@ def test_cli_rejects_export_options_out_of_range_before_building(
         option: str, expected: str):
     # NOTE: --option skipped the ranges of the export flags, a delaunay_b of 1.5 kept the triangulation
     #       from finishing (#441)
-    from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
-    from klayout_pex.pex25d.diagnostics import ExitCode
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+    from kpex.pex25d.diagnostics import ExitCode
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     build = Mock(side_effect=AssertionError('options out of range must not reach meshing'))
     monkeypatch.setattr(PEX25DFasterCapModelBuilder, 'build', build)
@@ -298,8 +298,8 @@ def test_cli_rejects_export_options_out_of_range_before_building(
 @pytest.mark.parametrize('selector', ['unknown', 'example'])
 def test_cli_unknown_or_ambiguous_exporters_exit_usage(
         install_exporter: Callable[..., str], tmp_path: Path, selector: str):
-    from klayout_pex.pex25d.diagnostics import ExitCode
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.diagnostics import ExitCode
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     first = install_exporter('test-one', 'example')
     second = install_exporter('test-two', 'example')
@@ -339,6 +339,7 @@ def test_external_plugin_cannot_silently_replace_a_builtin(
     registry = pex25d.exporter_registry()
 
     builtin = registry.load(target)
+    assert type(registry.load(f'kpex:{target}')) is type(builtin)
     assert type(registry.load(f'klayout-pex:{target}')) is type(builtin)
     assert type(builtin).__name__ == class_name
     assert builtin.name == target
@@ -395,8 +396,8 @@ def test_builtin_calls_preserve_model_and_output_settings(
         tmp_path: Path, target: str,
         options: Optional[Mapping[str, Any]],
         scene: PEX25DScene):
-    from klayout_pex.fastercap import pex25d_model_builder
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapExporterOptions
+    from kpex.fastercap import pex25d_model_builder
+    from kpex.fastercap.pex25d_exporter import FasterCapExporterOptions
 
     calls: List[Tuple[PEX25DScene, FasterCapExporterOptions]] = []
     generator = Mock()
@@ -451,13 +452,13 @@ def test_imports_and_builtin_discovery_need_no_geometry_or_generated_code():
 
         class BlockOptionalImports(importlib.abc.MetaPathFinder):
             def find_spec(self, fullname, path=None, target=None):
-                if fullname.split('.')[0] in {'klayout', 'klayout_pex_protobuf', 'packaging'}:
+                if fullname.split('.')[0] in {'klayout', 'kpex_protobuf', 'packaging'}:
                     raise ImportError('blocked optional dependency: ' + fullname)
 
         sys.meta_path.insert(0, BlockOptionalImports())
-        from klayout_pex.plugin_api import v1
-        from klayout_pex.plugin_api.v1.pex25d_importer import PEX25DImporter
-        from klayout_pex.plugin_api.v1.pex25d_scene_exporter import PEX25DSceneExporter
+        from kpex.plugin_api import v1
+        from kpex.plugin_api.v1.pex25d_importer import PEX25DImporter
+        from kpex.plugin_api.v1.pex25d_scene_exporter import PEX25DSceneExporter
         assert v1.PEX25DImporter is PEX25DImporter
         assert v1.PEX25DSceneExporter is PEX25DSceneExporter
         assert v1.ImporterFactory is not None
@@ -474,14 +475,14 @@ def test_imports_and_builtin_discovery_need_no_geometry_or_generated_code():
         else:
             raise AssertionError('native helpers should require the optional backend')
 
-        from klayout_pex import pex25d
+        from kpex import pex25d
         registry = pex25d.exporter_registry()
-        from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter, FastCap2SceneExporter
-        from klayout_pex.stl.pex25d_exporter import STLSceneExporter
+        from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter, FastCap2SceneExporter
+        from kpex.stl.pex25d_exporter import STLSceneExporter
         assert v1.PEX25DSceneExporter.supported_capabilities() == frozenset()
         for exporter_class in (FasterCapSceneExporter, FastCap2SceneExporter, STLSceneExporter):
             assert v1.SceneCapability.GROUND_CUTOUTS in exporter_class.supported_capabilities()
-        exporter = registry.load('klayout-pex:fastercap')
+        exporter = registry.load('kpex:fastercap')
         try:
             from types import SimpleNamespace
             scene = SimpleNamespace(ground_plane=SimpleNamespace(cutouts=(), net='', name='subs'),
@@ -547,7 +548,7 @@ BOX CONDUCTOR B LAYER met1 LL 2.0 0.0 UR 3.0 0.5
 
 
 def test_empty_geometry_writers_return_only_files_written(tmp_path: Path):
-    from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelGenerator
+    from kpex.fastercap.fastercap_model_generator import FasterCapModelGenerator
 
     generator = FasterCapModelGenerator(dbu=0.001, k_void=1.0, delaunay_amax=0.0,
                                         delaunay_b=1.0, materials={'empty': 2.0},
@@ -570,7 +571,7 @@ def test_empty_geometry_writers_return_only_files_written(tmp_path: Path):
 def test_builtin_rejects_invalid_option_values_before_building(
         install_exporter: Callable[..., str], monkeypatch: pytest.MonkeyPatch,
         tmp_path: Path, scene: PEX25DScene, name: str, value: Any, target: str):
-    from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+    from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
 
     build = Mock(side_effect=AssertionError('invalid options must not reach meshing'))
     monkeypatch.setattr(PEX25DFasterCapModelBuilder, 'build', build)
@@ -584,7 +585,7 @@ def test_builtin_rejects_invalid_option_values_before_building(
 
 @pytest.mark.parametrize('number', [1, 1.0])
 def test_builtin_numeric_options_accept_ints_and_floats(number: float):
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapExporterOptions
+    from kpex.fastercap.pex25d_exporter import FasterCapExporterOptions
 
     settings = FasterCapExporterOptions(delaunay_amax=number, delaunay_b=number,
                                         field_margin_um=number)
@@ -597,7 +598,7 @@ def test_plugin_execution_errors_are_wrapped_for_api_and_cli(
         install_exporter: Callable[..., str], tmp_path: Path, scene: PEX25DScene,
         capsys: pytest.CaptureFixture, caplog: pytest.LogCaptureFixture,
         exception: str, log_level: str):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     caplog.set_level(logging.DEBUG, logger='__kpex__')
     source = PLUGIN_SOURCE.replace('options = options or {}', f'raise {exception}')
@@ -630,8 +631,8 @@ def test_builtin_crashes_have_distinct_exit_status_and_debug_traceback(
         install_exporter: Callable[..., str], tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture,
         caplog: pytest.LogCaptureFixture, log_level: str):
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     caplog.set_level(logging.DEBUG, logger='__kpex__')
     bug = AttributeError('no_such_field')
@@ -648,7 +649,7 @@ def test_builtin_crashes_have_distinct_exit_status_and_debug_traceback(
                          '--to', 'fastercap', '--out-dir', str(tmp_path / 'deck')])
     assert completion.value.code == pex25d.ExitCode.INTERNAL_ERROR
     output = capsys.readouterr()
-    assert 'klayout-pex:fastercap' in output.out + output.err
+    assert 'kpex:fastercap' in output.out + output.err
     assert 'AttributeError: no_such_field' in output.out + output.err
     assert ('Traceback' in output.out + output.err) == (log_level == 'debug')
     tracebacks = [record for record in caplog.records if record.exc_info]
@@ -691,7 +692,7 @@ def test_plugin_domain_errors_keep_their_identity(
         scene: PEX25DScene, error_type: str, phase: str):
     source = PLUGIN_SOURCE.replace(
         'from pathlib import Path',
-        f'from pathlib import Path\nfrom klayout_pex.plugin_api.v1 import {error_type}\n'
+        f'from pathlib import Path\nfrom kpex.plugin_api.v1 import {error_type}\n'
         f'failure = {error_type}("configuration error")')
     source = source.replace('return Exporter()' if phase == 'factory' else 'options = options or {}',
                             'raise failure')
@@ -705,8 +706,8 @@ def test_plugin_domain_errors_keep_their_identity(
 def test_cli_checks_exporter_before_reading_or_resolving(
         install_exporter: Callable[..., str], monkeypatch: pytest.MonkeyPatch,
         tmp_path: Path, selector: str):
-    from klayout_pex.pex25d import codec, resolver
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d import codec, resolver
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     install_exporter('test-one', 'example')
     install_exporter('test-two', 'example')
@@ -725,10 +726,10 @@ def test_cli_checks_exporter_before_reading_or_resolving(
 
 def test_cli_emits_collected_diagnostics_when_export_fails(
         install_exporter: Callable[..., str], tmp_path: Path):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     source = PLUGIN_SOURCE.replace('from pathlib import Path',
-                                  'from pathlib import Path\nfrom klayout_pex.plugin_api.v1 import ExportError')
+                                  'from pathlib import Path\nfrom kpex.plugin_api.v1 import ExportError')
     source = source.replace('options = options or {}', 'raise ExportError("unsupported geometry")')
     install_exporter('test-one', 'example', source)
     input_path = tmp_path / 'empty.pex25d'
@@ -747,21 +748,21 @@ def test_unknown_selector_lists_available_identifiers_without_loading_plugins(
     module = install_exporter('test-one', 'example', 'raise ImportError("missing mesher")')
     with pytest.raises(ExportError) as failure:
         pex25d.exporter_registry().load('unknown')
-    for name in ('klayout-pex:fastercap', 'klayout-pex:fastcap2', 'test-one:example'):
+    for name in ('kpex:fastercap', 'kpex:fastcap2', 'test-one:example'):
         assert name in str(failure.value)
     assert module not in sys.modules
 
 
 def test_cli_lists_exporters_without_input_or_plugin_imports(
         install_exporter: Callable[..., str], capsys: pytest.CaptureFixture):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     module = install_exporter('test-one', 'example', 'raise ImportError("missing mesher")')
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'exporters'])
     assert completion.value.code == pex25d.ExitCode.OK
     output = capsys.readouterr().out
-    for name in ('klayout-pex:fastercap', 'klayout-pex:fastcap2', 'test-one:example'):
+    for name in ('kpex:fastercap', 'kpex:fastcap2', 'test-one:example'):
         assert name in output
     assert module not in sys.modules
 
@@ -803,7 +804,7 @@ def test_reusing_registry_avoids_repeated_metadata_discovery(
 
 def test_cli_loads_selected_factory_only_once(
         install_exporter: Callable[..., str], tmp_path: Path):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     source = PLUGIN_SOURCE.replace('def create_exporter() -> Exporter:',
                                   'calls = 0\ndef create_exporter() -> Exporter:\n'
@@ -825,13 +826,13 @@ def test_format_import_does_not_load_registry():
 
         class BlockRegistryImports(importlib.abc.MetaPathFinder):
             def find_spec(self, fullname, path=None, target=None):
-                if fullname.startswith('klayout_pex.plugin.'):
+                if fullname.startswith('kpex.plugin.'):
                     raise ImportError('format import loaded ' + fullname)
 
         sys.meta_path.insert(0, BlockRegistryImports())
-        from klayout_pex import pex25d
+        from kpex import pex25d
         assert callable(pex25d.read_text)
-        assert not [name for name in sys.modules if name.startswith('klayout_pex.plugin.')]
+        assert not [name for name in sys.modules if name.startswith('kpex.plugin.')]
     """
     result = subprocess.run([sys.executable, '-c', textwrap.dedent(script)],
                             cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True, encoding='utf-8')
@@ -859,7 +860,7 @@ def test_export_io_errors_keep_identity_and_exit_usage(
         install_exporter: Callable[..., str], monkeypatch: pytest.MonkeyPatch,
         tmp_path: Path, scene: PEX25DScene, capsys: pytest.CaptureFixture,
         caplog: pytest.LogCaptureFixture, target: str, error_number: int):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     caplog.set_level(logging.DEBUG, logger='__kpex__')
     install_exporter('test-one', 'example')
@@ -889,7 +890,7 @@ def test_export_io_errors_keep_identity_and_exit_usage(
 def test_cli_rejects_output_directory_that_is_a_file(
         install_exporter: Callable[..., str], tmp_path: Path,
         capsys: pytest.CaptureFixture, target: str):
-    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+    from kpex.pex25d.pex25d_cli import Pex25DCLI
 
     install_exporter('test-one', 'example')
     input_path = tmp_path / 'cell.pex25d'

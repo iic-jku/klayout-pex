@@ -5,7 +5,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ REPORT_PATH=$DIR/build/pylint-report.html
 pylint --rcfile $DIR/.pylintrc \
        --output-format json2 \
        --ignore build \
-	$DIR/klayout_pex > $RESULTS_PATH
+	$DIR/kpex > $RESULTS_PATH
 
 pylint-json2html -f jsonextended $RESULTS_PATH -o $REPORT_PATH
 

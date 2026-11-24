@@ -5,7 +5,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 #
 # NOTE: always (re)builds everything the wheel packages, so the tests never run against outdated files
 #       (checking modification times isn't reliable, e.g. git operations touch sources):
-#       - protobuf modules klayout_pex_protobuf/**/*_pb2.py and
-#         PDK tech info klayout_pex_protobuf/*_tech.pb.json (./gen_tech_pb.sh, a few seconds)
+#       - protobuf modules kpex_protobuf/**/*_pb2.py and
+#         PDK tech info kpex_protobuf/*_tech.pb.json (./gen_tech_pb.sh, a few seconds)
 #       - the wheel itself (a few seconds)
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
@@ -41,7 +41,7 @@ WHEEL_DIR="$DIR/build/smoke-tests-dist"
 rm -rf "$WHEEL_DIR"
 poetry build --format wheel --output "$WHEEL_DIR" || exit 1
 
-KPEX_SMOKE_TEST_WHEEL=$(ls "$WHEEL_DIR"/klayout_pex-*.whl)
+KPEX_SMOKE_TEST_WHEEL=$(ls "$WHEEL_DIR"/kpex-*.whl)
 export KPEX_SMOKE_TEST_WHEEL
 
 source "$DIR"/_run_tests.sh

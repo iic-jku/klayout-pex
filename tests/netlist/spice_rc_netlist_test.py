@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.netlist.rc_reduction import ReductionOptions, reduce_network
-from klayout_pex.netlist.spice_rc_netlist import NetlistReadError, SpiceRCNetlist
+from kpex.netlist.rc_reduction import ReductionOptions, reduce_network
+from kpex.netlist.spice_rc_netlist import NetlistReadError, SpiceRCNetlist
 from tests.common.rc_networks import (
     approx,
     protected_names,

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.rcx25.c.device_capacitance_references import (
+from kpex.rcx25.c.device_capacitance_references import (
     DeviceCapacitanceCheckError, read_device_capacitance_references, tech_device_capacitance_references,
 )
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from tests.common.device_capacitance import REFERENCE, layout_context, reference_document, write_references
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('RCX25', 'Device Capacitance References')]

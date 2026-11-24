@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.rcx25.extraction_results import *
-import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+from kpex.rcx25.extraction_results import *
+import kpex_protobuf.kpex.layout.location_pb2 as location_pb2
 
 
 @allure.parent_suite("Unit Tests")

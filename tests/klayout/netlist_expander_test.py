@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,19 +30,19 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModelError, DeviceModels
-from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.fastcap.output_interpreter import FastCapOutputInterpreter
-from klayout_pex.klayout.netlist_expander import NetlistExpander, remove_devices
-from klayout_pex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
-from klayout_pex.rcx25.exclusion import ConductorPart, ExcludedBlock, Exclusions
-from klayout_pex.log import (
+from kpex.device_models import DeviceModelError, DeviceModels
+from kpex.fastercap.output_interpreter import FasterCapOutputInterpreter
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.fastcap.output_interpreter import FastCapOutputInterpreter
+from kpex.klayout.netlist_expander import NetlistExpander, remove_devices
+from kpex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
+from kpex.rcx25.exclusion import ConductorPart, ExcludedBlock, Exclusions
+from kpex.log import (
     debug,
 )
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.tech_info import TechInfo
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.tech_info import TechInfo
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 @allure.parent_suite("Unit Tests")
@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
     @property
     def tech_info_json_path(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                             'klayout_pex_protobuf', 'sky130A_tech.pb.json'))
+                                             'kpex_protobuf', 'sky130A_tech.pb.json'))
 
     def test_netlist_expansion(self):
         exp = NetlistExpander()

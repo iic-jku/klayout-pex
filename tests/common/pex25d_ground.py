@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,11 +26,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Tuple
 import klayout.db as kdb
-from klayout_pex import pex25d
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_info import TechInfo
+from kpex import pex25d
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.pex25d_builder import PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 GROUND_CUTOUT_TEXT = """PEX25D 1.0-rc1

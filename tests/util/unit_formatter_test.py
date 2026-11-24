@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ from __future__ import annotations
 import allure
 import unittest
 
-from klayout_pex.util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
+from kpex.util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 
 
 @allure.parent_suite("Unit Tests")

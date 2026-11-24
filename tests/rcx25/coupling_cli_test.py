@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,10 +29,10 @@ from typing import Optional, Sequence
 import allure
 import pytest
 
-from klayout_pex.env import Env
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.rcx25.coupling import CouplingPolicy
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.env import Env
+from kpex.kpex_cli import KpexCLI
+from kpex.rcx25.coupling import CouplingPolicy
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.cli_runner import run_cli
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('CLI', 'RCX25', 'Capacitance Modes')]

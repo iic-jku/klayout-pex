@@ -5,7 +5,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -32,6 +32,6 @@ pip3 install \
         --upgrade \
 	--index-url https://test.pypi.org/simple/ \
 	--extra-index-url https://pypi.org/simple/ \
-	klayout-pex
+	kpex
 
 

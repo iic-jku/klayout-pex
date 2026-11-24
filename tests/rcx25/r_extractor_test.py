@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,30 +32,30 @@ import allure
 import klayout.db as kdb
 import klayout.pex as klp
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.rcx25.r.r_extractor import (
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.rcx25.r.r_extractor import (
     RExtractionTechError,
     RExtractor,
     ideal_layer_id,
     keep_pins_of_top_circuit,
     label_names_net
 )
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech
-import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
-import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech
+import kpex_protobuf.kpex.layout.location_pb2 as location_pb2
+import kpex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 
 REPO_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
 
 
 def ihp_sg13g2_tech() -> tech_pb2.Technology:
-    return TechInfo.parse_tech_def(jsonpb_path=os.path.join(REPO_DIR, 'klayout_pex_protobuf', 'ihp-sg13g2_tech.pb.json'))
+    return TechInfo.parse_tech_def(jsonpb_path=os.path.join(REPO_DIR, 'kpex_protobuf', 'ihp-sg13g2_tech.pb.json'))
 
 
 def sky130a_tech() -> tech_pb2.Technology:
-    return TechInfo.parse_tech_def(jsonpb_path=os.path.join(REPO_DIR, 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))
+    return TechInfo.parse_tech_def(jsonpb_path=os.path.join(REPO_DIR, 'kpex_protobuf', 'sky130A_tech.pb.json'))
 
 
 def r_extractor(tech: tech_pb2.Technology,
@@ -229,12 +229,12 @@ class RExtractorWellTest(unittest.TestCase):
 
     def test_substrate_is_no_conductor(self):
         # NOTE: the substrate is ideal, as it is 3D bulk rather than a sheet
-        with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+        with mock.patch('kpex.rcx25.r.r_extractor.warning') as warning_mock:
             self.assertEqual([], self.pwell_conductors(resistance=3000000, substrate=True))
         warning_mock.assert_not_called()
 
     def test_well_without_sheet_resistance_is_no_conductor(self):
-        with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+        with mock.patch('kpex.rcx25.r.r_extractor.warning') as warning_mock:
             self.assertEqual([], self.pwell_conductors(resistance=None, substrate=False))
         self.assertEqual([
             "The resistance network leaves out these wells, as the tech info has no sheet resistance for them, "

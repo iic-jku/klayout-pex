@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 from typing import List
 from pathlib import Path
 
-from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyScenario
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyScenario
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from scripts.gen_tech_pb.provenance import nominal_provenance
 from scripts.gen_tech_pb.source_physical_corners import load_restricted_physical_corners
 

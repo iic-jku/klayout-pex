@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import allure
 import klayout.rdb as rdb
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
+from kpex.kpex_cli import KpexCLI
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import pytest
 from unittest import mock
 
 from typing import *
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.rc_networks import build_network, port_admittance
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
@@ -162,7 +162,7 @@ def test_ldmos_drain_is_under_its_contacts(cell_name: str,
     # Both drains are the same stack, which differs in the resistance per contact only: 8 contacts under a Metal1 strip
     # 0.38 µm wide, 0.52 µm from contact to contact at 90 mΩ/sq, a ladder from the pin D at the first contact
     terminal = f"D.P0.{diffusion}"
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         rows = pex_whiteboxed.written_netlist_rows('test_patterns', f"{cell_name}.gds.gz")
     messages = [c.args[0] for c in warning_mock.call_args_list]
     assert [m for m in messages if 'leaves out these LVS layers' in m] == []
@@ -189,7 +189,7 @@ def test_diffusion_resistors_have_their_contacts_in_their_models():
     # their terminals, and the contacts of the salicided ones abut their bodies: the contacts are within the devices,
     # rather than contact shapes the tech info doesn't know, and no resistors here. Those are the Metal1 from the labels
     # to the terminals of the salicided ones, and the nwell taps of the p+ ones, with their contacts
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.assert_expected_matches_obtained(
             'test_patterns', 'res_diffusion_w1_l4.gds.gz',
             expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
@@ -265,7 +265,7 @@ def test_contacts_over_the_taps_are_known():
     # The contacts over the p-taps, the n-taps of the deep nwell and the p-diffusion of the isolated p-wells
     # join Metal1 to layers that are no conductors of the resistance network, so they are part of the taps,
     # rather than contact shapes the tech info doesn't know (#294)
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz')
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
 

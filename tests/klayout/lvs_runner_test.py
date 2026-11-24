@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@ import unittest
 from typing import List
 from unittest import mock
 
-from klayout_pex.kpex_cli import InputMode, KpexCLI
-from klayout_pex.klayout.lvs_runner import LVSError, LVSRunner
-from klayout_pex.tool_version_constraints import Tool
+from kpex.kpex_cli import InputMode, KpexCLI
+from kpex.klayout.lvs_runner import LVSError, LVSRunner
+from kpex.tool_version_constraints import Tool
 
 
 # What KLayout 0.30 prints when an %include of an LVS script can't be resolved
@@ -85,7 +85,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.netlist_path = os.path.join(self.tmp_dir, "cell_extracted.cir")
 
     def run_lvs(self, fake_klayout: FakeKLayoutProcess):
-        with mock.patch('klayout_pex.klayout.lvs_runner.subprocess.Popen', fake_klayout):
+        with mock.patch('kpex.klayout.lvs_runner.subprocess.Popen', fake_klayout):
             LVSRunner.run_klayout_lvs(exe_path="klayout",
                                       lvs_script="sg13cmos5l.lvs",
                                       gds_path="cell.gds",
@@ -133,8 +133,8 @@ class LVSRunnerFailureTest(unittest.TestCase):
 
     def test_netlist_mismatch_is_no_error(self):
         # NOTE: the report is the criterion, e.g. of an LVS script that exits with 1 after a mismatch
-        with mock.patch('klayout_pex.klayout.lvs_runner.warning') as warning_mock, \
-             mock.patch('klayout_pex.klayout.lvs_runner.error') as error_mock:
+        with mock.patch('kpex.klayout.lvs_runner.warning') as warning_mock, \
+             mock.patch('kpex.klayout.lvs_runner.error') as error_mock:
             self.run_lvs(FakeKLayoutProcess(output="ERROR : Netlists don't match\n",
                                             returncode=1,
                                             writes_report=True))
@@ -190,9 +190,9 @@ class LVSRunnerFailureTest(unittest.TestCase):
         fake_klayout = FakeKLayoutProcess(output=KLAYOUT_INCLUDE_ERROR_OUTPUT,
                                           returncode=1,
                                           writes_report=False)
-        with mock.patch('klayout_pex.klayout.lvs_runner.subprocess.Popen', fake_klayout), \
+        with mock.patch('kpex.klayout.lvs_runner.subprocess.Popen', fake_klayout), \
              mock.patch.object(Tool, 'detect_version', return_value=None), \
-             mock.patch('klayout_pex.kpex_cli.error') as error_mock:
+             mock.patch('kpex.kpex_cli.error') as error_mock:
             with self.assertRaises(SystemExit) as ctx:
                 KpexCLI().create_lvsdb(args)
         self.assertEqual(1, ctx.exception.code)

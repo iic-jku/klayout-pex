@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ from typing import *
 import unittest
 from unittest import mock
 
-from klayout_pex.env import Env, EnvVar
-from klayout_pex.pdk_config import PDK
+from kpex.env import Env, EnvVar
+from kpex.pdk_config import PDK
 
 
 @allure.parent_suite("Unit Tests")

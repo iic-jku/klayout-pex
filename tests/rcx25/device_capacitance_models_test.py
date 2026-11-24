@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ from typing import Dict
 import allure
 import pytest
 
-from klayout_pex.rcx25.c.device_capacitance_references import (
+from kpex.rcx25.c.device_capacitance_references import (
     DeviceCapacitanceCheckError, DeviceCapacitanceReference, tech_device_capacitance_references,
 )
 from tests.common.device_capacitance import DESIGN, layout_context
 
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_info import TechInfo
+from kpex.pdk_config import PDK
+from kpex.tech_info import TechInfo
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice, write_spiceinit
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 

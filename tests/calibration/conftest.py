@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@ from typing import Any, Dict
 
 import pytest
 
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
-from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo as Stack
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo as Stack
 
 
 @pytest.fixture

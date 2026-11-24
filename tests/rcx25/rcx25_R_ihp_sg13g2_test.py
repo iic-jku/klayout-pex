@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/martinjankoehler/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.rcx25.extraction_results import CellExtractionResults
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.tech_info import TechInfo
-import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.kpex_cli import KpexCLI
+from kpex.pdk_config import PDK
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.rcx25.extraction_results import CellExtractionResults
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.tech_info import TechInfo
+import kpex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 from tests.common.lvsdb_fixtures import DESIGNS_DIR, klayout_exe_path, lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction, effective_resistance
@@ -105,7 +105,7 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
     # The terminals of the MOM capacitor are on its ports (cap_cmomi_m5_ports, the Metal5 pins within its marker),
     # an LVS layer the tech info has no layer for (#217), so they are where they overlap the Metal5 of their nets
     cell_name = 'cmomi_w5u_l5u_m1_m5'
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell(cell_name, f"{cell_name}.gds.gz")
 
     assert [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]] == []
@@ -138,7 +138,7 @@ def test_contacts_over_the_taps_are_known():
     # The contacts over the n-taps and the p-taps join Metal1 to the nwell (no sheet resistance) and the substrate,
     # which are no conductors of the resistance network, so they are part of the taps,
     # rather than contact shapes the tech info doesn't know (#294)
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+    with mock.patch('kpex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell('sg13g2_a21o_1', 'sg13g2_a21o_1.gds.gz')
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
 
@@ -582,7 +582,7 @@ def test_device_the_deck_cannot_extract_stops_the_lvs(tmp_path: Path, gds_name: 
     if klayout_exe_path() is None:
         pytest.skip("needs the KLayout executable (KPEX_KLAYOUT_EXE)")
     gds_path = pex_blackboxed.pdk.gds_path('test_patterns', gds_name)
-    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit) as exit_info:
+    with mock.patch('kpex.kpex_cli.error') as error_mock, pytest.raises(SystemExit) as exit_info:
         KpexCLI().main(['main', 'extract', '--pdk', pex_blackboxed.pdk.name, '--mode', 'R', '--blackbox', 'y',
                         '--gds', gds_path, '--out-dir', str(tmp_path), '--2.5D'])
     assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
@@ -619,7 +619,7 @@ R2;A;B;;2.09"""
 def test_metal_on_p_taps_that_only_the_substrate_joins_is_on_its_net():
     # Metal1: 110 mΩ/sq, Metal2: 88 mΩ/sq, 4 µm / 0.3 µm = 13.33 sq between the 2 vias of each wire (9 Ω)
     # NOTE: identical wires, so identical resistors, and none between them, as the substrate is ideal
-    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+    with mock.patch('kpex.rcx25.extractor.warning') as warning_mock:
         pex_whiteboxed.assert_expected_matches_obtained(
             'test_patterns', 'r_ptap_pair_m1_m2.gds.gz',
             expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]

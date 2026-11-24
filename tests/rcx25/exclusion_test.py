@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
-from klayout_pex.pdk_config import PDK
-from klayout_pex.rcx25.capacitance_distributor import CapacitanceDistributor
-from klayout_pex.rcx25.c.capacitance_integrals import EdgeCapacitanceProfile
-from klayout_pex.rcx25.exclusion import (
+from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.pdk_config import PDK
+from kpex.rcx25.capacitance_distributor import CapacitanceDistributor
+from kpex.rcx25.c.capacitance_integrals import EdgeCapacitanceProfile
+from kpex.rcx25.exclusion import (
     BlockKind,
     BlockLabel,
     ConductorPart,
@@ -56,7 +56,7 @@ from klayout_pex.rcx25.exclusion import (
     matches_name,
     merged_intervals,
 )
-from klayout_pex.rcx25.extraction_results import (
+from kpex.rcx25.extraction_results import (
     CellExtractionResults,
     add_distributed_capacitance,
     NetCoupleKey,
@@ -67,10 +67,10 @@ from klayout_pex.rcx25.extraction_results import (
     SidewallCap,
     SidewallKey,
 )
-from klayout_pex.rcx25.r.r_extractor import port_of_cut
-from klayout_pex.tech_info import TechInfo
-import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
-import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+from kpex.rcx25.r.r_extractor import port_of_cut
+from kpex.tech_info import TechInfo
+import kpex_protobuf.kpex.layout.location_pb2 as location_pb2
+import kpex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 parent_suite = "kpex/2.5D exclusion markers"
 tags = ("PEX", "2.5D", "Exclusion")

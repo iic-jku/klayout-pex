@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-from klayout_pex.calibration.patterns import CalibrationPatternSpec, read_patterns
+from kpex.calibration.patterns import CalibrationPatternSpec, read_patterns
 
 
 def read_pattern_data(tmp_path: Path, data: Dict[str, Any]) -> CalibrationPatternSpec:

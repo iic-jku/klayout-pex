@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ from __future__ import annotations
 
 import google.protobuf.json_format
 
-from klayout_pex.device_models import DeviceModels
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+from kpex.device_models import DeviceModels
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 def device_models(*mappings: dict) -> DeviceModels:

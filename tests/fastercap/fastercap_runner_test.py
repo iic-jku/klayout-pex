@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ import tempfile
 import unittest
 from unittest import mock
 
-from klayout_pex.fastercap.fastercap_error import FasterCapError
-from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix, run_fastercap
+from kpex.fastercap.fastercap_error import FasterCapError
+from kpex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix, run_fastercap
 
 
 @allure.parent_suite("Unit Tests")
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
         ):
             with self.subTest(exit_code=exit_code), tempfile.TemporaryDirectory() as tmp_dir:
                 process = mock.Mock(returncode=exit_code, stdout=io.StringIO("Capacitance matrix is:\n"))
-                with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen', return_value=process), \
+                with mock.patch('kpex.fastercap.fastercap_runner.subprocess.Popen', return_value=process), \
                      self.assertRaises(FasterCapError) as cm:
                     run_fastercap(exe_path='FasterCap', lst_file_path='plate.lst',
                                   log_path=os.path.join(tmp_dir, 'FasterCap_Output.txt'),
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
         # NOTE: -a overrides -m (#452)
         with tempfile.TemporaryDirectory() as tmp_dir:
             process = mock.Mock(returncode=0, stdout=io.StringIO("Capacitance matrix is:\n"))
-            with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen',
+            with mock.patch('kpex.fastercap.fastercap_runner.subprocess.Popen',
                             return_value=process) as popen:
                 run_fastercap(exe_path='FasterCap', lst_file_path='plate.lst',
                               log_path=os.path.join(tmp_dir, 'FasterCap_Output.txt'),

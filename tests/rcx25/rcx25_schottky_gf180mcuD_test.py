@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ import klayout.db as kdb
 import numpy as np
 import pytest
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
-from klayout_pex.pdk_config import PDK
-from klayout_pex.rcx25.extraction_results import DeviceTerminalKey
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.tech_info import TechInfo
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.shapes_pb2_converter import ShapesConverter
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.pdk_config import PDK
+from kpex.rcx25.extraction_results import DeviceTerminalKey
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.tech_info import TechInfo
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.rc_networks import port_admittance, scope_named

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist
-from klayout_pex.netlist.admittance_check import AdmittanceCheckOptions, check_reduction_admittance
-from klayout_pex.netlist.rc_reduction import ReductionOptions
+from kpex.netlist.netlist_reduction import reduce_spice_netlist
+from kpex.netlist.admittance_check import AdmittanceCheckOptions, check_reduction_admittance
+from kpex.netlist.rc_reduction import ReductionOptions
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 from tests.common.rc_networks import port_admittance, random_extracted_network, spice_subcircuit, write

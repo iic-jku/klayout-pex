@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,14 +33,14 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.fastercap.fastercap_error import FasterCapError
-from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.pex25d_builder import BuildError, PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.protobuf import pex25d_file_pb2
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.tech_info import TechInfo
+from kpex.fastercap.fastercap_error import FasterCapError
+from kpex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.klayout.pex25d_builder import BuildError, PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.pex25d.protobuf import pex25d_file_pb2
+from kpex.pex25d.resolver import resolve
+from kpex.tech_info import TechInfo
 from scripts.gen_tech_pb.corner_data import write_bundled_corner_catalog
 from scripts.gen_tech_pb.physical_corners import load_corner_process_stacks
 from scripts.gen_tech_pb.source_physical_corners import load_restricted_physical_corners

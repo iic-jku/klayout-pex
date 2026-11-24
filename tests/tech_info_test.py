@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,18 +36,18 @@ import unittest
 import allure
 import google.protobuf.json_format
 
-from klayout_pex.tech_info import TechDefError, TechInfo
-from klayout_pex.util.multiple_choice import MultipleChoicePattern
+from kpex.tech_info import TechDefError, TechInfo
+from kpex.util.multiple_choice import MultipleChoicePattern
 from tests.common.technology import tech_with_two_metals
 
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
-import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as parasitics_pb2
-import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+import kpex_protobuf.kpex.tech.process_parasitics_pb2 as parasitics_pb2
+import kpex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
 def tech_pbjson_paths() -> List[str]:
     protobuf_dir = os.path.realpath(os.path.join(__file__, '..', '..',
-                                                 'klayout_pex_protobuf'))
+                                                 'kpex_protobuf'))
     return sorted(glob.glob(os.path.join(protobuf_dir, '*_tech.pb.json')))
 
 

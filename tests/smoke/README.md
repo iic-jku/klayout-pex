@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 Johannes Kepler University, Institute for Integrated Circuits.
 
 This file is part of KPEX 
-(see https://github.com/iic-jku/klayout-pex).
+(see https://github.com/iic-jku/kpex).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ failed for every user, while all tests passed
 
 - The `installed_wheel` fixture ([conftest.py](conftest.py)) installs the wheel
   (given by `KPEX_SMOKE_TEST_WHEEL`) into a fresh venv, once per test session,
-  and makes sure `klayout_pex` is imported from there (not from the checkout).
+  and makes sure `kpex` is imported from there (not from the checkout).
 - Smoke tests run the console scripts of that venv (`kpex`, `netlist`, `pex25d`)
   as subprocesses, outside of the checkout and without `PYTHONPATH`.
 - Each aspect gets its own module, e.g. [pdk_extraction_test.py](pdk_extraction_test.py).
@@ -56,8 +56,8 @@ failed for every user, while all tests passed
 Like the other `run_*_tests.sh` scripts, this generates the Allure report into `build/allure-report`
 (and opens it on macOS). Before, it rebuilds everything the wheel packages, so it's never outdated:
 
-1. `./gen_tech_pb.sh`, for the generated protobuf modules (`klayout_pex_protobuf/**/*_pb2.py`)
-   and the PDK tech info (`klayout_pex_protobuf/*_tech.pb.json`)
+1. `./gen_tech_pb.sh`, for the generated protobuf modules (`kpex_protobuf/**/*_pb2.py`)
+   and the PDK tech info (`kpex_protobuf/*_tech.pb.json`)
 2. `poetry build --format wheel`, into `build/smoke-tests-dist/`
 3. `pytest -m smoke`
 
@@ -68,7 +68,7 @@ Requirements:
 
 To check an existing wheel instead (e.g. a CI artifact, or a release downloaded from PyPI):
 ```bash
-KPEX_SMOKE_TEST_WHEEL=path/to/klayout_pex-<version>-py3-none-any.whl poetry run pytest -m smoke
+KPEX_SMOKE_TEST_WHEEL=path/to/kpex-<version>-py3-none-any.whl poetry run pytest -m smoke
 ```
 
 ## Adding a smoke test
@@ -90,7 +90,7 @@ def test_console_scripts(installed_wheel, tmp_path):
 ```
 
 Guidelines:
-- Never test code imported into the test process: `import klayout_pex` there comes from
+- Never test code imported into the test process: `import kpex` there comes from
   the checkout. Importing is fine for test data only (e.g. the `PDK` enum to parametrize over).
 - Keep them quick (seconds), as they gate publishing. Prefer `--2.5D` over FasterCap or MAGIC.
 - Use `tmp_path` as working and output directory.

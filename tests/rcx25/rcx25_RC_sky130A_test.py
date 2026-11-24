@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.rcx25.extraction_results import NetCoupleKey, NetworkNodeNames
+from kpex.kpex_cli import KpexCLI
+from kpex.rcx25.extraction_results import NetCoupleKey, NetworkNodeNames
 
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode RC]"

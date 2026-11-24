@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import hashlib
 import allure
 from google.protobuf import struct_pb2
 
-from klayout_pex.tech_identity import message_sha256
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex.tech_identity import message_sha256
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 
 
 @allure.parent_suite('Unit Tests')

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ from typing import Any, Dict, List, Tuple
 
 from google.protobuf.json_format import MessageToJson, Parse, ParseDict
 
-from klayout_pex.tech_catalog import write_nominal_catalog
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import (
+from kpex.tech_catalog import write_nominal_catalog
+from kpex_protobuf.kpex.tech.tech_catalog_pb2 import (
     TechnologyCatalog, TechnologyDataset, TechnologyDatasetFile, TechnologyProvenance,
     TechnologyRevision, TechnologyScenario, TechnologySource,
 )

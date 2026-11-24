@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ import shutil
 
 import pytest
 
-from klayout_pex import pex25d
-from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
-from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
-from klayout_pex.pex25d.accounting import SceneCapacitanceMap
+from kpex import pex25d
+from kpex.fastercap.output_interpreter import FasterCapOutputInterpreter
+from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
+from kpex.pex25d.accounting import SceneCapacitanceMap
 from tests.common.fastercap_simulation import solve_fastercap
 
 

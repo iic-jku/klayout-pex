@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,14 +34,14 @@ import allure
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.fastercap.pex25d_exporter import FasterCapModelOptions
-from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
-from klayout_pex.klayout.pex25d_builder import BuildError, BuilderOptions
-from klayout_pex.klayout.physical_geometry import PhysicalGeometryError, apply_width_bias, shape_region
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.fastercap.pex25d_exporter import FasterCapModelOptions
+from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+from kpex.klayout.pex25d_builder import BuildError, BuilderOptions
+from kpex.klayout.physical_geometry import PhysicalGeometryError, apply_width_bias, shape_region
+from kpex.pex25d.resolver import resolve
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
 from tests.klayout.pex25d_builder_test import TerminalFixture
 
 
@@ -170,8 +170,8 @@ def test_failed_bias_leaves_input_file_unchanged():
 @pytest.mark.fastercap
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
 def test_biased_plate_field_solver_capacitance_has_expected_monotonic_order(tmp_path: Path):
-    from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
-    from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
+    from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+    from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
 
     capacitances = []
     for bias in (-0.2, 0.0, 0.2):

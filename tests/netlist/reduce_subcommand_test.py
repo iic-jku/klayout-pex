@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.netlist.netlist_cli import NetlistCLI
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from kpex.netlist.netlist_cli import NetlistCLI
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.netlist.spice_rc_netlist import SpiceRCNetlist
 from tests.common.cli_runner import (
     assert_netlist_cli_loads_neither_klayout_nor_protobuf,
     run_cli,
@@ -159,11 +159,11 @@ def test_invalid_netlist_exits_one(tmp_path):
 @allure.tag(*tags)
 def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
     output = str(tmp_path / 'reduced.spice')
-    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '-o', output, '--ticer-tau', '1p'])
+    result = run_cli_process('kpex.netlist', ['reduce', line_netlist, '-o', output, '--ticer-tau', '1p'])
     assert result.returncode == ExitCode.OK, result.stderr
     assert line_node_names(output) == ['A', 'B', 'gnd!'], result.stderr
 
-    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '--ticer-max-degree', 'many'])
+    result = run_cli_process('kpex.netlist', ['reduce', line_netlist, '--ticer-max-degree', 'many'])
     assert result.returncode == ExitCode.USAGE, result.stderr
     assert "argument --ticer-max-degree: must be an integer ≥ 1, got 'many'" in result.stderr
 
@@ -248,7 +248,7 @@ def test_checked_reduction_is_format_only_and_reports_process_failure(line_netli
         ['netlist', 'reduce', line_netlist, '-o', str(tmp_path / 'checked.spice'), *check_args])
     source = '.SUBCKT cell A B\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n'
     path = write(str(tmp_path), 'series.spice', source)
-    result = run_cli_process('klayout_pex.netlist', ['reduce', path, '--ticer-tau', '1n', '--check-frequency', '1G'])
+    result = run_cli_process('kpex.netlist', ['reduce', path, '--ticer-tau', '1n', '--check-frequency', '1G'])
     assert result.returncode == ExitCode.DIAGNOSTIC_ERRORS, result.stderr
     assert 'relative Frobenius error 0.628319' in result.stdout + result.stderr, result.stderr
 

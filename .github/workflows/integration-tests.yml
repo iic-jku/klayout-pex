@@ -4,7 +4,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/iic-jku/klayout-pex).
+## (see https://github.com/iic-jku/kpex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ jobs:
       uses: actions/cache@v6
       with:
         path: .venv
-        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        key: venv-kpex-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: "[🐍] Install dependencies"
       run: poetry install --no-interaction --no-root
@@ -136,8 +136,8 @@ jobs:
 
     - name: "Unpack Python Wheel"
       run: |
-        tar xvfz dist/klayout_pex*.tar.gz --strip-components=1   # source dist
-        unzip -o dist/klayout_pex*.whl klayout_pex_protobuf/\*   # generated protobuf files
+        tar xvfz dist/kpex-*.tar.gz --strip-components=1   # source dist
+        unzip -o dist/kpex-*.whl kpex_protobuf/\*   # generated protobuf files
 
     - name: "[🐍] Run Unit tests"
       env:

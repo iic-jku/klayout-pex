@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ import unittest
 
 import allure
 
-from klayout_pex.netlist.expression.ngspice import NGSPICE_SYNTAX
-from klayout_pex.netlist.expression.nodes import ExpressionError
-from klayout_pex.netlist.expression.parser import ExpressionParser, ExpressionSyntaxError
-from klayout_pex.netlist.expression.scope import ParameterScope
+from kpex.netlist.expression.ngspice import NGSPICE_SYNTAX
+from kpex.netlist.expression.nodes import ExpressionError
+from kpex.netlist.expression.parser import ExpressionParser, ExpressionSyntaxError
+from kpex.netlist.expression.scope import ParameterScope
 from tests.common.ngspice import ngspice_operating_point, requires_ngspice
 
 

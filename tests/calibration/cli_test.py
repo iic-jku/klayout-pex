@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ import allure
 from google.protobuf.json_format import MessageToDict, Parse
 import pytest
 
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_identity import message_sha256
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
+from kpex.kpex_cli import KpexCLI
+from kpex.pdk_config import PDK
+from kpex.tech_identity import message_sha256
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
 from tests.common.cli_runner import run_cli
 
 pytestmark = allure.parent_suite('Unit Tests')

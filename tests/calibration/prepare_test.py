@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,24 +35,24 @@ import klayout.db as kdb
 from google.protobuf.json_format import MessageToJson, Parse, ParseError
 import pytest
 
-from klayout_pex.calibration.patterns import CalibrationError, read_patterns
-from klayout_pex.calibration.prepare import prepare_calibration
-from klayout_pex.klayout.pex25d_stack import BuilderOptions, GeometryScope, build_pex25d_stack
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.artifact import infer_artifact_spec
-from klayout_pex.pex25d.codec import load_artifact
-from klayout_pex.pex25d.diagnostics import Diagnostic, DiagnosticsReport, Severity, SourceRef, Tier
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.pex25d.validator import validate
-from klayout_pex.tech_identity import message_sha256
-from klayout_pex.tech_info import TechDefError, TechInfo
-from klayout_pex.util.multiple_choice import MultipleChoicePattern
-from klayout_pex_protobuf.kpex.calibration import patterns_pb2, preparation_pb2
-from klayout_pex_protobuf.kpex.pex25d.pex25d_diagnostics_pb2 import Diagnostic as DiagnosticMessage
-from klayout_pex_protobuf.kpex.pex25d.pex25d_units_pb2 import Units
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex.calibration.patterns import CalibrationError, read_patterns
+from kpex.calibration.prepare import prepare_calibration
+from kpex.klayout.pex25d_stack import BuilderOptions, GeometryScope, build_pex25d_stack
+from kpex.klayout.pex25d_builder import PEX25DBuilder
+from kpex.pdk_config import PDK
+from kpex.pex25d.artifact import infer_artifact_spec
+from kpex.pex25d.codec import load_artifact
+from kpex.pex25d.diagnostics import Diagnostic, DiagnosticsReport, Severity, SourceRef, Tier
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.pex25d.resolver import resolve
+from kpex.pex25d.validator import validate
+from kpex.tech_identity import message_sha256
+from kpex.tech_info import TechDefError, TechInfo
+from kpex.util.multiple_choice import MultipleChoicePattern
+from kpex_protobuf.kpex.calibration import patterns_pb2, preparation_pb2
+from kpex_protobuf.kpex.pex25d.pex25d_diagnostics_pb2 import Diagnostic as DiagnosticMessage
+from kpex_protobuf.kpex.pex25d.pex25d_units_pb2 import Units
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from tests.common.tech_catalog import add_scenario, write_test_catalog
 from tests.common.fastercap_geometry import context_from_shapes
 
@@ -308,7 +308,7 @@ def test_finite_coating_and_margin_cannot_reach_native_endpoint(
         assert getattr(scene.domain.box.upper_right, axis) == 2**31 - 2
         assert result.manifest_path.is_file()
     else:
-        with mock.patch('klayout_pex.calibration.prepare.validate', side_effect=AssertionError('unsafe native validation')):
+        with mock.patch('kpex.calibration.prepare.validate', side_effect=AssertionError('unsafe native validation')):
             with pytest.raises(CalibrationError, match='supported native XY coordinate range'):
                 prepare_calibration(tech_info, read_patterns(specification), output)
         assert not output.exists()
@@ -407,7 +407,7 @@ def test_preparation_manifest_preserves_typed_geometry_diagnostics(
         report.add(note)
         return report
 
-    with mock.patch('klayout_pex.calibration.prepare.validate', side_effect=validate_with_note):
+    with mock.patch('kpex.calibration.prepare.validate', side_effect=validate_with_note):
         result = prepare_calibration(tech_info, read_patterns(specification), tmp_path / 'prepared')
     manifest = Parse(result.manifest_path.read_text(encoding='utf-8'), preparation_pb2.CalibrationManifest())
     diagnostic = manifest.cases[0].diagnostics[-1]

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.log import error, warning
-from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.run_result import RESULT_FILE_NAME, RunResult, Stage
+from kpex.log import error, warning
+from kpex.pex25d.diagnostics import ExitCode
+from kpex.run_result import RESULT_FILE_NAME, RunResult, Stage
 
 
 @allure.parent_suite("Unit Tests")

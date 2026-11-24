@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,18 +30,18 @@ from unittest import mock
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder, BuilderOptions, BuildError
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.diagnostics import DiagnosticsReport, Severity
-from klayout_pex.pex25d.protobuf import pex25d_file_pb2, pex25d_terminal_pb2
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.pex25d.resolver import resolve
-from klayout_pex.pex25d.validator import validate
-from klayout_pex.pex25d.writer import write_pex25d_text
-from klayout_pex.tech_info import TechInfo
-from klayout_pex.util.multiple_choice import MultipleChoicePattern
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
-import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
+from kpex.klayout.pex25d_builder import PEX25DBuilder, BuilderOptions, BuildError
+from kpex.pdk_config import PDK
+from kpex.pex25d.diagnostics import DiagnosticsReport, Severity
+from kpex.pex25d.protobuf import pex25d_file_pb2, pex25d_terminal_pb2
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.pex25d.resolver import resolve
+from kpex.pex25d.validator import validate
+from kpex.pex25d.writer import write_pex25d_text
+from kpex.tech_info import TechInfo
+from kpex.util.multiple_choice import MultipleChoicePattern
+import kpex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+import kpex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
 class TerminalFixture:
@@ -328,7 +328,7 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         fixture = TerminalFixture()
         fixture.tech.tech.substrate.lvs_layer_names.append('sub_marker')
         fixture.device('C1', kdb.Region(kdb.Box(10, 0, 20, 20)), lvs_layer_name='sub_marker')
-        with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+        with mock.patch('kpex.tech_info.warning') as warning_mock:
             file = fixture.build()
         assert not file.terminals
         warning_mock.assert_not_called()
@@ -363,7 +363,7 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         fixture.geometry['met2'] = kdb.Region(kdb.Box(0, 0, 30, 20))
         fixture.device('C1', kdb.Region(kdb.Box(0, 0, 100, 20)), lvs_layer_name='ports')
         fixture.device('C2', kdb.Region(kdb.Box(0, 0, 30, 20)), lvs_layer_name='ports')
-        with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+        with mock.patch('kpex.tech_info.warning') as warning_mock:
             file = fixture.build()
         assert sorted((t.name, t.layer) for t in file.terminals) == \
                [('device:C1:G', 'met1'), ('device:C2:G', 'met1')]  # NOTE: C2 on the lowest of equals
@@ -379,7 +379,7 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         # NOTE: e.g. a terminal on a well, reported as in the R extraction
         fixture = TerminalFixture()
         fixture.device('C1', kdb.Region(kdb.Box(200, 0, 300, 20)), lvs_layer_name='well_marker')
-        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+        with mock.patch('kpex.klayout.pex25d_builder.warning') as warning_mock:
             file = fixture.build()
         assert not file.terminals
         warning_mock.assert_called_once()
@@ -562,7 +562,7 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
         for name in ('oxide', 'nitride', 'air'):
             layer = layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
             layer.simple_dielectric_layer.dielectric_k = 1.0 if name == 'air' else 4.0
-        with mock.patch('klayout_pex.klayout.pex25d_stack.warning') as warning_mock:
+        with mock.patch('kpex.klayout.pex25d_stack.warning') as warning_mock:
             pex25d_file = fixture.build()
         assert pex25d_file.background.name == 'air'
         assert [c.args[0] for c in warning_mock.call_args_list] == [
@@ -574,7 +574,7 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
         # not its top. The nitride's field height must include the oxide below it.
         # Checking both profiles catches an air gap beside `Metal5` or a film that
         # becomes 1.1925 um too thick by counting the metal twice (#470).
-        with mock.patch('klayout_pex.klayout.pex25d_stack.warning') as warning_mock:
+        with mock.patch('kpex.klayout.pex25d_stack.warning') as warning_mock:
             file = self.stack(PDK.GF180MCUD)
         warning_mock.assert_not_called()
         scene = resolve(file)

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import allure
 import numpy as np
 import pytest
 
-from klayout_pex.netlist.coupling import ground_capacitances
+from kpex.netlist.coupling import ground_capacitances
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('Netlist', 'Grounding')]
 

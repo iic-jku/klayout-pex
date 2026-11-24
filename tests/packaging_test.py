@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.pdk_config import PDK
+from kpex.pdk_config import PDK
 from tests.common.build_scripts import REPO_DIR, kpex_symlinks
 
 parent_suite = "Unit Tests"
@@ -88,7 +88,7 @@ def deck_files(deck_path: str) -> List[str]:
 @allure.tag(*tags)
 def test_generated_protobuf_modules_are_in_the_wheel():
     protos_dir = Path(REPO_DIR, 'protos')
-    modules = {f"klayout_pex_protobuf/{proto.relative_to(protos_dir).with_suffix('').as_posix()}_pb2.py"
+    modules = {f"kpex_protobuf/{proto.relative_to(protos_dir).with_suffix('').as_posix()}_pb2.py"
                for proto in protos_dir.rglob('*.proto')}
     assert sorted(modules - wheel_includes()) == []
 
@@ -97,14 +97,14 @@ def test_generated_protobuf_modules_are_in_the_wheel():
 @allure.tag(*tags)
 @pytest.mark.parametrize('pdk', list(PDK), ids=str)
 def test_tech_info_of_each_pdk_is_in_the_wheel(pdk: PDK):
-    assert f"klayout_pex_protobuf/{os.path.basename(pdk.config.tech_pb_json_path)}" in wheel_includes()
+    assert f"kpex_protobuf/{os.path.basename(pdk.config.tech_pb_json_path)}" in wheel_includes()
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('pdk', list(PDK), ids=str)
 def test_lvs_deck_of_each_pdk_and_its_includes_are_in_the_wheel(pdk: PDK):
-    # NOTE: within pdk/, which the wheel has as klayout_pex/pdk (see the packages of [tool.poetry])
+    # NOTE: within pdk/, which the wheel has as kpex/pdk (see the packages of [tool.poetry])
     pdk_dir = os.path.join(REPO_DIR, 'pdk')
     for path in deck_files(pdk.config.pex_lvs_script_path):
         assert os.path.commonpath([os.path.abspath(path), pdk_dir]) == pdk_dir, path
@@ -134,7 +134,7 @@ def test_console_script_has_its_entry_point(script: str):
 @pytest.mark.parametrize('pdk', list(PDK), ids=str)
 def test_technology_catalog_and_its_explicit_components_are_included(pdk: PDK):
     from google.protobuf.json_format import Parse
-    from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyCatalog
+    from kpex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyCatalog
 
     path = Path(pdk.config.tech_catalog_path)
     catalog = Parse(path.read_text(encoding='utf-8'), TechnologyCatalog())

@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,15 +34,15 @@ import allure
 from google.protobuf.json_format import Parse
 import pytest
 
-from klayout_pex.calibration.patterns import CalibrationError, MAX_COORDINATE
-from klayout_pex.calibration.prepare import prepare_calibration
-from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.pdk_config import PDK
-from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.tech_info import TechInfo
-from klayout_pex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
-from klayout_pex_protobuf.kpex.calibration.targets_pb2 import HALO_NORMALIZED, UNSCALED
-from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from kpex.calibration.patterns import CalibrationError, MAX_COORDINATE
+from kpex.calibration.prepare import prepare_calibration
+from kpex.kpex_cli import KpexCLI
+from kpex.pdk_config import PDK
+from kpex.pex25d.reader import read_pex25d_text
+from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
+from kpex_protobuf.kpex.calibration.targets_pb2 import HALO_NORMALIZED, UNSCALED
+from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from tests.common.calibration import read_pattern_data
 from tests.common.cli_runner import run_cli
 
@@ -167,7 +167,7 @@ def test_unknown_or_unrelated_target_references_fail_before_technology_loading(
     read_path = tmp_path / 'patterns.json'
     # The CLI must catch target errors before loading the selected catalog or creating output.
     read_path.write_text(json.dumps(targeted_data), encoding='utf-8')
-    with mock.patch('klayout_pex.calibration.cli.TechInfo.from_catalog') as load:
+    with mock.patch('kpex.calibration.cli.TechInfo.from_catalog') as load:
         code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'prepare', '--pdk', 'sky130A', '--patterns', str(read_path), '--out-dir', str(tmp_path / 'bad')])
     assert code != 0, output
     load.assert_not_called()

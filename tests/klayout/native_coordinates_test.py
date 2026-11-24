@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from __future__ import annotations
 import klayout.db as kdb
 import pytest
 
-from klayout_pex.klayout.native_coordinates import is_supported_native_coordinate
+from kpex.klayout.native_coordinates import is_supported_native_coordinate
 
 
 @pytest.mark.parametrize('value,accepted', [

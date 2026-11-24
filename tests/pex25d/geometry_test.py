@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ from __future__ import annotations
 import allure
 import unittest
 
-from klayout_pex.pex25d.validator import (
+from kpex.pex25d.validator import (
     Polygon, polygons_overlap, ring_is_collinear, ring_is_simple,
     ring_strictly_inside, rings_meet,
 )

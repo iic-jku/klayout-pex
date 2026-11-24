@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import math
 import allure
 import pytest
 
-from klayout_pex.netlist.rc_network import RCNetwork
+from kpex.netlist.rc_network import RCNetwork
 from tests.common.rc_networks import approx, build_network
 
 parent_suite = "Unit Tests"

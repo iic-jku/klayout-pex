@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import os
 import tempfile
 import unittest
 
-from klayout_pex.fastcap.fastcap_runner import fastcap_parse_capacitance_matrix
+from kpex.fastcap.fastcap_runner import fastcap_parse_capacitance_matrix
 
 
 @allure.parent_suite("Unit Tests")

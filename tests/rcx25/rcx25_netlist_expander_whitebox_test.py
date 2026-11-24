@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModels
-from klayout_pex.rcx25.extraction_results import CellExtractionResults, ExtractionResults
-from klayout_pex.rcx25.netlist_expander import RCX25NetlistExpander
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
+from kpex.device_models import DeviceModels
+from kpex.rcx25.extraction_results import CellExtractionResults, ExtractionResults
+from kpex.rcx25.netlist_expander import RCX25NetlistExpander
+import kpex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 def device_models(*metal_capacitor_class_names: str) -> DeviceModels:

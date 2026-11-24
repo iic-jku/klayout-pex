@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ import allure
 
 import klayout.db as kdb
 
-from klayout_pex import pex25d
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
-from klayout_pex.fastercap.pex25d_exporter import FasterCapModelOptions
-from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+from kpex import pex25d
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from kpex.fastercap.pex25d_exporter import FasterCapModelOptions
+from kpex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
 
 
 def dielectric_prisms(text: str) -> Dict[str, List[Tuple[kdb.Region, int, int]]]:

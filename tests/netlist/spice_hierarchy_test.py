@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,9 +31,9 @@ import unittest
 
 import allure
 
-from klayout_pex.netlist.spice_hierarchy import SpiceEvaluationError, SpiceHierarchy
-from klayout_pex.netlist.spice_netlist import SpiceElement
-from klayout_pex.netlist.spice_reader import SpiceReader
+from kpex.netlist.spice_hierarchy import SpiceEvaluationError, SpiceHierarchy
+from kpex.netlist.spice_netlist import SpiceElement
+from kpex.netlist.spice_reader import SpiceReader
 from tests.common.ngspice import ngspice_operating_point, requires_ngspice
 
 

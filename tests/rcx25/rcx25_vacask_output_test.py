@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.netlist.netlist_format import NetlistFormat
-from klayout_pex.netlist.spice_reader import SpiceReader
-from klayout_pex.rcx25.pex_mode import PEXMode
+from kpex.netlist.netlist_format import NetlistFormat
+from kpex.netlist.spice_reader import SpiceReader
+from kpex.rcx25.pex_mode import PEXMode
 from tests.common.ngspice import read_wrdata, requires_ngspice, run_ngspice, write_spiceinit
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.vacask import (

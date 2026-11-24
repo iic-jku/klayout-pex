@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,11 +28,11 @@ from typing import Any, Dict, Tuple
 
 import klayout.db as kdb
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.pdk_config import PDK
-from klayout_pex.rcx25.c.device_capacitance_references import DeviceCapacitanceReference
-from klayout_pex.rcx25.pex_mode import PEXMode
-from klayout_pex.tech_info import TechInfo
+from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from kpex.pdk_config import PDK
+from kpex.rcx25.c.device_capacitance_references import DeviceCapacitanceReference
+from kpex.rcx25.pex_mode import PEXMode
+from kpex.tech_info import TechInfo
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 

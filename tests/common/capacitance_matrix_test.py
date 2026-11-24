@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/iic-jku/klayout-pex).
+# (see https://github.com/iic-jku/kpex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import tempfile
 from typing import *
 import unittest
 
-from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.common.capacitance_matrix import CapacitanceMatrix
 
 
 @allure.parent_suite("Unit Tests")
