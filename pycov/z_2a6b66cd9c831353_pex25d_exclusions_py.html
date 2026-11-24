@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for kpex/klayout/pex25d_exclusions.py: 88%</title>
+    <title>Coverage for kpex/klayout/pex25d_exclusions.py: 85%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>kpex<span class="sep">/</span>klayout<span class="sep">/</span>pex25d_exclusions.py</b>:
-            <span class="pc_cov">88%</span>
+            <span class="pc_cov">85%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">101 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">89<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">12<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">86<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">15<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_2a6b66cd9c831353_pex25d_ground_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-24 18:56 +0000
+            created at 2026-11-24 20:24 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -219,13 +219,13 @@
     <p class="run"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">            <span class="nam">policy</span><span class="op">.</span><span class="nam">exclusions</span><span class="op">.</span><span class="nam">add</span><span class="op">(</span><span class="nam">name</span><span class="op">=</span><span class="fst">f&#x27;</span><span class="fst">exclude</span><span class="op">{</span><span class="nam">index</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">,</span> <span class="nam">region</span><span class="op">=</span><span class="nam">region</span><span class="op">.</span><span class="nam">name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">                                  <span class="nam">kind</span><span class="op">=</span><span class="nam">schema</span><span class="op">.</span><span class="nam">CapacitanceExclusion</span><span class="op">.</span><span class="nam">KIND_ALL_LAYER_PAIRS</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">            <span class="nam">first</span><span class="op">,</span> <span class="nam">second</span> <span class="op">=</span> <span class="nam">sorted</span><span class="op">(</span><span class="nam">block</span><span class="op">.</span><span class="nam">capacitance_pair</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">            <span class="key">for</span> <span class="nam">ordinal</span><span class="op">,</span> <span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">b</span><span class="op">)</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">itertools</span><span class="op">.</span><span class="nam">product</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">                    <span class="op">[</span><span class="nam">name</span> <span class="key">for</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">alias</span> <span class="key">in</span> <span class="nam">aliases</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">alias</span> <span class="op">==</span> <span class="nam">first</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">                    <span class="op">[</span><span class="nam">name</span> <span class="key">for</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">alias</span> <span class="key">in</span> <span class="nam">aliases</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">alias</span> <span class="op">==</span> <span class="nam">second</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">                <span class="nam">policy</span><span class="op">.</span><span class="nam">exclusions</span><span class="op">.</span><span class="nam">add</span><span class="op">(</span><span class="nam">name</span><span class="op">=</span><span class="fst">f&#x27;</span><span class="fst">exclude</span><span class="op">{</span><span class="nam">index</span><span class="op">}</span><span class="fst">_</span><span class="op">{</span><span class="nam">ordinal</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">,</span> <span class="nam">region</span><span class="op">=</span><span class="nam">region</span><span class="op">.</span><span class="nam">name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">                                      <span class="nam">kind</span><span class="op">=</span><span class="nam">schema</span><span class="op">.</span><span class="nam">CapacitanceExclusion</span><span class="op">.</span><span class="nam">KIND_LAYER_PAIR</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">                                      <span class="nam">layer_a</span><span class="op">=</span><span class="nam">a</span><span class="op">,</span> <span class="nam">layer_b</span><span class="op">=</span><span class="nam">b</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">            <span class="nam">first</span><span class="op">,</span> <span class="nam">second</span> <span class="op">=</span> <span class="nam">sorted</span><span class="op">(</span><span class="nam">block</span><span class="op">.</span><span class="nam">capacitance_pair</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">            <span class="key">for</span> <span class="nam">ordinal</span><span class="op">,</span> <span class="op">(</span><span class="nam">a</span><span class="op">,</span> <span class="nam">b</span><span class="op">)</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">itertools</span><span class="op">.</span><span class="nam">product</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">                    <span class="op">[</span><span class="nam">name</span> <span class="key">for</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">alias</span> <span class="key">in</span> <span class="nam">aliases</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">alias</span> <span class="op">==</span> <span class="nam">first</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">                    <span class="op">[</span><span class="nam">name</span> <span class="key">for</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">alias</span> <span class="key">in</span> <span class="nam">aliases</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">alias</span> <span class="op">==</span> <span class="nam">second</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">                <span class="nam">policy</span><span class="op">.</span><span class="nam">exclusions</span><span class="op">.</span><span class="nam">add</span><span class="op">(</span><span class="nam">name</span><span class="op">=</span><span class="fst">f&#x27;</span><span class="fst">exclude</span><span class="op">{</span><span class="nam">index</span><span class="op">}</span><span class="fst">_</span><span class="op">{</span><span class="nam">ordinal</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">,</span> <span class="nam">region</span><span class="op">=</span><span class="nam">region</span><span class="op">.</span><span class="nam">name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">                                      <span class="nam">kind</span><span class="op">=</span><span class="nam">schema</span><span class="op">.</span><span class="nam">CapacitanceExclusion</span><span class="op">.</span><span class="nam">KIND_LAYER_PAIR</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">                                      <span class="nam">layer_a</span><span class="op">=</span><span class="nam">a</span><span class="op">,</span> <span class="nam">layer_b</span><span class="op">=</span><span class="nam">b</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="op">(</span><span class="nam">policy</span><span class="op">.</span><span class="nam">regions</span> <span class="key">or</span> <span class="nam">policy</span><span class="op">.</span><span class="nam">exclusions</span> <span class="key">or</span> <span class="nam">policy</span><span class="op">.</span><span class="nam">excluded_substrate_nets</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">        <span class="com"># An unused marker or excluded name must not manufacture a required</span>&nbsp;</span><span class="r"></span></p>
@@ -243,7 +243,7 @@
             <a class="nav" href="z_2a6b66cd9c831353_pex25d_ground_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-24 18:56 +0000
+            created at 2026-11-24 20:24 +0000
         </p>
     </div>
 </footer>
