@@ -504,6 +504,21 @@ Saved `6.3` reports remain collectable offline with their original precision and
 solver identity. Recompute earlier calibration measurements with the corrected
 solver before fitting coefficients.
 
+### Qualifying collected measurements
+
+`kpex calibrate qualify --study study.pb.json --out-dir qualification` consumes a
+`CalibrationQualificationStudy` from `protos/kpex/calibration/qualification.proto`.
+Use named `CalibrationCollection` paths relative to the study and their exact SHA-256
+hashes. Each case names a common reference and up to three ordered refinement series.
+The three supported controls are manual GMRES tolerance, initial maximum triangle area
+and preparation domain margin.
+
+Each series needs three distinct levels ending at the reference. The two final entry-wise
+changes must meet the declared absolute and relative budget. Physical matrix diagnostics and
+signed refinement changes are recorded separately in `qualification/qualification.pb.json`.
+The command returns a diagnostic error for incomplete or rejected cases after writing the report.
+Review the report alongside the original study and saved collections before fitting coefficients.
+
 ### Result file
 
 Each run of `kpex extract` and `kpex pex25d` writes `kpex_result.json` into its run directory,

@@ -51,7 +51,7 @@ class CalibrationCollectionResult:
     failed_cases: int
 
 
-def _native_statistics(log: Path) -> Dict[str, Optional[int]]:
+def read_native_statistics(log: Path) -> Dict[str, Optional[int]]:
     """Read only the final matrix's statistics block; missing or ambiguous counts stay unknown."""
     fields = {
         'input_panels': ('Number of input panels to solver engine:', r'Number of input panels to solver engine: (\d+)'),
@@ -249,7 +249,7 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
                 except FasterCapError as exc:
                     record.status = CalibrationCaseResult.INVALID_RESULT
                     record.diagnostics.append(str(exc))
-                for name, value in _native_statistics(log).items():
+                for name, value in read_native_statistics(log).items():
                     if value is not None and value <= 2**64 - 1:
                         setattr(record, name, value)
                 for line in log.read_text(encoding='utf-8', errors='replace').splitlines():
