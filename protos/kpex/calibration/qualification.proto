@@ -1,0 +1,136 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/kpex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.calibration;
+
+import "kpex/calibration/preparation.proto";
+import "kpex/pex25d/pex25d_units.proto";
+import "kpex/result/capacitance_matrix.proto";
+
+message CalibrationQualificationStudy {
+    uint32 schema_version = 1;
+    CalibrationQualificationTolerance tolerance = 10;
+    repeated CalibrationQualificationCollection collections = 20;
+    repeated CalibrationQualificationCaseStudy cases = 30;
+}
+
+message CalibrationQualificationTolerance {
+    // Entry-wise budget is max(absolute_floor_f, relative_tolerance * abs(reference)).
+    double absolute_floor_f = 1;
+    double relative_tolerance = 10;
+}
+
+message CalibrationQualificationCollection {
+    string id = 1;
+    CalibrationArtifactReference collection = 10; // Relative to the study file.
+}
+
+message CalibrationQualificationCaseStudy {
+    string case_id = 1;
+    string reference_collection_id = 10;
+    repeated CalibrationRefinementStudy refinements = 20;
+}
+
+enum CalibrationRefinementAxis {
+    REFINEMENT_AXIS_UNSPECIFIED = 0;
+    GMRES_TOLERANCE = 10; // Decreasing manual FasterCap GMRES tolerance.
+    INITIAL_MESH_MAX_AREA = 20; // Decreasing initial maximum triangle area in um^2.
+    DOMAIN_MARGIN = 30; // Increasing preparation margin in grid units.
+}
+
+message CalibrationRefinementStudy {
+    CalibrationRefinementAxis axis = 1;
+    // Coarse to fine. At least three distinct collected runs ending at the reference.
+    repeated string collection_ids = 10;
+}
+
+enum CalibrationQualificationStatus {
+    QUALIFICATION_STATUS_UNSPECIFIED = 0;
+    STABILIZED = 10;
+    INCOMPLETE = 20; // Missing, non-independent or insufficiently stable evidence.
+    REJECTED = 30; // Solver execution or matrix diagnostics failed.
+}
+
+message CalibrationQualificationReport {
+    uint32 schema_version = 1;
+    uint32 qualification_method_version = 10;
+    string kpex_version = 20;
+    string study_sha256 = 30;
+    CalibrationQualificationStudy study = 40;
+    repeated CalibrationQualificationCaseResult cases = 50;
+}
+
+message CalibrationQualificationCaseResult {
+    string case_id = 1;
+    CalibrationQualificationStatus status = 10;
+    CalibrationCase pattern = 20;
+    CalibratedTechnology technology = 30;
+    kpex.pex25d.Units units = 40;
+    kpex.result.MaxwellCapacitanceMatrix reference_matrix = 50;
+    repeated CalibrationMatrixDiagnostics reference_diagnostics = 60;
+    repeated CalibrationRefinementResult refinements = 70;
+    repeated string diagnostics = 80;
+    repeated CalibrationMatrixEntry unresolved_entries = 90;
+}
+
+message CalibrationMatrixEntry {
+    string charge_conductor_id = 1;
+    string excitation_conductor_id = 10;
+}
+
+message CalibrationMatrixDiagnostics {
+    kpex.result.MaxwellCapacitanceMatrix.ReferenceConvention reference_convention = 1;
+    double maximum_reciprocity_error_f = 10;
+    double minimum_energy_eigenvalue_f = 20;
+    repeated double charge_row_sums_f = 30;
+    repeated string violations = 40;
+}
+
+message CalibrationRefinementResult {
+    CalibrationRefinementAxis axis = 1;
+    CalibrationQualificationStatus status = 10;
+    repeated CalibrationRefinementLevel levels = 20;
+    repeated CalibrationRefinementChange changes = 30;
+    repeated string diagnostics = 40;
+}
+
+message CalibrationRefinementLevel {
+    string collection_id = 1;
+    // The axis identifies the units: fraction, um^2 or grid units.
+    double parameter_value = 10;
+    optional uint64 refined_panels = 20;
+    repeated CalibrationMatrixDiagnostics matrix_diagnostics = 30;
+}
+
+message CalibrationRefinementChange {
+    string previous_collection_id = 1;
+    string next_collection_id = 10;
+    repeated CalibrationCapacitanceChange entries = 20;
+    bool within_budget = 30;
+}
+
+message CalibrationCapacitanceChange {
+    CalibrationMatrixEntry entry = 1;
+    double signed_delta_f = 10;
+    double allowed_change_f = 20;
+}
