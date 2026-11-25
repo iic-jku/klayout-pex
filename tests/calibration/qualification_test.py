@@ -29,7 +29,7 @@ import math
 from pathlib import Path
 import shutil
 import sys
-from typing import Any, Dict, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import pytest
 
@@ -40,7 +40,9 @@ from kpex.calibration.qualification import _diagnose, qualify_study
 from kpex.calibration.solve import SolveOptions, solve_calibration
 from kpex.calibration.validation import CalibrationError
 from kpex.fastercap.fastercap_runner import FasterCapRunResult
+from kpex.kpex_cli import KpexCLI
 from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.calibration.length_fit_pb2 import CalibrationLengthFitReport, CalibrationLengthFitResult
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
     CalibrationQualificationReport, CalibrationQualificationStatus as Status,
     CalibrationQualificationStudy, CalibrationQualificationTolerance, CalibrationRefinementAxis as Axis,
@@ -48,15 +50,17 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
 from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection, CalibrationRunManifest
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 from kpex_protobuf.kpex.result.solver_execution_pb2 import SolverIdentity
+from tests.common.cli_runner import run_cli
 from tests.common.fastercap_report import numerical_report
 
 
 def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
-           *, fake: bool = False) -> Tuple[CalibrationQualificationStudy, Path]:
+           *, fake: bool = False, case_count: int = 1) -> Tuple[CalibrationQualificationStudy, Path]:
     prepared = {}
+    patterns = pattern_data['patterns'][:case_count]
     for margin in (2, 4, 8):
         specification = root / f'patterns-{margin}.pb.json'
-        data = dict(pattern_data, domain_margin_um=str(margin), patterns=pattern_data['patterns'][:1])
+        data = dict(pattern_data, domain_margin_um=str(margin), patterns=patterns)
         specification.write_text(json.dumps(data), encoding='utf-8')
         prepared[margin] = prepare_calibration(
             tech_info, read_patterns(specification), root / f'prepared-{margin}').manifest_path
@@ -78,20 +82,19 @@ def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
     study.tolerance.relative_tolerance = 0 if fake else 0.02
     for name, (margin, options) in variants.items():
         result = solve_calibration(prepared[margin], root / name, options=options)
-        assert result.successful_cases == 1, result
+        assert result.successful_cases == case_count, result
         entry = study.collections.add(id=name).collection
         entry.path = result.collection_path.relative_to(root).as_posix()
         entry.sha256 = sha256_file(result.collection_path)
-    case = study.cases.add(case_id='plates', reference_collection_id='reference')
-    case.refinements.add(axis=Axis.GMRES_TOLERANCE, collection_ids=['solver-coarse', 'solver-medium', 'reference'])
-    case.refinements.add(axis=Axis.INITIAL_MESH_MAX_AREA, collection_ids=['mesh-coarse', 'mesh-medium', 'reference'])
-    case.refinements.add(axis=Axis.DOMAIN_MARGIN, collection_ids=['domain-small', 'domain-medium', 'reference'])
+    for pattern in patterns:
+        case = study.cases.add(case_id=pattern['id'], reference_collection_id='reference')
+        case.refinements.add(axis=Axis.GMRES_TOLERANCE, collection_ids=['solver-coarse', 'solver-medium', 'reference'])
+        case.refinements.add(axis=Axis.INITIAL_MESH_MAX_AREA, collection_ids=['mesh-coarse', 'mesh-medium', 'reference'])
+        case.refinements.add(axis=Axis.DOMAIN_MARGIN, collection_ids=['domain-small', 'domain-medium', 'reference'])
     return study, write_message(root / 'study.pb.json', study)
 
 
-@pytest.fixture
-def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
-          monkeypatch: pytest.MonkeyPatch) -> Tuple[CalibrationQualificationStudy, Path]:
+def _mock_solver(monkeypatch: pytest.MonkeyPatch, matrix_for_case: Callable[[str, str], List[List[float]]]):
     executable = Path(sys.executable).resolve()
     identity = SolverIdentity(name='fastercap', version='6.4.0', executable_path=str(executable),
                               executable_sha256=sha256_file(executable), operating_system='test', architecture='test')
@@ -100,11 +103,8 @@ def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
     def run(exe: str, deck: str, log: str, *args: Any, report_path: str, **kwargs: Any) -> FasterCapRunResult:
         variant = Path(log).parents[2].name
         panels = {'mesh-coarse': 40, 'mesh-medium': 60}.get(variant, 80)
-        added = 0.001e-9 if variant == 'solver-coarse' else 0.0
-        # An independently constructed passive network with a grounded
-        # conductor in a non-terminal position and a known change on A.
         names = ['g1_B', 'g2_substrate', 'g3_A']
-        matrix = [[5e-9, -2e-9, -1e-9], [-2e-9, 6e-9, -3e-9], [-1e-9, -3e-9, 7e-9 + added]]
+        matrix = matrix_for_case(Path(log).parent.name, variant)
         external = numerical_report(names, matrix, deck)
         external['build']['version'] = 'FasterCap version 6.4.0'
         Path(report_path).write_text(json.dumps(external), encoding='utf-8')
@@ -113,7 +113,92 @@ def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
         return FasterCapRunResult((exe, deck), 0, 0.1)
 
     monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
+
+
+@pytest.fixture
+def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
+          monkeypatch: pytest.MonkeyPatch) -> Tuple[CalibrationQualificationStudy, Path]:
+    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
+        added = 0.001e-9 if variant == 'solver-coarse' else 0.0
+        # Passive network with ground in a non-terminal position and a known change on A.
+        return [[5e-9, -2e-9, -1e-9], [-2e-9, 6e-9, -3e-9], [-1e-9, -3e-9, 7e-9 + added]]
+
+    _mock_solver(monkeypatch, matrix_for_case)
     return _study(tmp_path, tech_info, pattern_data, fake=True)
+
+
+@pytest.mark.parametrize('holdout_offset_f', [0, 2e-17])
+def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
+                                    monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float):
+    lengths = {f'wire_{length}': length for length in (4, 8, 12, 16)}
+    pattern_data['patterns'] = [
+        {'id': name, 'role': 'VALIDATION' if length == 12 else 'TRAINING',
+         'length_um': str(length), 'width_um': '0.4', 'parallel_wires': {'layer': 'M1', 'gap_um': '0.2'}}
+        for name, length in lengths.items()
+    ]
+
+    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
+        length = lengths[case_id]
+        coupling_f = 2e-16 * length + 1e-16 + (holdout_offset_f if length == 12 else 0)
+        if variant == 'mesh-medium':
+            coupling_f += 1.5e-18 if length == 12 else 0.5e-18
+        coupling = coupling_f / 1e-6  # The test report encodes values in microfarads.
+        # The native matrix is excitation-major and B comes first. A small
+        # in-budget asymmetry distinguishes directed selection from averaging.
+        return [[9e-9, -2e-9, -coupling],
+                [-2e-9, 8e-9, -2e-9], [-coupling + 1e-13, -2e-9, 9e-9]]
+
+    _mock_solver(monkeypatch, matrix_for_case)
+    _, path = _study(tmp_path, tech_info, pattern_data, fake=True, case_count=4)
+    qualified = qualify_study(path, tmp_path / 'qualified')
+    assert all(case.status == Status.STABILIZED for case in qualified.report.cases)
+    # Requalification on another platform can change the last bits of an eigenvalue.
+    diagnostics = qualified.report.cases[0].reference_diagnostics[0]
+    diagnostics.minimum_energy_eigenvalue_f = math.nextafter(diagnostics.minimum_energy_eigenvalue_f, math.inf)
+    write_message(qualified.report_path, qualified.report, replace=True)
+    out_dir = tmp_path / 'fit'
+    args = ['kpex', 'calibrate', 'fit-length', '--study', str(path),
+            '--qualification', str(qualified.report_path), '--residual-budget-f', '1e-17',
+            '--out-dir', str(out_dir)]
+    code, output = run_cli(KpexCLI().main, args)
+    assert code == (1 if holdout_offset_f else 0), output
+    report = read_message(out_dir / 'fit-length.pb.json', CalibrationLengthFitReport())
+    assert report.qualification_sha256 == sha256_file(qualified.report_path)
+    assert report.study_sha256 == sha256_file(path)
+    family, = report.families
+    assert family.status == (CalibrationLengthFitResult.INADEQUATE if holdout_offset_f
+                             else CalibrationLengthFitResult.WITHIN_BUDGET)
+    assert family.distributed_f_per_um == pytest.approx(2e-16, abs=1e-29)
+    assert family.end_f == pytest.approx(1e-16, abs=1e-29)
+    assert [sample.length_um for sample in family.training] == [4, 8, 16]
+    held, = family.validation
+    assert held.length_um == 12
+    assert held.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
+    assert held.measured_f - held.reverse_measured_f == pytest.approx(1e-19, abs=1e-29)
+    assert [s.axis for s in family.solver_sensitivity] == [
+        Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
+    ]
+    mesh = family.solver_sensitivity[1]
+    assert not mesh.diagnostic
+    assert mesh.reference_parameter_value == 0.25
+    assert [level.parameter_value for level in mesh.levels] == [2.0, 0.75]
+    alternative, = mesh.levels[1].validation
+    assert alternative.case_id == held.case_id
+    # The held-out measurement moves by 1.5 aF. Only the 0.5 aF change
+    # in training data moves the prediction, so the residual falls by 1 aF.
+    assert alternative.measured_f - held.measured_f == pytest.approx(1.5e-18, abs=1e-29)
+    assert alternative.predicted_f - held.predicted_f == pytest.approx(0.5e-18, abs=1e-29)
+    assert alternative.residual_change_f == pytest.approx(-1e-18, abs=1e-29)
+    assert mesh.levels[1].max_abs_training_residual_f == pytest.approx(0, abs=1e-29)
+
+    # Editing only the saved qualification must be detected even when the
+    # evidence still supports a fit and the modified report parses correctly.
+    qualified.report.cases[0].reference_matrix.rows[0].values[0] *= 2
+    write_message(qualified.report_path, qualified.report, replace=True)
+    args[-1] = str(tmp_path / 'edited')
+    code, output = run_cli(KpexCLI().main, args)
+    assert code == 2 and 'differs from the recomputed study' in output
+    assert not Path(args[-1]).exists()
 
 
 def test_qualified_report_and_budget_boundary(study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path):

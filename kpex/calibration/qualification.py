@@ -30,7 +30,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-from .artifacts import artifact_path, read_message, sha256_file, validate_output_directory, verify_artifacts, write_message
+from .artifacts import read_message, sha256_file, validate_output_directory, verify_artifacts, write_message
 from .qualification_evidence import QualificationMeasurement, read_collection, read_measurement
 from .validation import CalibrationError, validate_identifier
 from ..version import __version__
@@ -55,7 +55,13 @@ class QualificationOutput:
     report: CalibrationQualificationReport
 
 
-def _charge_rows(matrix: Matrix) -> np.ndarray:
+@dataclass(frozen=True)
+class QualificationEvaluation:
+    report: CalibrationQualificationReport
+    references: Dict[str, QualificationMeasurement]
+
+
+def charge_rows(matrix: Matrix) -> np.ndarray:
     values = np.array([list(row.values) for row in matrix.rows], dtype=float)
     names = matrix.conductor_ids
     if (matrix.unit != Matrix.FARAD or not names or len(set(names)) != len(names)
@@ -71,7 +77,7 @@ def _charge_rows(matrix: Matrix) -> np.ndarray:
 
 
 def _diagnose(matrix: Matrix, tolerance: CalibrationQualificationTolerance) -> CalibrationMatrixDiagnostics:
-    values = _charge_rows(matrix)
+    values = charge_rows(matrix)
     names = matrix.conductor_ids
     bounds = np.maximum(tolerance.absolute_floor_f, tolerance.relative_tolerance * np.abs(values))
     scale = float(np.max(np.abs(values)))
@@ -202,7 +208,7 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
         matrix = measurement.record.measured_matrix
         native_order = list(matrix.conductor_ids)
         positions = [native_order.index(name) for name in order]
-        matrices.append(_charge_rows(matrix)[np.ix_(positions, positions)])
+        matrices.append(charge_rows(matrix)[np.ix_(positions, positions)])
     budgets = np.maximum(tolerance.absolute_floor_f, tolerance.relative_tolerance * np.abs(matrices[-1]))
     for index, (previous, current) in enumerate(zip(matrices, matrices[1:])):
         with np.errstate(over='ignore', invalid='ignore'):
@@ -267,7 +273,7 @@ def _qualify_case(spec: CalibrationQualificationCaseStudy, measurements: Dict[st
     if reference.record.status == CalibrationCaseResult.COLLECTED:
         matrix = reference.record.measured_matrix
         result.reference_matrix.CopyFrom(matrix)
-        values = _charge_rows(matrix)
+        values = charge_rows(matrix)
         for i, charge in enumerate(matrix.conductor_ids):
             for j, excitation in enumerate(matrix.conductor_ids):
                 if abs(values[i, j]) <= tolerance.absolute_floor_f:
@@ -287,8 +293,8 @@ def _qualify_case(spec: CalibrationQualificationCaseStudy, measurements: Dict[st
     return result
 
 
-def qualify_study(path: Path, output_dir: Path) -> QualificationOutput:
-    validate_output_directory(output_dir)
+def evaluate_qualification(path: Path) -> QualificationEvaluation:
+    """Recompute qualification and expose the verified reference measurements."""
     path = path.absolute()
     study_hash = sha256_file(path)
     study = read_message(path, CalibrationQualificationStudy())
@@ -298,14 +304,22 @@ def qualify_study(path: Path, output_dir: Path) -> QualificationOutput:
             for item, collection_path in zip(study.collections, paths)}
     report = CalibrationQualificationReport(schema_version=1, qualification_method_version=METHOD_VERSION,
                                             kpex_version=__version__, study_sha256=study_hash, study=study)
+    references = {}
     for case in study.cases:
         names = dict.fromkeys([case.reference_collection_id,
                                *(name for group in case.refinements for name in group.collection_ids)])
         measurements = {name: read_measurement(runs[name], case.case_id) for name in names}
         report.cases.append(_qualify_case(case, measurements, study.tolerance))
+        references[case.case_id] = measurements[case.reference_collection_id]
     if sha256_file(path) != study_hash or any(sha256_file(file) != item.collection.sha256
                                               for item, file in zip(study.collections, paths)):
         raise CalibrationError('Study or collection changed during qualification')
+    return QualificationEvaluation(report, references)
+
+
+def qualify_study(path: Path, output_dir: Path) -> QualificationOutput:
+    validate_output_directory(output_dir)
+    report = evaluate_qualification(path).report
     created = False
     try:
         output_dir.mkdir()
