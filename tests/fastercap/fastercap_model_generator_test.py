@@ -24,11 +24,13 @@
 import allure
 import os
 import pytest
+import time
 from typing import *
 from unittest import mock
 
 import klayout.db as kdb
-from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
+from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator, HCondKey, \
+    Point, Triangle
 
 
 @allure.parent_suite("Unit Tests")
@@ -186,3 +188,79 @@ def test_ending_inner_dielectric_reveals_only_first_surviving_material(start: fl
     with mock.patch('kpex.fastercap.fastercap_model_generator.error') as errors:
         generator.check()
     assert not errors.call_args_list
+
+
+def conductor_of_triangles(triangles: List[Triangle]) -> FasterCapModelGenerator:
+    generator = FasterCapModelGenerator(dbu=0.001, k_void=1.0, delaunay_amax=0.0, delaunay_b=0.5,
+                                        materials={}, net_names=['N'])
+    generator.cond_data[HCondKey(net_name='N', outside=None)] = triangles
+    return generator
+
+
+def pillow(n: int, missing: Sequence[int] = (), end_x: Optional[float] = None) -> List[Triangle]:
+    """
+    :return: a flat closed surface: the triangle A B C on top, below it n triangles of a fan from C along A B,
+             whose n - 1 inner points on A B are T-junctions on the edge A B of the top.
+             Without the triangles of the fan at the indexes `missing`, and with the fan ending at `end_x`
+    """
+    length = n * 0.01
+    a, b, c = Point(0.0, 0.0, 0.0), Point(length, 0.0, 0.0), Point(0.0, 1.0, 0.0)
+    fan = [Point(i * 0.01, 0.0, 0.0) for i in range(n)] + [Point(length if end_x is None else end_x, 0.0, 0.0)]
+    return [Triangle(a, b, c)] + [Triangle(c, fan[i + 1], fan[i]) for i in range(n) if i not in missing]
+
+
+def geometry_check_errors(triangles: List[Triangle]) -> List[str]:
+    with mock.patch('kpex.fastercap.fastercap_model_generator.error') as error_mock:
+        conductor_of_triangles(triangles).check()
+    return sorted(c.args[0] for c in error_mock.call_args_list)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+@pytest.mark.parametrize('n', [1, 2, 3, 8])
+def test_geometry_check_matches_an_edge_with_the_edges_of_triangles_along_it(n: int):
+    # NOTE: 1 is the exact reverse edge, no T-junction; 2 splits from either end of the edge;
+    #       from 3 on, the inner pieces are only reached by splitting the pieces again
+    assert geometry_check_errors(pillow(n)) == []
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+def test_geometry_check_reports_the_piece_of_an_edge_along_a_missing_triangle():
+    # NOTE: the middle triangle of the fan, whose piece of the edge A B lies between two T-junctions.
+    #       The conductor's surface is reversed, its edges to C and the piece of B A remain open
+    assert geometry_check_errors(pillow(3, missing=[1])) == [
+        "Net 'N': edge (0, 1, 0)-(0.02, 0, 0) not connected with reverse edge (open surface)",
+        "Net 'N': edge (0.01, 0, 0)-(0, 1, 0) not connected with reverse edge (open surface)",
+        "Net 'N': edge (0.02, 0, 0)-(0.01, 0, 0) not connected with reverse edge (open surface)",
+    ]
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+def test_geometry_check_reports_a_gap_of_one_database_unit():
+    # NOTE: the fan ends one database unit before B, its last edge along A B is just shorter than that piece
+    assert geometry_check_errors(pillow(2, end_x=0.019)) == [
+        "Net 'N': edge (0, 1, 0)-(0.02, 0, 0) not connected with reverse edge (open surface)",
+        "Net 'N': edge (0.019, 0, 0)-(0, 1, 0) not connected with reverse edge (open surface)",
+        "Net 'N': edge (0.02, 0, 0)-(0.019, 0, 0) not connected with reverse edge (open surface)",
+    ]
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+def test_geometry_check_accepts_a_triangle_with_an_edge_of_length_zero():
+    # NOTE: two corners on the same grid point: an edge without a direction, which neither splits nor is split
+    p, q = Point(1.0, 0.0, 0.0), Point(1.0001, 0.0, 0.0)
+    assert geometry_check_errors(pillow(2) + [Triangle(p, q, Point(1.0, 1.0, 0.0))]) == []
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+def test_geometry_check_resolves_many_t_junctions_on_an_edge_quickly():
+    # NOTE: the check used to compare all edges again for each T-junction from either end of the edge,
+    #       each with all edges at its end points, which C joins: 200 T-junctions took 48 s, now 6 ms
+    triangles = pillow(200)
+    start = time.perf_counter()
+    assert geometry_check_errors(triangles) == []
+    assert time.perf_counter() - start < 1.0

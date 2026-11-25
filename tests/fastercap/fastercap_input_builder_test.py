@@ -129,7 +129,7 @@ def test_net_across_a_block_has_a_conductor_per_part_which_have_one_surface():
     generator = FasterCapInputBuilder(pex_context=pex_context,
                                       tech_info=tech_info,
                                       substrate_net_name=pex_context.substrate_net_name,
-                                      delaunay_amax=50.0,  # NOTE: few triangles, as the check is quadratic in them
+                                      delaunay_amax=50.0,
                                       delaunay_b=0.5,
                                       exclusions=exclusions).build()
 
