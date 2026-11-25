@@ -165,29 +165,29 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     report = read_message(out_dir / 'fit-length.pb.json', CalibrationLengthFitReport())
     assert report.qualification_sha256 == sha256_file(qualified.report_path)
     assert report.study_sha256 == sha256_file(path)
-    family, = report.families
-    assert family.status == (CalibrationLengthFitResult.INADEQUATE if holdout_offset_f
-                             else CalibrationLengthFitResult.WITHIN_BUDGET)
-    assert family.distributed_f_per_um == pytest.approx(2e-16, abs=1e-29)
-    assert family.end_f == pytest.approx(1e-16, abs=1e-29)
-    assert [sample.length_um for sample in family.training] == [4, 8, 16]
-    held, = family.validation
+    fit, = report.fits
+    assert fit.status == (CalibrationLengthFitResult.REJECTED if holdout_offset_f
+                          else CalibrationLengthFitResult.ACCEPTED)
+    assert fit.distributed_coupling_f_per_um == pytest.approx(2e-16, abs=1e-29)
+    assert fit.end_correction_f == pytest.approx(1e-16, abs=1e-29)
+    assert [sample.length_um for sample in fit.training_samples] == [4, 8, 16]
+    held, = fit.validation_samples
     assert held.length_um == 12
     assert held.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
-    assert held.measured_f - held.reverse_measured_f == pytest.approx(1e-19, abs=1e-29)
-    assert [s.axis for s in family.solver_sensitivity] == [
+    assert held.solver_coupling_f - held.reverse_solver_coupling_f == pytest.approx(1e-19, abs=1e-29)
+    assert [s.axis for s in fit.refinement_sensitivity] == [
         Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
     ]
-    mesh = family.solver_sensitivity[1]
+    mesh = fit.refinement_sensitivity[1]
     assert not mesh.diagnostic
     assert mesh.reference_parameter_value == 0.25
     assert [level.parameter_value for level in mesh.levels] == [2.0, 0.75]
-    alternative, = mesh.levels[1].validation
+    alternative, = mesh.levels[1].validation_samples
     assert alternative.case_id == held.case_id
     # The held-out measurement moves by 1.5 aF. Only the 0.5 aF change
     # in training data moves the prediction, so the residual falls by 1 aF.
-    assert alternative.measured_f - held.measured_f == pytest.approx(1.5e-18, abs=1e-29)
-    assert alternative.predicted_f - held.predicted_f == pytest.approx(0.5e-18, abs=1e-29)
+    assert alternative.solver_coupling_f - held.solver_coupling_f == pytest.approx(1.5e-18, abs=1e-29)
+    assert alternative.predicted_coupling_f - held.predicted_coupling_f == pytest.approx(0.5e-18, abs=1e-29)
     assert alternative.residual_change_f == pytest.approx(-1e-18, abs=1e-29)
     assert mesh.levels[1].max_abs_training_residual_f == pytest.approx(0, abs=1e-29)
 

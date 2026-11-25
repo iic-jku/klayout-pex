@@ -38,7 +38,7 @@ from .validation import CalibrationError
 from ..version import __version__
 
 from kpex_protobuf.kpex.calibration.length_fit_pb2 import (
-    CalibrationLengthFamily, CalibrationLengthFitReport, CalibrationLengthFitResult,
+    CalibrationLengthFitReport, CalibrationLengthFitResult, CalibrationLengthSeries,
 )
 from kpex_protobuf.kpex.calibration.patterns_pb2 import PARALLEL_PLATES, PARALLEL_WIRES
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
@@ -48,12 +48,12 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
 
-def _family(reference: QualificationMeasurement) -> CalibrationLengthFamily:
+def _series(reference: QualificationMeasurement) -> CalibrationLengthSeries:
     pattern = reference.pattern
     if pattern.family not in (PARALLEL_PLATES, PARALLEL_WIRES):
         raise CalibrationError(f"Case '{pattern.id}' must be a parallel-plate or parallel-wire pattern")
     targets = {target.id: target for target in reference.run.preparation.targets}
-    return CalibrationLengthFamily(
+    return CalibrationLengthSeries(
         technology=reference.run.preparation.technology, pattern_family=pattern.family,
         layers=pattern.layers, units=reference.run.preparation.units,
         width_grid=pattern.dimensions_grid.width, gap_grid=pattern.dimensions_grid.gap,
@@ -107,18 +107,20 @@ def _recent_couplings(refinement: CalibrationRefinementResult, reference_f: floa
     return couplings
 
 
-def _add_solver_sensitivity(result: CalibrationLengthFitResult, observations: List[LengthObservation],
-                            cases: Dict[str, CalibrationQualificationCaseResult],
-                            references: Dict[str, QualificationMeasurement], policy: LengthFitPolicy):
+def _add_refinement_sensitivity(
+    result: CalibrationLengthFitResult, observations: List[LengthObservation],
+    cases: Dict[str, CalibrationQualificationCaseResult], references: Dict[str, QualificationMeasurement],
+    policy: LengthFitPolicy,
+):
     settings = set()
     for item in observations:
         run = references[item.case_id].run
         settings.add((run.preparation.domain_margin_grid,
                       run.manifest.options.fastercap.SerializeToString(deterministic=True)))
 
-    reference_residuals = {item.case_id: item.residual_f for item in result.validation}
+    reference_residuals = {item.case_id: item.residual_f for item in result.validation_samples}
     for axis in REFINEMENT_AXES:
-        sensitivity = result.solver_sensitivity.add(axis=axis)
+        sensitivity = result.refinement_sensitivity.add(axis=axis)
         if len(settings) != 1:
             sensitivity.diagnostic = 'The cases use different reference numerical settings'
             continue
@@ -141,9 +143,11 @@ def _add_solver_sensitivity(result: CalibrationLengthFitResult, observations: Li
                 continue
             level.max_abs_training_residual_f = fit['training']['max_abs_residual_f']
             for item in fit['validation']['observations']:
-                level.validation.add(case_id=item['case_id'], measured_f=item['measured_f'],
-                                     predicted_f=item['predicted_f'], residual_f=item['residual_f'],
-                                     residual_change_f=item['residual_f'] - reference_residuals[item['case_id']])
+                level.validation_samples.add(
+                    case_id=item['case_id'], solver_coupling_f=item['measured_f'],
+                    predicted_coupling_f=item['predicted_f'], residual_f=item['residual_f'],
+                    residual_change_f=item['residual_f'] - reference_residuals[item['case_id']],
+                )
 
 
 def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir: Path, policy: LengthFitPolicy
@@ -166,39 +170,41 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
         residual_budget_f=policy.weight_floor_f * policy.max_weighted_residual,
         max_condition_number=policy.max_condition_number,
     )
-    families: Dict[bytes, CalibrationLengthFamily] = {}
+    series_by_key: Dict[bytes, CalibrationLengthSeries] = {}
     observations: Dict[bytes, List[LengthObservation]] = defaultdict(list)
     reverse: Dict[str, float] = {}
     cases = {case.case_id: case for case in evaluation.report.cases}
     for case in evaluation.report.cases:
         observation, reverse[case.case_id] = _observation(case)
-        family = _family(evaluation.references[case.case_id])
-        key = family.SerializeToString(deterministic=True)
-        families[key] = family
+        series = _series(evaluation.references[case.case_id])
+        key = series.SerializeToString(deterministic=True)
+        series_by_key[key] = series
         observations[key].append(observation)
 
-    for key, family in families.items():
+    for key, series in series_by_key.items():
         try:
             fit = fit_length_series(observations[key], policy)
         except CalibrationError as exc:
-            exc.add_note('Length family with cases ' + ', '.join(obs.case_id for obs in observations[key]))
+            exc.add_note('Length series with cases ' + ', '.join(obs.case_id for obs in observations[key]))
             raise
-        result = report.families.add(
-            family=family,
-            status=(CalibrationLengthFitResult.INADEQUATE if fit['diagnostics']
-                    else CalibrationLengthFitResult.WITHIN_BUDGET),
-            distributed_f_per_um=fit['parameters']['c_infinite_f_per_um'],
-            end_f=fit['parameters']['c_end_f'],
+        result = report.fits.add(
+            series=series,
+            status=(CalibrationLengthFitResult.REJECTED if fit['diagnostics']
+                    else CalibrationLengthFitResult.ACCEPTED),
+            distributed_coupling_f_per_um=fit['parameters']['c_infinite_f_per_um'],
+            end_correction_f=fit['parameters']['c_end_f'],
             condition_number=fit['sensitivity']['dimensionless_condition_number'],
             zero_slope_constraint_active=bool(fit['constraints']['active']),
             diagnostics=fit['diagnostics'],
         )
-        for subset, samples in (('training', result.training), ('validation', result.validation)):
+        for subset, samples in (('training', result.training_samples), ('validation', result.validation_samples)):
             for item in fit[subset]['observations']:
-                samples.add(case_id=item['case_id'], length_um=item['length_um'], measured_f=item['measured_f'],
-                            reverse_measured_f=reverse[item['case_id']], predicted_f=item['predicted_f'],
-                            residual_f=item['residual_f'])
-        _add_solver_sensitivity(result, observations[key], cases, evaluation.references, policy)
+                samples.add(
+                    case_id=item['case_id'], length_um=item['length_um'], solver_coupling_f=item['measured_f'],
+                    reverse_solver_coupling_f=reverse[item['case_id']],
+                    predicted_coupling_f=item['predicted_f'], residual_f=item['residual_f'],
+                )
+        _add_refinement_sensitivity(result, observations[key], cases, evaluation.references, policy)
     if sha256_file(qualification_path) != qualification_sha256:
         raise CalibrationError('Qualification report changed during fitting')
     output_dir.mkdir()
