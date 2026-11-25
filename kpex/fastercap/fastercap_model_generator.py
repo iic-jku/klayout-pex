@@ -261,25 +261,8 @@ class Point:
     def __sub__(self, other: Point) -> Point:
         return Point(self.x - other.x, self.y - other.y, self.z - other.z)
 
-    def sq_length(self) -> float:
-        return self.x**2 + self.y**2 + self.z**2
-
     def to_fastcap(self) -> str:
         return '%.12g %.12g %.12g' % (self.x, self.y, self.z)
-
-
-def vector_product(a: Point, b: Point) -> Point:
-    vp = Point(
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x
-    )
-    return vp
-
-
-def dot_product(a: Point, b: Point) -> float:
-    dp = a.x * b.x + a.y * b.y + a.z * b.z
-    return dp
 
 
 @dataclass(frozen=True)
@@ -321,13 +304,6 @@ class Triangle:
 class Edge:
     p0: Point
     p1: Point
-
-    def vector_of_edge(self) -> Point:
-        return Point(
-            self.p1.x - self.p0.x,
-            self.p1.y - self.p0.y,
-            self.p1.z - self.p0.z
-        )
 
     def reversed(self) -> Edge:
         return Edge(self.p1, self.p0)
@@ -941,60 +917,77 @@ class FasterCapModelGenerator:
         return f"{self._point2s(e.p0)}-{self._point2s(e.p1)}"
 
     @staticmethod
-    def _is_antiparallel(a: Point,
-                         b: Point) -> bool:
-        vp = vector_product(a, b)
-        if abs(vp.sq_length()) > 0.5:  # we got normalized!
-            return False
+    def _split_edges(edges: Set[Edge]):
+        """
+        Splits the edges in place at T-junctions, where the edges of several triangles run along an edge
+        of an adjoining triangle: an edge is split at the far end point of a shorter antiparallel edge
+        that shares one of its end points, until no edge can be split further.
+        Then each piece of the longer edge can be matched with its reverse edge.
 
-        sp = dot_product(a, b)
-        return sp < 0
+        The end points are on the database unit grid, so an edge is a number of steps along its reduced
+        integer direction, which finds the antiparallel edges at a point exactly.
+        Each split revisits only the edges at the points it changes, not all edges.
+        """
+        Direction = Tuple[int, int, int]
 
-    def _split_edges(self, edges: set[Edge]):
-        edges_by_p2: DefaultDict[Point, List[Edge]] = defaultdict(list)
-        edges_by_p1: DefaultDict[Point, List[Edge]] = defaultdict(list)
+        def steps_and_direction(e: Edge) -> Tuple[int, Direction]:
+            d = (e.p1.x - e.p0.x, e.p1.y - e.p0.y, e.p1.z - e.p0.z)
+            steps = math.gcd(*d)
+            if steps == 0:
+                return 0, (0, 0, 0)
+            return steps, (d[0] // steps, d[1] // steps, d[2] // steps)
+
+        def opposite(d: Direction) -> Direction:
+            return -d[0], -d[1], -d[2]
+
+        starting_at: DefaultDict[Tuple[Point, Direction], Set[Edge]] = defaultdict(set)
+        ending_at: DefaultDict[Tuple[Point, Direction], Set[Edge]] = defaultdict(set)
+
+        def index(e: Edge):
+            steps, d = steps_and_direction(e)
+            if steps:  # NOTE: an edge of length 0 has no direction, it neither splits nor is split
+                starting_at[(e.p0, d)].add(e)
+                ending_at[(e.p1, d)].add(e)
+
+        def split_point(e: Edge) -> Optional[Point]:
+            steps, d = steps_and_direction(e)
+            if not steps:
+                return None
+            # NOTE: an antiparallel edge ending at the start of e, or starting at its end, runs along e
+            for other in ending_at.get((e.p0, opposite(d)), ()):
+                if steps_and_direction(other)[0] < steps:
+                    return other.p0
+            for other in starting_at.get((e.p1, opposite(d)), ()):
+                if steps_and_direction(other)[0] < steps:
+                    return other.p1
+            return None
+
         for e in edges:
-            edges_by_p2[e.p1].append(e)
-            edges_by_p1[e.p0].append(e)
+            index(e)
 
-        i = 0
-        while True:
-            i += 1
-            subst: DefaultDict[Edge, List[Edge]] = defaultdict(list)
+        pending = list(edges)
+        while pending:
+            e = pending.pop()
+            if e not in edges:
+                continue
+            p = split_point(e)
+            if p is None:
+                continue
 
-            for e in edges:
-                ee = edges_by_p2.get(e.p0, [])
-                for eee in ee:
-                    ve = e.vector_of_edge()
-                    veee = eee.vector_of_edge()
-                    if self._is_antiparallel(ve, veee) and \
-                       (veee.sq_length() < ve.sq_length() - 0.5):
-                        # There is a shorter edge antiparallel ->
-                        # this means we need to insert a split point into e
-                        subst[e] += [Edge(e.p0, eee.p0), Edge(eee.p0, e.p1)]
+            _, d = steps_and_direction(e)
+            edges.remove(e)
+            starting_at[(e.p0, d)].remove(e)
+            ending_at[(e.p1, d)].remove(e)
 
-            for e in edges:
-                ee = edges_by_p1.get(e.p1, [])
-                for eee in ee:
-                    ve = e.vector_of_edge()
-                    veee = eee.vector_of_edge()
-                    if self._is_antiparallel(ve, veee) and \
-                       (veee.sq_length() < ve.sq_length() - 0.5):
-                        # There is a shorter edge antiparallel ->
-                        # this means we need to insert a split point into e
-                        subst[e] += [Edge(e.p0, eee.p1), Edge(eee.p1, e.p1)]
-
-            if len(subst) == 0:
-                break
-
-            for e, replacement in subst.items():
-                edges_by_p1[e.p0].remove(e)
-                edges_by_p2[e.p1].remove(e)
-                edges.remove(e)
-                for r in replacement:
-                    edges.add(r)
-                    edges_by_p1[r.p0].append(r)
-                    edges_by_p2[r.p1].append(r)
+            for piece in (Edge(e.p0, p), Edge(p, e.p1)):
+                if piece in edges:
+                    continue
+                edges.add(piece)
+                index(piece)
+                # NOTE: the piece itself and the antiparallel edges it may split, at its end points
+                pending.append(piece)
+                pending.extend(starting_at.get((piece.p1, opposite(d)), ()))
+                pending.extend(ending_at.get((piece.p0, opposite(d)), ()))
 
     def dump_stl(self, output_dir_path: str, prefix: str) -> List[str]:
         """Return STL paths written; empty solids produce no file."""
