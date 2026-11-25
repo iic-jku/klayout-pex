@@ -146,9 +146,9 @@ def test_excluded_area():
 def test_kept_edge_parts(edge_a: kdb.Edge, edge_b: Optional[kdb.Edge], kept):
     m = markers(kdb.Box(0, 0, 100, 100))
     if edge_b is None:
-        assert m.kept_edge_parts(edge_a, 'A', kdb.Edge(0, -500, 100, -500), SUBSTRATE) == pytest.approx(kept)
+        assert m.kept_edge_parts(edge_a, 'A', kdb.Edge(0, -500, 100, -500), SUBSTRATE) == kept
     else:
-        assert m.kept_edge_parts(edge_a, 'A', edge_b, 'A') == pytest.approx(kept)
+        assert m.kept_edge_parts(edge_a, 'A', edge_b, 'A') == kept
 
 
 @allure.parent_suite(parent_suite)
