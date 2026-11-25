@@ -69,3 +69,10 @@ up to roughly 1.2, it didn't finish with 1.2 for an L shape, with 1.25 for a box
 
 DELAUNAY_B = NumberRange(lambda value: 0 <= value <= DELAUNAY_B_MAX, f"from 0 to {DELAUNAY_B_MAX:g}")
 """The minimum b = 2·sin(angle) of the triangles of a Delaunay refinement"""
+
+DELAUNAY_B_DEFAULT = 0.5
+"""
+The b of the FasterCap and FastCap2 input triangulation unless one is given: a minimum angle of about 14.5 degrees.
+FasterCap refines its input adaptively. With 30 degrees (b = 1), the dielectric interfaces of a field made initial
+meshes so dense that its automatic refinement stopped without refining, at several times the solve time
+"""
