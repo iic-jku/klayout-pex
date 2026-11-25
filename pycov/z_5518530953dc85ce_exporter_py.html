@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_468dc7ca0582448a___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-24 21:42 +0000
+            created at 2026-11-25 03:26 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -85,8 +85,8 @@
     <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="com"># SPDX-FileCopyrightText: 2026 Martin Jan K&#246;hler and Harald Pretl</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="com"># Johannes Kepler University, Institute for Integrated Circuits.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="com">#</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="com"># This file is part of klayout-pex-plugin-elmer</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="com"># (see https://github.com/iic-jku/klayout-pex-plugin-elmer).</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="com"># This file is part of kpex-plugin-elmer</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="com"># (see https://github.com/iic-jku/kpex-plugin-elmer).</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="com">#</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="com"># This program is free software: you can redistribute it and/or modify</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="com"># it under the terms of the GNU General Public License as published by</span>&nbsp;</span><span class="r"></span></p>
@@ -125,13 +125,13 @@
     <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t"><span class="key">import</span> <span class="nam">os</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t"><span class="key">from</span> <span class="nam">typing</span> <span class="key">import</span> <span class="nam">TYPE_CHECKING</span><span class="op">,</span> <span class="nam">Any</span><span class="op">,</span> <span class="nam">ClassVar</span><span class="op">,</span> <span class="nam">FrozenSet</span><span class="op">,</span> <span class="nam">List</span><span class="op">,</span> <span class="nam">Mapping</span><span class="op">,</span> <span class="nam">Optional</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t"><span class="key">from</span> <span class="nam">klayout_pex</span><span class="op">.</span><span class="nam">log</span> <span class="key">import</span> <span class="nam">info</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t"><span class="key">from</span> <span class="nam">klayout_pex</span><span class="op">.</span><span class="nam">plugin_api</span><span class="op">.</span><span class="nam">v1</span> <span class="key">import</span> <span class="nam">PEX25DSceneExporter</span><span class="op">,</span> <span class="nam">SceneCapability</span><span class="op">,</span> <span class="nam">require_scene_capabilities</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t"><span class="key">from</span> <span class="nam">kpex</span><span class="op">.</span><span class="nam">log</span> <span class="key">import</span> <span class="nam">info</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t"><span class="key">from</span> <span class="nam">kpex</span><span class="op">.</span><span class="nam">plugin_api</span><span class="op">.</span><span class="nam">v1</span> <span class="key">import</span> <span class="nam">PEX25DSceneExporter</span><span class="op">,</span> <span class="nam">SceneCapability</span><span class="op">,</span> <span class="nam">require_scene_capabilities</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t"><span class="key">from</span> <span class="nam">klayout_pex_plugins</span><span class="op">.</span><span class="nam">gmsh</span> <span class="key">import</span> <span class="op">(</span><span class="nam">LENGTH_UNIT_M</span><span class="op">,</span> <span class="nam">GmshMeshOptions</span><span class="op">,</span> <span class="nam">GmshSceneExporter</span><span class="op">,</span> <span class="nam">MeshResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">                                      <span class="nam">parse_options</span><span class="op">,</span> <span class="nam">write_mesh</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="exc show_exc"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="exc show_exc"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t"><span class="key">if</span> <span class="nam">TYPE_CHECKING</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="exc show_exc"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">    <span class="key">from</span> <span class="nam">klayout_pex_protobuf</span><span class="op">.</span><span class="nam">kpex</span><span class="op">.</span><span class="nam">pex25d</span><span class="op">.</span><span class="nam">pex25d_scene_pb2</span> <span class="key">import</span> <span class="nam">PEX25DScene</span>&nbsp;</span><span class="r"></span></p>
+    <p class="exc show_exc"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">    <span class="key">from</span> <span class="nam">kpex_protobuf</span><span class="op">.</span><span class="nam">kpex</span><span class="op">.</span><span class="nam">pex25d</span><span class="op">.</span><span class="nam">pex25d_scene_pb2</span> <span class="key">import</span> <span class="nam">PEX25DScene</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t"><span class="nam">OUTER_BOUNDARY_CONDITIONS</span> <span class="op">=</span> <span class="op">(</span><span class="str">&#x27;zero_charge&#x27;</span><span class="op">,</span> <span class="str">&#x27;ground&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -206,7 +206,7 @@
     <p class="pln"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">    <span class="str">&quot;&quot;&quot;The solver input file; ElmerGrid names the mesh directory after the .msh file.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">    <span class="nam">mesh_dir</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">splitext</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">basename</span><span class="op">(</span><span class="nam">mesh</span><span class="op">.</span><span class="nam">msh_path</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">    <span class="nam">lines</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">        <span class="str">&#x27;! Electrostatics of a PEX25D scene, written by klayout-pex-plugin-elmer.&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">        <span class="str">&#x27;! Electrostatics of a PEX25D scene, written by kpex-plugin-elmer.&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="fst">f&#x27;</span><span class="fst">! Capacitance body i is the terminal with tag i in </span><span class="op">{</span><span class="nam">mesh_dir</span><span class="op">}</span><span class="fst">.json.</span><span class="fst">&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">        <span class="str">&#x27;&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="str">&#x27;Header&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -292,7 +292,7 @@
             <a class="nav" href="z_468dc7ca0582448a___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-24 21:42 +0000
+            created at 2026-11-25 03:26 +0000
         </p>
     </div>
 </footer>
