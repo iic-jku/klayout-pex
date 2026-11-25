@@ -166,6 +166,12 @@
 - Explain why the selected corner cases matter in test comments or the review notes. Keep
   that reasoning concise and specific to the failure modes. Do not add a generic checklist
   or irrelevant edge cases to every test.
+- For exploratory or large field-solver runs, reuse the existing resource guard.
+  Verify a hard memory limit and disabled swap for the entire process tree before
+  launching. If either limit cannot be verified, stop before solving.
+- Start with a coarse mesh and run one solve at a time with `--jobs 1` and
+  `--threads-per-job 1`. Keep sampled RSS and a wall-clock deadline as additional
+  safeguards. Preserve the resource log and any result stopped by a limit.
 - No loosened tolerances or re-baselined numbers without a physical explanation.
 - Subprocess tests put the child's stderr in the assertion message.
 
