@@ -876,6 +876,18 @@ def test_result_file_of_pex25d_names_its_outputs(tmp_path):
            [('pex25d_file', str(pex25d_path))]
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "FasterCap")
+def test_exporter_triangulates_fastercap_input_like_extract_by_default():
+    # NOTE: pex25d export and the exporter API used b = 1 (30 degrees), kpex extract b = 0.5: for the same scene,
+    #       FasterCap got initial meshes so dense that its automatic refinement stopped without refining
+    from kpex.env import Env
+    from kpex.fastercap.pex25d_exporter import FasterCapExporterOptions
+    args = KpexCLI.parse_args(['extract', '--pdk', 'sky130A', '--fastercap',
+                              '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH)], Env.from_os_environ())
+    assert FasterCapExporterOptions().delaunay_b == args.delaunay_b
+
+
 @pytest.mark.parametrize('version,accepted', [('0.30.13', False), ('0.30.14', True), ('0.30.15', True)])
 def test_lvsdb_input_checks_python_module_without_needing_executable(version: str, accepted: bool):
     from kpex.env import Env

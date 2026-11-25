@@ -40,7 +40,8 @@ import os
 from typing import TYPE_CHECKING, Any, ClassVar, FrozenSet, List, Mapping, Optional
 
 from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter
-from ..util.number_range import DELAUNAY_B, NON_NEGATIVE_MICROMETERS, NON_NEGATIVE_SQUARE_MICROMETERS
+from ..util.number_range import DELAUNAY_B, DELAUNAY_B_DEFAULT, NON_NEGATIVE_MICROMETERS, \
+    NON_NEGATIVE_SQUARE_MICROMETERS
 
 if TYPE_CHECKING:
     from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
@@ -60,8 +61,8 @@ class FasterCapModelOptions:
     delaunay_amax: float = field(default=0.0, metadata={'range': NON_NEGATIVE_SQUARE_MICROMETERS})
     """Maximum triangle area; 0 leaves it to the mesher."""
 
-    delaunay_b: float = field(default=1.0, metadata={'range': DELAUNAY_B})
-    """Minimum mesh angle as b = 2·sin(angle); 1.0 is 30 degrees."""
+    delaunay_b: float = field(default=DELAUNAY_B_DEFAULT, metadata={'range': DELAUNAY_B})
+    """Minimum mesh angle as b = 2·sin(angle); 0.5 is about 14.5 degrees, 1.0 is 30 degrees."""
 
     field_margin_um: float = field(default=8.0, metadata={'range': NON_NEGATIVE_MICROMETERS})
     """

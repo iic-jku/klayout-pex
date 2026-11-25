@@ -31,6 +31,7 @@ from typing import Any, Optional
 from ..rcx25.exclusion import Exclusions, ConductorPart
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext
 from ..tech_info import TechInfo
+from ..util.number_range import DELAUNAY_B_DEFAULT
 from .fastercap_error import FasterCapError
 from .fastercap_model_generator import FasterCapModelGenerator
 
@@ -40,7 +41,7 @@ class FasterCapInputBuilder:
 
     def __init__(self, pex_context: KLayoutExtractionContext, tech_info: TechInfo,
                  substrate_net_name: str, k_void: float = 3.5,
-                 delaunay_amax: float = 0.0, delaunay_b: float = 1.0,
+                 delaunay_amax: float = 0.0, delaunay_b: float = DELAUNAY_B_DEFAULT,
                  exclusions: Optional[Exclusions] = None):
         self.pex_context = pex_context
         self.tech_info = tech_info
