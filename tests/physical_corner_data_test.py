@@ -163,6 +163,7 @@ def test_physical_component_selection_requires_explicit_scenario_capability(tmp_
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
 @pytest.mark.parametrize('pdk', list(PDK))
 def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tmp_path: Path, pdk: PDK):
+    from kpex.calibration.collect import read_native_statistics
     from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
     from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
 
@@ -182,10 +183,17 @@ def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tm
         directory = tmp_path / corner
         outputs = FasterCapSceneExporter().export(scene, output_dir_path=str(directory),
                                                   options={'field_margin_um': 8.0})
+        # NOTE: explicit mesh refinement levels, as the automatic refinement can stop on its panel-count
+        #       criterion without refining (sky130A gave the same matrix at -a0.02 and -a0.005). The finer
+        #       level must refine, so that the comparison is evidence of convergence. The GMRES tolerance
+        #       keeps the solver error below the change between the levels.
         estimates = []
-        for tolerance in (0.02, 0.005):
-            log = str(directory / f'solve-{tolerance}.log')
-            run_fastercap(shutil.which('FasterCap'), outputs[0], log, tolerance, 0.1, 0, True, False, False)
+        panels = []
+        for mesh_refinement in (0.005, 0.0025):
+            log = str(directory / f'solve-{mesh_refinement}.log')
+            run_fastercap(shutil.which('FasterCap'), outputs[0], log, None, 0.1, 0, True, False, False,
+                          mesh_refinement=mesh_refinement, gmres_tolerance=1e-6)
+            panels.append(read_native_statistics(Path(log))['refined_panels'])
             matrix = fastercap_parse_capacitance_matrix(log)
             first = next(i for i, name in enumerate(matrix.conductor_names) if name.endswith('_bottom'))
             second = next(i for i, name in enumerate(matrix.conductor_names) if name.endswith('_top'))
@@ -193,6 +201,7 @@ def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tm
             assert forward > 0 and backward > 0
             assert forward == pytest.approx(backward, rel=0.02, abs=0)
             estimates.append((forward+backward)/2)
+        assert None not in panels and panels[0] < panels[1], panels
         assert estimates[-1] == pytest.approx(estimates[-2], rel=0.02, abs=0)
         results[corner] = estimates[-1]
         # Independent infinite-plate area estimates from the pinned source gap,
