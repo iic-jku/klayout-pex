@@ -1,0 +1,75 @@
+#
+# --------------------------------------------------------------------------------
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+# Johannes Kepler University, Institute for Integrated Circuits.
+#
+# This file is part of KPEX
+# (see https://github.com/iic-jku/kpex).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# --------------------------------------------------------------------------------
+#
+
+name: Set up KPEX checkout
+description: Install Python, Poetry and the cached venv, generate the protobuf modules and tech info, install KPEX
+inputs:
+  python-version:
+    description: Python version to set up
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: "[🐍] Setup python ${{ inputs.python-version }}"
+      id: setup-python
+      uses: actions/setup-python@v7
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: "[🐍] Install Poetry"
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        virtualenvs-path: .venv
+        installer-parallel: true
+
+    - name: "[🐍] Load cached venv"
+      uses: actions/cache@v6
+      with:
+        path: .venv
+        key: venv-kpex-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: "[🐍] Install dependencies"
+      run: poetry install --no-interaction --no-root
+      shell: bash    # NOTE: required for windows poetry calls
+
+    # NOTE: the same steps as gen_tech_pb.sh
+    - name: "[🐍] Generate protobuf python modules"
+      run: poetry run python scripts/build/generate_protobuf.py
+      shell: bash
+
+    - name: "[🐍] Verify python protobuf generation"
+      run: |
+        # check if protobuf python modules were created
+        ls kpex_protobuf/kpex/tech/tech_pb2.py
+      shell: bash
+
+    - name: "[🐍] Generate PB Tech"
+      run: poetry run python scripts/gen_tech_pb kpex_protobuf
+      shell: bash
+
+    - name: "[🐍] Install project"
+      run: poetry install --no-interaction
+      shell: bash
