@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_5aed77b868240c56___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-25 20:24 +0000
+            created at 2026-11-25 20:58 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -270,7 +270,7 @@
     <p class="run run2"><span class="n"><a id="t188" href="#t188">188</a></span><span class="t">    <span class="nam">true_or_false</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t189" href="#t189">189</a></span><span class="t">    <span class="nam">warn_deprecated_options</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t190" href="#t190">190</a></span><span class="t"><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">util</span><span class="op">.</span><span class="nam">number_range</span> <span class="key">import</span> <span class="nam">DELAUNAY_B_MAX</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">util</span><span class="op">.</span><span class="nam">number_range</span> <span class="key">import</span> <span class="nam">DELAUNAY_B_DEFAULT</span><span class="op">,</span> <span class="nam">DELAUNAY_B_MAX</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t192" href="#t192">192</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">version</span> <span class="key">import</span> <span class="nam">__version__</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t193" href="#t193">193</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -505,7 +505,7 @@
     <p class="run run2"><span class="n"><a id="t423" href="#t423">423</a></span><span class="t">                                      <span class="nam">type</span><span class="op">=</span><span class="nam">non_negative_square_micrometers</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="num">50</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t424" href="#t424">424</a></span><span class="t">                                      <span class="nam">help</span><span class="op">=</span><span class="str">&quot;Delaunay triangulation maximum area (default is %(default)s)&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t425" href="#t425">425</a></span><span class="t">        <span class="nam">add_argument_with_former_name</span><span class="op">(</span><span class="nam">group_fastercap</span><span class="op">,</span> <span class="str">&quot;--delaunay-b&quot;</span><span class="op">,</span> <span class="str">&quot;--delaunay_b&quot;</span><span class="op">,</span> <span class="str">&quot;-b&quot;</span><span class="op">,</span> <span class="nam">dest</span><span class="op">=</span><span class="str">&quot;delaunay_b&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t426" href="#t426">426</a></span><span class="t">                                      <span class="nam">type</span><span class="op">=</span><span class="nam">delaunay_b</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="num">0.5</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t426" href="#t426">426</a></span><span class="t">                                      <span class="nam">type</span><span class="op">=</span><span class="nam">delaunay_b</span><span class="op">,</span> <span class="nam">default</span><span class="op">=</span><span class="nam">DELAUNAY_B_DEFAULT</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t427" href="#t427">427</a></span><span class="t">                                      <span class="nam">help</span><span class="op">=</span><span class="fst">f&quot;</span><span class="fst">Delaunay triangulation b = 2&#183;sin(minimum angle), </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t428" href="#t428">428</a></span><span class="t">                                           <span class="fst">f&quot;</span><span class="fst">from 0 to </span><span class="op">{</span><span class="nam">DELAUNAY_B_MAX</span><span class="op">:</span><span class="fst">g</span><span class="op">}</span><span class="fst"> (default is %(default)s)</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t429" href="#t429">429</a></span><span class="t">        <span class="nam">add_argument_with_former_name</span><span class="op">(</span><span class="nam">group_fastercap</span><span class="op">,</span> <span class="str">&quot;--geo-check&quot;</span><span class="op">,</span> <span class="str">&quot;--geo_check&quot;</span><span class="op">,</span> <span class="nam">dest</span><span class="op">=</span><span class="str">&quot;geometry_check&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -2506,7 +2506,7 @@
             <a class="nav" href="z_5aed77b868240c56___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-25 20:24 +0000
+            created at 2026-11-25 20:58 +0000
         </p>
     </div>
 </footer>
