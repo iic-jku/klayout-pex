@@ -35,7 +35,7 @@ from kpex import pex25d
 from kpex.common.capacitance_matrix import CapacitanceMatrix
 from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
 from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
-from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
+from kpex.fastercap.pex25d_exporter import FasterCapModelOptions, FasterCapSceneExporter
 from tests.common.pex25d_ground import GROUND_CUTOUT_TEXT
 
 
@@ -65,7 +65,10 @@ def test_isolated_contact_capacitance_matches_reference_solids(
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
     outputs = FasterCapSceneExporter().export(scene, output_dir_path=str(tmp_path / 'scene'))
 
-    reference = FasterCapModelBuilder(dbu=0.001, k_void=1.0)
+    # NOTE: meshed like the scene's export, so that the solids are compared, not two triangulations
+    options = FasterCapModelOptions()
+    reference = FasterCapModelBuilder(dbu=0.001, k_void=1.0, delaunay_amax=options.delaunay_amax,
+                                      delaunay_b=options.delaunay_b)
     ring = kdb.Region()
     for bounds in ((-3000, -3000, 3000, -1000), (-3000, 2000, 3000, 3000),
                    (-3000, -1000, -1000, 2000), (2000, -1000, 3000, 2000)):

@@ -188,7 +188,7 @@ from .util.argparse_helpers import (
     true_or_false,
     warn_deprecated_options,
 )
-from .util.number_range import DELAUNAY_B_MAX
+from .util.number_range import DELAUNAY_B_DEFAULT, DELAUNAY_B_MAX
 from .version import __version__
 
 
@@ -423,7 +423,7 @@ class KpexCLI:
                                       type=non_negative_square_micrometers, default=50,
                                       help="Delaunay triangulation maximum area (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--delaunay-b", "--delaunay_b", "-b", dest="delaunay_b",
-                                      type=delaunay_b, default=0.5,
+                                      type=delaunay_b, default=DELAUNAY_B_DEFAULT,
                                       help=f"Delaunay triangulation b = 2·sin(minimum angle), "
                                            f"from 0 to {DELAUNAY_B_MAX:g} (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--geo-check", "--geo_check", dest="geometry_check",
