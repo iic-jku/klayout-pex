@@ -142,7 +142,10 @@ jobs:
     - name: "[🐍] Run Unit tests"
       env:
         PYTHONWARNDEFAULTENCODING: "1"  # NOTE: see filterwarnings in pyproject.toml
+        GH_TOKEN: ${{ github.token }}   # NOTE: reads the jobs of this run
+      # NOTE: stopped once a job of ci-cd.yml's unit-tests failed, whose results the reports still publish
       run: >
+        bash .github/scripts/run_until_jobs_fail.sh "Unit Tests"
         poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }} -m pytest -m "slow"
         --alluredir ${{ env.ALLURE_RESULTS_PATH }}
         --color no 
