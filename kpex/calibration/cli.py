@@ -44,12 +44,13 @@ from ..util.argparse_helpers import add_log_level_argument
 
 def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser(
-        'calibrate', help='Prepare, solve, collect and qualify calibration patterns',
+        'calibrate', help='Prepare, solve, collect, qualify and fit calibration patterns',
         description='Prepare patterns, run bounded field solves and collect raw matrices. '
                     'Qualify numerical stabilization before coefficient fitting.', formatter_class=RichHelpFormatter)
     commands = parser.add_subparsers(dest='calibration_command', required=True)
     from .solve_cli import add_execution_subparsers
     from .qualification_cli import add_qualification_subparser
+    from .fit_cli import add_fit_length_subparser
     prepare = commands.add_parser(
         'prepare', help='Write validated PEX25D patterns and a preparation manifest',
         description='Create finite substrate, parallel-plate, parallel-wire and directional-fringe patterns '
@@ -65,6 +66,7 @@ def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     add_log_level_argument(prepare)
     add_execution_subparsers(commands)
     add_qualification_subparser(commands)
+    add_fit_length_subparser(commands)
 
 
 def run_calibration_command(args: argparse.Namespace):
@@ -75,6 +77,9 @@ def run_calibration_command(args: argparse.Namespace):
     if args.calibration_command == 'qualify':
         from .qualification_cli import run_qualification_command
         return run_qualification_command(args)
+    if args.calibration_command == 'fit-length':
+        from .fit_cli import run_fit_length_command
+        return run_fit_length_command(args)
     if args.calibration_command != 'prepare':
         raise NotImplementedError(f'Calibration command {args.calibration_command!r}')
     try:
