@@ -1,0 +1,26 @@
+SUBPROCESS __kpex__:kpex_cli.py:2106 kpex extract --pdk sky130A --2.5D --mode RC --lvsdb /Users/runner/work/kpex/kpex/testdata/lvsdb/sky130A/test_patterns/nfet_li1.lvsdb.gz --mode C --out-netlist /private/var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/pytest-of-runner/pytest-0/test_unmapped_devices_need_exp6/netlist.spice --unmapped-devices keep --out-dir /private/var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/pytest-of-runner/pytest-0/test_unmapped_devices_need_exp6
+INFO     __kpex__:kpex_cli.py:1050 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:364 Tool                   Found    Required                              Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:364 KLayout Python module  0.30.14  >=0.30.1,>=0.30.14,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /private/var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/pytest-of-runner/pytest-0/test_unmapped_devices_need_exp6/nfet_li1__nfet_li1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2276 Peak memory (resident set size) after preparing the LVSDB: 451.2 MiB
+INFO     __kpex__:kpex_cli.py:2280 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2280 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2280 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2280 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2280 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2280 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1630 Sidewall halo: 8 µm (tech info of sky130A)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 451.2 MiB
+INFO     __kpex__:kpex_cli.py:1693 Capacitance output policy: grounded, reference: sky130_gnd
+WARNING  __kpex__:kpex_cli.py:1695 Grounded capacitance output removes inter-net transfer admittance after exact floating-capacitance elimination. It preserves diagonal capacitance at retained nodes, not arbitrary distributed-RC port impedance. Geometry reports and device-capacitance checks still describe the coupled extraction
+SUBPROCESS __kpex__:kpex_cli.py:1714 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1714 C1;D;VSUBS;0.149;
+SUBPROCESS __kpex__:kpex_cli.py:1714 C2;G;VSUBS;0.158;
+SUBPROCESS __kpex__:kpex_cli.py:1714 C3;S;VSUBS;0.109;
+SUBPROCESS __kpex__:kpex_cli.py:1717 /private/var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/pytest-of-runner/pytest-0/test_unmapped_devices_need_exp6/nfet_li1__nfet_li1/nfet_li1_k25d_pex_netlist.csv
+WARNING  __kpex__:netlist_printer.py:103 Keeping unmapped devices in native LVS representation: sky130_fd_pr__nfet_01v8. No simulation models are supplied. Provide compatible models and verify device types, terminal order, parameters and units before simulation.
+SUBPROCESS __kpex__:kpex_cli.py:1757 Wrote expanded netlist to: /private/var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/pytest-of-runner/pytest-0/test_unmapped_devices_need_exp6/nfet_li1__nfet_li1/nfet_li1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1792 Peak memory (resident set size) after the netlist: 451.2 MiB
+INFO     __kpex__:kpex_cli.py:1848 Copied expanded SPICE netlist to: /private/var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/pytest-of-runner/pytest-0/test_unmapped_devices_need_exp6/netlist.spice
+INFO     __kpex__:kpex_cli.py:2145 Peak memory (resident set size) after the run: 451.2 MiB
