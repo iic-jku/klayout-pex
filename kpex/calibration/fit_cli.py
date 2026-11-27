@@ -42,6 +42,20 @@ def add_fit_length_subparser(commands: argparse._SubParsersAction):
                     'held-out lengths. Recheck the saved solver evidence and write a protobuf JSON report.',
         formatter_class=RichHelpFormatter, allow_abbrev=False,
     )
+    _add_fit_arguments(parser)
+
+
+def add_fit_overlap_subparser(commands: argparse._SubParsersAction):
+    parser = commands.add_parser(
+        'fit-overlap', help='Fit an overlap area coefficient from qualified parallel plates',
+        description='Fit the area, edge and signed corner terms for one overlap target using four or more '
+                    'training rectangles and one or more held-out rectangles. Write a protobuf JSON report.',
+        formatter_class=RichHelpFormatter, allow_abbrev=False,
+    )
+    _add_fit_arguments(parser)
+
+
+def _add_fit_arguments(parser: argparse.ArgumentParser):
     parser.add_argument('--study', type=Path, required=True, metavar='FILE',
                         help='Original CalibrationQualificationStudy and its relative collection paths')
     parser.add_argument('--qualification', type=Path, required=True, metavar='FILE',
@@ -70,4 +84,20 @@ def run_fit_length_command(args: argparse.Namespace):
     info(f'Length fit report: {path}')
     if any(result.status != CalibrationLengthFitResult.ACCEPTED for result in report.fits):
         error('The length fit exceeded the declared residual budget or was physically inadequate')
+        sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+
+
+def run_fit_overlap_command(args: argparse.Namespace):
+    from .overlap_report import fit_qualified_overlap
+    from kpex_protobuf.kpex.calibration.overlap_fit_pb2 import CalibrationOverlapFitResult
+
+    try:
+        path, report = fit_qualified_overlap(args.study, args.qualification, args.out_dir, args.residual_budget_f)
+    except (OSError, CalibrationError) as exc:
+        error(str(exc))
+        sys.exit(ExitCode.USAGE)
+    info(f'Overlap fit report: {path}')
+    if report.fit.status != CalibrationOverlapFitResult.ACCEPTED:
+        for diagnostic in report.fit.diagnostics:
+            error(diagnostic)
         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)

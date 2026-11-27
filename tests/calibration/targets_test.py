@@ -42,7 +42,6 @@ from kpex.pex25d.reader import read_pex25d_text
 from kpex.tech_info import TechInfo
 from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
 from kpex_protobuf.kpex.calibration.targets_pb2 import HALO_NORMALIZED, UNSCALED
-from kpex_protobuf.kpex.tech.tech_pb2 import Technology
 from tests.common.calibration import read_pattern_data
 from tests.common.cli_runner import run_cli
 
@@ -51,25 +50,6 @@ pytestmark = allure.parent_suite('Unit Tests')
 
 def binding(number: int) -> Dict[str, str]:
     return {'canonical_layer': f'routing{number}', 'process_profile': f'M{number}'}
-
-
-@pytest.fixture
-def targeted_technology(tech_info: TechInfo) -> TechInfo:
-    tech = Technology()
-    tech.CopyFrom(tech_info.tech)
-    for number in (1, 2):
-        drawn = tech.layers.add(name=f'routing{number}')
-        drawn.drw_gds_pair.layer = number
-        computed = tech.lvs_computed_layers.add(original_layer_name=f'routing{number}', process_layer_name=f'M{number}')
-        computed.layer_info.name = f'M{number}'
-        computed.layer_info.drw_gds_pair.layer = number
-    caps = tech.process_parasitics.capacitance
-    caps.substrates.add(layer_name='routing1', area_capacitance=1.0, perimeter_capacitance=2.0)
-    caps.overlaps.add(top_layer_name='routing2', bottom_layer_name='routing1', capacitance=3.0)
-    caps.sidewalls.add(layer_name='routing2', capacitance=4.0, offset=-0.01)
-    caps.sideoverlaps.add(in_layer_name='routing1', out_layer_name='routing2', capacitance=5.0)
-    caps.sideoverlaps.add(in_layer_name='routing2', out_layer_name='routing1', capacitance=6.0)
-    return TechInfo(tech, dielectric_filter=None)
 
 
 @pytest.fixture
