@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">221 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">189<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">32<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">191<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">30<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_f77042217cd15748_qualification_cli_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 17:16 +0000
+            created at 2026-11-27 19:13 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -182,7 +182,7 @@
     <p class="run run2"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="key">for</span> <span class="nam">i</span><span class="op">,</span> <span class="nam">name</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">names</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">        <span class="key">if</span> <span class="nam">values</span><span class="op">[</span><span class="nam">i</span><span class="op">,</span> <span class="nam">i</span><span class="op">]</span> <span class="op">&lt;</span> <span class="op">-</span><span class="nam">bounds</span><span class="op">[</span><span class="nam">i</span><span class="op">,</span> <span class="nam">i</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">            <span class="nam">result</span><span class="op">.</span><span class="nam">violations</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="fst">f&#x27;</span><span class="fst">Negative diagonal for </span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">            <span class="nam">result</span><span class="op">.</span><span class="nam">violations</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="fst">f&#x27;</span><span class="fst">Negative diagonal for </span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">        <span class="key">if</span> <span class="nam">rows</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span> <span class="op">&lt;</span> <span class="op">-</span><span class="nam">row_budgets</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">            <span class="nam">result</span><span class="op">.</span><span class="nam">violations</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="fst">f&#x27;</span><span class="fst">Negative charge-row sum for </span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">        <span class="key">for</span> <span class="nam">j</span><span class="op">,</span> <span class="nam">other</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">names</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -191,7 +191,7 @@
     <p class="run"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">            <span class="key">if</span> <span class="nam">j</span> <span class="op">&gt;</span> <span class="nam">i</span> <span class="key">and</span> <span class="nam">asymmetry</span><span class="op">[</span><span class="nam">i</span><span class="op">,</span> <span class="nam">j</span><span class="op">]</span> <span class="op">&gt;</span> <span class="nam">max</span><span class="op">(</span><span class="nam">bounds</span><span class="op">[</span><span class="nam">i</span><span class="op">,</span> <span class="nam">j</span><span class="op">]</span><span class="op">,</span> <span class="nam">bounds</span><span class="op">[</span><span class="nam">j</span><span class="op">,</span> <span class="nam">i</span><span class="op">]</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">                <span class="nam">result</span><span class="op">.</span><span class="nam">violations</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="fst">f&#x27;</span><span class="fst">Reciprocity defect for </span><span class="op">{</span><span class="nam">name</span><span class="op">}</span><span class="fst"> / </span><span class="op">{</span><span class="nam">other</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">    <span class="key">if</span> <span class="nam">eigenvalue</span> <span class="op">&lt;</span> <span class="op">-</span><span class="nam">energy_budget</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">        <span class="nam">result</span><span class="op">.</span><span class="nam">violations</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">&#x27;Negative energy beyond the entry-wise perturbation budget&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">        <span class="nam">result</span><span class="op">.</span><span class="nam">violations</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">&#x27;Negative energy beyond the entry-wise perturbation budget&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">    <span class="key">return</span> <span class="nam">result</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -404,7 +404,7 @@
             <a class="nav" href="z_f77042217cd15748_qualification_cli_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 17:16 +0000
+            created at 2026-11-27 19:13 +0000
         </p>
     </div>
 </footer>
