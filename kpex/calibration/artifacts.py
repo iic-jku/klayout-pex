@@ -37,7 +37,7 @@ from google.protobuf.json_format import MessageToJson, ParseError
 from google.protobuf.message import Message
 
 from .validation import CalibrationError
-from ..util.protobuf_json import parse_protobuf_json
+from .serialization import parse_calibration_message
 
 MessageType = TypeVar('MessageType', bound=Message)
 MAX_JSON_BYTES = 16 * 1024 * 1024
@@ -51,7 +51,7 @@ def read_message(path: Path, message: MessageType) -> MessageType:
             data = stream.read(MAX_JSON_BYTES + 1)
         if len(data) > MAX_JSON_BYTES:
             raise CalibrationError(f"Artifact '{path}' exceeds {MAX_JSON_BYTES} bytes")
-        return parse_protobuf_json(data.decode('utf-8'), message)
+        return parse_calibration_message(data.decode('utf-8'), message)
     except (OSError, UnicodeError, ValueError, ParseError, RecursionError) as exc:
         raise CalibrationError(f"Cannot read protobuf artifact '{path}': {exc}") from exc
 

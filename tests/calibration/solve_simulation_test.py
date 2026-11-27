@@ -34,7 +34,7 @@ import numpy as np
 import pytest
 from kpex.tech_info import TechInfo
 
-from kpex.calibration.artifacts import read_message
+from kpex.calibration.artifacts import read_message, sha256_file, write_message
 from kpex.calibration.patterns import read_patterns
 from kpex.calibration.prepare import prepare_calibration
 from kpex.calibration.solve import SolveOptions, solve_calibration
@@ -80,6 +80,27 @@ def test_all_pattern_families_solve_and_recollect(tmp_path: Path, tech_info: Tec
         assert len(case.measured_matrix.rows) == expected
     again = collect_calibration(result.manifest_path, tmp_path / 'collected')
     assert read_message(again.manifest_path, CalibrationCollection()) == data
+
+    # Also exercise an old run manifest against the exact same real solver
+    # evidence, without another solve or changing its raw matrices/logs.
+    from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest, CalibrationRunCompletion
+    from kpex_protobuf.kpex.calibration.v1.solving_pb2 import CalibrationRunManifest as RunV1
+    from kpex.fastercap.calibration_backend import controls_message, statistics_message
+    old_root = tmp_path / 'version-1 run'
+    shutil.copytree(result.manifest_path.parent, old_root)
+    current = read_message(result.manifest_path, CalibrationRunManifest())
+    old = RunV1.FromString(current.SerializeToString())
+    old.DiscardUnknownFields()
+    old.schema_version = 1
+    old.options.fastercap.ParseFromString(controls_message(current.options.solver_controls).SerializeToString())
+    write_message(old_root / 'manifest.json', old, replace=True)
+    completion = read_message(old_root / 'completed.pb.json', CalibrationRunCompletion())
+    completion.manifest.sha256 = sha256_file(old_root / 'manifest.json')
+    write_message(old_root / 'completed.pb.json', completion, replace=True)
+    old_again = collect_calibration(old_root / 'manifest.json', tmp_path / 'collected-v1')
+    old_data = read_message(old_again.manifest_path, CalibrationCollection())
+    assert list(old_data.cases) == list(data.cases)
+    assert all(statistics_message(case.solver_statistics).refined_panels > 0 for case in old_data.cases)
 
 
 @pytest.mark.slow

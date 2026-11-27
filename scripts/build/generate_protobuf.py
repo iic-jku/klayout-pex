@@ -29,6 +29,7 @@ import re
 import tempfile
 
 from grpc_tools import protoc
+import grpc_tools
 
 
 def qualify_generated_modules(source: str, module_name: str) -> str:
@@ -53,6 +54,7 @@ def main() -> int:
         status = protoc.main([
             'protoc',
             f'--proto_path={schema_dir}',
+            f'--proto_path={Path(grpc_tools.__file__).parent / "_proto"}',
             f'--python_out={generated_dir}',
             *(schema.relative_to(schema_dir).as_posix() for schema in schemas),
         ])

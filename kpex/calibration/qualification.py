@@ -33,6 +33,7 @@ import numpy as np
 from .artifacts import read_message, sha256_file, validate_output_directory, verify_artifacts, write_message
 from .qualification_evidence import QualificationMeasurement, read_collection, read_measurement
 from .validation import CalibrationError, validate_identifier
+from .backend import calibration_backend
 from ..version import __version__
 
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
@@ -41,13 +42,10 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
     CalibrationQualificationStudy, CalibrationQualificationTolerance, CalibrationRefinementAxis as Axis,
     CalibrationRefinementResult, CalibrationRefinementStudy,
 )
-from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCaseResult, CalibrationSolveOptions
-from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCaseResult
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
-REFINEMENT_AXES = (Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
-SUPPORTED_REFINEMENT_AXES = (*REFINEMENT_AXES, Axis.FASTERCAP_MESH_REFINEMENT)
-METHOD_VERSION = 3
+METHOD_VERSION = 4
 
 
 @dataclass(frozen=True)
@@ -129,33 +127,6 @@ def _physical(measurement: QualificationMeasurement, tolerance: CalibrationQuali
     return diagnostics, errors
 
 
-def _controls(level: QualificationMeasurement, axis: int) -> Tuple[float, CalibrationSolveOptions, PEX25DScene]:
-    fixed = CalibrationSolveOptions()
-    fixed.CopyFrom(level.run.manifest.options)
-    # Scheduling and time limits do not change a completed solve's inputs.
-    fixed.ClearField('jobs')
-    fixed.ClearField('solver_timeout_seconds')
-    scene = PEX25DScene()
-    scene.CopyFrom(level.scene)
-    match axis:
-        case Axis.GMRES_TOLERANCE:
-            value = fixed.fastercap.gmres_tolerance
-            fixed.fastercap.ClearField('gmres_tolerance')
-        case Axis.INITIAL_MESH_MAX_AREA:
-            value = fixed.fastercap.mesh_max_area_um2
-            fixed.fastercap.ClearField('mesh_max_area_um2')
-        case Axis.FASTERCAP_MESH_REFINEMENT:
-            value = fixed.fastercap.mesh_refinement
-            fixed.fastercap.ClearField('mesh_refinement')
-        case Axis.DOMAIN_MARGIN:
-            value = level.run.preparation.domain_margin_grid
-            scene.domain.ClearField('box')
-            scene.domain.ClearField('applied_margin')
-        case _:
-            raise NotImplementedError(f'Calibration refinement axis {axis}')
-    return value, fixed, scene
-
-
 def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasurement,
                 measurements: Dict[str, QualificationMeasurement], tolerance: CalibrationQualificationTolerance
                 ) -> CalibrationRefinementResult:
@@ -166,32 +137,30 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
         return result
     if len({level.run.run_sha256 for level in levels}) != len(levels):
         result.diagnostics.append('Repeated solver run is not independent refinement evidence')
-    _, target_controls, target_scene = _controls(target, spec.axis)
+    backend = calibration_backend(target.run.manifest.solver.name)
+    target_controls = backend.refinement_controls(target, spec.axis)
     rejected = False
     missing_matrix = False
     physical_messages = []
-    parameters: List[float] = []
     for name, measurement in zip(spec.collection_ids, levels):
-        value, controls, scene = _controls(measurement, spec.axis)
-        parameters.append(value)
-        level = result.levels.add(collection_id=name, parameter_value=value)
+        controls = backend.refinement_controls(measurement, spec.axis)
+        level = result.levels.add(collection_id=name, parameter_value=controls.parameter_value)
         record = measurement.record
-        if record.HasField('input_panels'):
-            level.input_panels = record.input_panels
-        if record.HasField('refined_panels'):
-            level.refined_panels = record.refined_panels
+        statistics = backend.refinement_statistics(record)
+        if statistics.type_url:
+            level.solver_statistics.CopyFrom(statistics)
         pattern, target_pattern = measurement.pattern, target.pattern
         technology, target_tech = measurement.run.preparation.technology, target.run.preparation.technology
-        if (scene != target_scene or pattern.family != target_pattern.family
+        if (controls.scene != target_controls.scene or pattern.family != target_pattern.family
                 or pattern.layers != target_pattern.layers or pattern.dimensions_grid != target_pattern.dimensions_grid
                 or pattern.measurement != target_pattern.measurement
                 or technology.physical_stack_sha256 != target_tech.physical_stack_sha256
                 or measurement.run.manifest.solver != target.run.manifest.solver):
             result.diagnostics.append(f'{name}: physical geometry, measurement or solver identity changed')
-        if (spec.axis in (Axis.GMRES_TOLERANCE, Axis.FASTERCAP_MESH_REFINEMENT)
+        if (backend.requires_unchanged_inputs(spec.axis)
                 and measurement.solver_inputs != target.solver_inputs):
             result.diagnostics.append(f'{name}: solver input files changed in the {Axis.Name(spec.axis)} study')
-        if controls != target_controls or controls.fastercap.HasField('automatic_tolerance'):
+        if controls.fixed != target_controls.fixed or not controls.independently_controlled:
             result.diagnostics.append(f'{name}: fixed numerical controls changed or automatic refinement is active')
         diagnostics, errors = _physical(measurement, tolerance)
         level.matrix_diagnostics.extend(diagnostics)
@@ -200,16 +169,7 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
             missing_matrix |= not diagnostics
             physical_messages.extend(f'{name}: {error}' for error in errors)
 
-    increasing = spec.axis == Axis.DOMAIN_MARGIN
-    if any(value <= 0 for value in parameters) or any(
-            not (left < right if increasing else left > right) for left, right in zip(parameters, parameters[1:])):
-        result.diagnostics.append('Refinement controls must be positive and strictly ordered from coarse to fine')
-    if spec.axis in (Axis.INITIAL_MESH_MAX_AREA, Axis.FASTERCAP_MESH_REFINEMENT):
-        initial = spec.axis == Axis.INITIAL_MESH_MAX_AREA
-        counts = [level.input_panels if initial else level.refined_panels for level in result.levels]
-        if not all(counts) or any(left >= right for left, right in zip(counts, counts[1:])):
-            kind = 'input' if initial else 'adaptive'
-            result.diagnostics.append(f'Observed {kind} panel counts must be present and strictly increase')
+    result.diagnostics.extend(backend.refinement_diagnostics(spec.axis, result.levels))
     incompatible = bool(result.diagnostics)
     result.diagnostics.extend(physical_messages)
     if rejected:
@@ -249,10 +209,10 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
 
 def _validated_study(study: CalibrationQualificationStudy):
     tolerance = study.tolerance
-    if (study.schema_version != 1 or not study.collections or not study.cases
+    if (study.schema_version != 2 or not study.collections or not study.cases
             or not math.isfinite(tolerance.absolute_floor_f) or tolerance.absolute_floor_f <= 0
             or not 0 <= tolerance.relative_tolerance < 1):
-        raise CalibrationError('Study needs schema version 1, collections, cases, a positive finite absolute floor '
+        raise CalibrationError('Study needs schema version 2, collections, cases, a positive finite absolute floor '
                                'in farads and a relative tolerance in [0, 1)')
     for collection in study.collections:
         validate_identifier(collection.id, 'Collection ID')
@@ -268,7 +228,8 @@ def _validated_study(study: CalibrationQualificationStudy):
         axes = set()
         for refinement in case.refinements:
             levels = refinement.collection_ids
-            if (refinement.axis not in SUPPORTED_REFINEMENT_AXES or refinement.axis in axes or not levels
+            if (refinement.axis not in Axis.values() or refinement.axis == Axis.REFINEMENT_AXIS_UNSPECIFIED
+                    or refinement.axis in axes or not levels
                     or any(level not in names for level in levels) or len(set(levels)) != len(levels)
                     or levels[-1] != case.reference_collection_id):
                 raise CalibrationError('Each refinement needs a unique supported axis and distinct declared '
@@ -295,7 +256,9 @@ def _qualify_case(spec: CalibrationQualificationCaseStudy, measurements: Dict[st
                     result.unresolved_entries.add(charge_conductor_id=charge, excitation_conductor_id=excitation)
     for study in spec.refinements:
         result.refinements.append(_refinement(study, reference, measurements, tolerance))
-    missing = [Axis.Name(axis) for axis in REFINEMENT_AXES if all(item.axis != axis for item in result.refinements)]
+    required_axes = calibration_backend(reference.run.manifest.solver.name).required_refinement_axes()
+    missing = [Axis.Name(axis) for axis in required_axes
+               if all(item.axis != axis for item in result.refinements)]
     if missing:
         result.diagnostics.append('Missing refinement evidence: ' + ', '.join(missing))
     if (errors and reference.record.status != CalibrationCaseResult.INCOMPLETE
@@ -317,7 +280,7 @@ def evaluate_qualification(path: Path) -> QualificationEvaluation:
     paths = verify_artifacts(path.parent, [item.collection for item in study.collections])
     runs = {item.id: read_collection(collection_path, item.collection.sha256)
             for item, collection_path in zip(study.collections, paths)}
-    report = CalibrationQualificationReport(schema_version=1, qualification_method_version=METHOD_VERSION,
+    report = CalibrationQualificationReport(schema_version=2, qualification_method_version=METHOD_VERSION,
                                             kpex_version=__version__, study_sha256=study_hash, study=study)
     references = {}
     for case in study.cases:

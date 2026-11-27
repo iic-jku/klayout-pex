@@ -23,6 +23,7 @@ syntax = "proto3";
 
 package kpex.calibration;
 
+import "google/protobuf/any.proto";
 import "kpex/calibration/preparation.proto";
 import "kpex/pex25d/pex25d_units.proto";
 import "kpex/result/capacitance_matrix.proto";
@@ -53,10 +54,10 @@ message CalibrationQualificationCaseStudy {
 
 enum CalibrationRefinementAxis {
     REFINEMENT_AXIS_UNSPECIFIED = 0;
-    GMRES_TOLERANCE = 10; // Decreasing manual FasterCap GMRES tolerance.
+    LINEAR_SOLVER_TOLERANCE = 10; // Backend-defined linear-system stopping tolerance.
     INITIAL_MESH_MAX_AREA = 20; // Decreasing initial maximum triangle area in um^2.
     DOMAIN_MARGIN = 30; // Increasing preparation margin in grid units.
-    FASTERCAP_MESH_REFINEMENT = 40; // Decreasing FasterCap adaptive mesh control (-m).
+    ADAPTIVE_MESH_REFINEMENT = 40; // Backend-defined adaptive discretization control.
 }
 
 message CalibrationRefinementStudy {
@@ -117,11 +118,14 @@ message CalibrationRefinementResult {
 
 message CalibrationRefinementLevel {
     string collection_id = 1;
-    // The axis identifies the units: fraction, um^2 or grid units.
+    // Interpretation, units and coarse-to-fine ordering are defined by the backend
+    // for this axis. Values from different backends are not interchangeable.
     double parameter_value = 10;
-    optional uint64 refined_panels = 20;
+    reserved 20, 40;
+    reserved "refined_panels", "input_panels";
     repeated CalibrationMatrixDiagnostics matrix_diagnostics = 30;
-    optional uint64 input_panels = 40;
+    // Backend evidence used to validate this refinement level.
+    google.protobuf.Any solver_statistics = 50;
 }
 
 message CalibrationRefinementChange {

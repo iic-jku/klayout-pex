@@ -97,8 +97,7 @@ message CalibrationLengthRefinementSensitivity {
 }
 
 message CalibrationLengthSensitivityLevel {
-    // GMRES tolerance, maximum initial triangle area in um^2, or domain margin
-    // in the family's coordinate grid units, according to the axis.
+    // Backend-defined parameter of the recorded refinement axis.
     double parameter_value = 1;
     repeated CalibrationLengthSensitivitySample validation_samples = 10;
     optional double max_abs_training_residual_f = 20;

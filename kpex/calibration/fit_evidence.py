@@ -86,6 +86,9 @@ def read_verified_qualification(study_path: Path, qualification_path: Path
     qualification_sha256 = sha256_file(qualification_path)
     saved = read_message(qualification_path, CalibrationQualificationReport())
     evaluation = evaluate_qualification(study_path)
+    if saved.qualification_method_version != evaluation.report.qualification_method_version:
+        raise CalibrationError('Qualification method changed; rerun kpex calibrate qualify on the saved study '
+                               'before fitting. Existing solver runs can be reused without solving again')
     # A package version change alone does not invalidate evidence produced by the same method.
     evaluation.report.kpex_version = saved.kpex_version
     _ignore_eigensolver_roundoff(saved)

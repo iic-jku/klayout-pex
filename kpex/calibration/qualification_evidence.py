@@ -28,15 +28,11 @@ from pathlib import Path
 from typing import Dict, Tuple, TYPE_CHECKING
 
 from google.protobuf.message import DecodeError
-from packaging.version import InvalidVersion, Version
 
 from .artifacts import artifact_path, read_message, sha256_file, verify_artifacts
-from .collect import read_native_statistics
+from .backend import calibration_backend
 from .prepared_input import read_preparation
-from .solve import validate_options_message
 from .validation import CalibrationError
-from ..fastercap.fastercap_error import FasterCapError
-from ..tool_version_constraints import Tool, effective_version_range
 
 from kpex_protobuf.kpex.calibration.solving_pb2 import (
     CalibrationCaseResult, CalibrationCollection, CalibrationRunCheckpoint, CalibrationRunManifest,
@@ -79,7 +75,7 @@ class QualificationMeasurement:
 def read_collection(path: Path, expected_hash: str) -> QualificationRun:
     root = path.parent
     collection = read_message(path, CalibrationCollection())
-    if sha256_file(path) != expected_hash or collection.schema_version != 1:
+    if sha256_file(path) != expected_hash or collection.schema_version != 2:
         raise CalibrationError(f"Collection '{path}' changed or has an unsupported schema")
     verify_artifacts(root, collection.artifacts)
     hashes = {item.path: item.sha256 for item in collection.artifacts}
@@ -87,18 +83,11 @@ def read_collection(path: Path, expected_hash: str) -> QualificationRun:
     if hashes.get(collection.run_manifest.path) != collection.run_manifest.sha256:
         raise CalibrationError('Run manifest is absent from the collection artifact set')
     run = read_message(run_path, CalibrationRunManifest())
-    if (run.schema_version != 1 or not run.kpex_version or run.solver.name != 'fastercap'
+    if (run.schema_version != 2 or not run.kpex_version
             or not run.solver.version or not run.solver.executable_sha256
             or not run.solver.operating_system or not run.solver.architecture):
         raise CalibrationError('Unsupported calibration run schema or solver identity')
-    try:
-        version = Version(run.solver.version)
-    except InvalidVersion as exc:
-        raise CalibrationError(f"Invalid recorded FasterCap version '{run.solver.version}'") from exc
-    supported = effective_version_range(Tool.FASTERCAP)
-    if version not in supported:
-        raise CalibrationError(f'Qualification requires FasterCap {supported}; the saved run used {version}')
-    validate_options_message(run.options)
+    calibration_backend(run.solver.name).validate_run(run, qualification=True)
 
     prepared_path = artifact_path(run_path.parent, run.preparation.path)
     if hashes.get(prepared_path.relative_to(root).as_posix()) != run.preparation.sha256:
@@ -120,8 +109,6 @@ def read_collection(path: Path, expected_hash: str) -> QualificationRun:
 
 
 def read_measurement(run: QualificationRun, case_id: str) -> QualificationMeasurement:
-    from ..fastercap.result_collection import collect_fastercap_matrix
-
     index = next((i for i, case in enumerate(run.collection.cases) if case.case_id == case_id), None)
     if index is None:
         raise CalibrationError(f"Referenced collection does not contain case '{case_id}'")
@@ -158,7 +145,7 @@ def read_measurement(run: QualificationRun, case_id: str) -> QualificationMeasur
             raise CalibrationError(f"Collected case '{case_id}' does not identify a successful solver execution")
         if (not case.numerical_report_path or checkpoint.numerical_report.path != case.numerical_report_path
                 or checkpoint.log.path != case.log_path):
-            raise CalibrationError(f"Collected case '{case_id}' requires the full-precision FasterCap report")
+            raise CalibrationError(f"Collected case '{case_id}' requires the full-precision solver report")
         log = run.artifact(artifact_path(run_root, case.log_path))
         report = run.artifact(artifact_path(run_root, case.numerical_report_path))
         log_name = log.relative_to(run.root).as_posix()
@@ -166,24 +153,8 @@ def read_measurement(run: QualificationRun, case_id: str) -> QualificationMeasur
         if (run.artifacts.get(log_name) != checkpoint.log.sha256
                 or run.artifacts.get(report_name) != checkpoint.numerical_report.sha256):
             raise CalibrationError(f"Collected case '{case_id}' has inconsistent checkpoint hashes")
-        actual_input = record.execution.arguments[-1].removeprefix('"').removesuffix('"')
-        try:
-            native, measured = collect_fastercap_matrix(
-                log, list(pattern.measurement.conductor_order), pattern.measurement.reference.profile,
-                numerical_report=report,
-                expected_input=actual_input, expected_version=run.manifest.solver.version,
-            )
-        except FasterCapError as exc:
-            raise CalibrationError(f"Cannot verify collected matrix for '{case_id}': {exc}") from exc
-        statistics = read_native_statistics(log)
-        for field in ('input_panels', 'refined_panels'):
-            count = statistics[field]
-            if count is not None and count > 2**64 - 1:
-                count = None
-            if (getattr(record, field) if record.HasField(field) else None) != count:
-                raise CalibrationError(f"Collected {field} for '{case_id}' differs from the saved log")
-        if record.native_matrix != native or record.measured_matrix != measured:
-            raise CalibrationError(f"Collected matrix for '{case_id}' differs from the native report")
+        calibration_backend(run.manifest.solver.name).verify_result(
+            log, report, pattern, record, run.manifest.solver.version)
     elif record.status not in (CalibrationCaseResult.INCOMPLETE, CalibrationCaseResult.EXECUTION_FAILED,
                                CalibrationCaseResult.INVALID_RESULT):
         raise CalibrationError(f"Invalid collection status for '{case_id}'")

@@ -31,6 +31,7 @@ import json
 from typing import Any, Dict, TypeVar
 
 from google.protobuf.descriptor import Descriptor, FieldDescriptor
+from google.protobuf.descriptor_pool import Default
 from google.protobuf.json_format import Parse, ParseError
 from google.protobuf.message import Message
 
@@ -41,6 +42,15 @@ MessageType = TypeVar('MessageType', bound=Message)
 def _check_representation(value: Any, descriptor: Descriptor):
     if not isinstance(value, dict):
         return  # The protobuf parser supplies the schema/type diagnostic.
+    if descriptor.full_name == 'google.protobuf.Any':
+        # Parse already resolved @type. Inspect that message too so fractional
+        # integers and duplicate JSON aliases cannot bypass strict checks in Any.
+        type_url = value.get('@type')
+        if type_url is not None:
+            payload_descriptor = Default().FindMessageTypeByName(type_url.rsplit('/', 1)[-1])
+            _check_representation({name: item for name, item in value.items() if name != '@type'},
+                                  payload_descriptor)
+        return
     names: Dict[str, FieldDescriptor] = {
         name: field for field in descriptor.fields for name in (field.name, field.json_name)
     }

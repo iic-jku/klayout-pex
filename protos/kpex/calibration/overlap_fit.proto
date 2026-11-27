@@ -80,7 +80,7 @@ message CalibrationOverlapRefinementSensitivity {
 }
 
 message CalibrationOverlapSensitivityLevel {
-    // GMRES tolerance, initial triangle area in um^2, or domain margin in um.
+    // Backend-defined refinement setting; DOMAIN_MARGIN is expressed in micrometers.
     double parameter_value = 1;
     optional double area_coupling_f_per_um2 = 10;
     optional double area_coupling_change_f_per_um2 = 20;
