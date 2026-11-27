@@ -21,17 +21,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""Qualification checks require independent, traceable numerical evidence."""
-
 """Shared calibration studies and deterministic solver evidence for tests."""
 
 from dataclasses import replace
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any, Callable, Dict, List, Tuple
 
 import pytest
+import numpy as np
 
 from kpex.calibration.artifacts import read_message, sha256_file, write_message
 from kpex.calibration.patterns import read_patterns
@@ -42,6 +42,7 @@ from kpex.tech_info import TechInfo
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
     CalibrationQualificationStudy, CalibrationRefinementAxis as Axis,
 )
+from kpex_protobuf.kpex.calibration.patterns_pb2 import PatternSetSpecification, TRAINING, VALIDATION
 from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection
 from kpex_protobuf.kpex.result.solver_execution_pb2 import SolverIdentity
 from tests.common.fastercap_report import numerical_report
@@ -122,3 +123,58 @@ def mock_solver(monkeypatch: pytest.MonkeyPatch, matrix_for_case: Callable[[str,
         return FasterCapRunResult((exe, deck), 0, 0.1)
 
     monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
+
+
+def wire_patterns_and_coupling() -> Tuple[List[Dict[str, Any]], Callable[[str, str], List[List[float]]]]:
+    lengths = {f'wire_{length}': length for length in (4, 8, 12, 16)}
+    patterns = [
+        {'id': name, 'role': 'VALIDATION' if length == 12 else 'TRAINING',
+         'length_um': str(length), 'width_um': '0.4', 'parallel_wires': {'layer': 'M1', 'gap_um': '0.2'}}
+        for name, length in lengths.items()
+    ]
+
+    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
+        coupling = (2e-16 * lengths.get(case_id, 4) + 1e-16) / 1e-6
+        return [[9e-9, -2e-9, -coupling],
+                [-2e-9, 8e-9, -2e-9], [-coupling, -2e-9, 9e-9]]
+
+    return patterns, matrix_for_case
+
+
+def overlap_patterns_and_coupling(holdout_offset_f: float = 0
+                                 ) -> Tuple[PatternSetSpecification, Callable[[str, str], List[List[float]]]]:
+    specification = PatternSetSpecification(schema_version=1, grid_um='0.001', fringe_scale_mode='HALO_NORMALIZED')
+    overlap = specification.targets.add(id='overlap').overlap
+    overlap.top.canonical_layer, overlap.top.process_profile = 'routing2', 'M2'
+    overlap.bottom.canonical_layer, overlap.bottom.process_profile = 'routing1', 'M1'
+    rectangles = dict(training_1=(2, 4), training_2=(2, 8), training_3=(4, 4), training_4=(4, 8), held_out=(3, 6))
+    for case_id, (width, length) in rectangles.items():
+        pattern = specification.patterns.add(id=case_id, width_um=str(width), length_um=str(length),
+                                             role=VALIDATION if case_id == 'held_out' else TRAINING,
+                                             target_ids=['overlap'])
+        pattern.parallel_plates.lower_layer = 'M1'
+        pattern.parallel_plates.upper_layer = 'M2'
+
+    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
+        width, length = rectangles[case_id]
+        coupling = 1e-16 * width * length + 2e-17 * 2 * (width + length) - 4e-17
+        if case_id == 'held_out':
+            coupling += holdout_offset_f
+        if variant == 'mesh-medium':
+            coupling += 1.5e-18 if case_id == 'held_out' else 0.5e-18
+        coupling /= 1e-6  # The native solver report fixture is in microfarads.
+        return [[9e-9, -2e-9, -coupling],
+                [-2e-9, 8e-9, -2e-9], [-coupling + 1e-13, -2e-9, 9e-9]]
+
+    return specification, matrix_for_case
+
+
+def assert_circuit_coupling(root: Path, simulator: Callable, coupling_f: float, prediction_f: float):
+    """Compare a fit with an independently specified passive capacitor network."""
+    circuit = root / 'holdout.spice'
+    circuit.write_text(f'.subckt dut A B\nCa A 0 3f\nCb B 0 2f\nCab A B {coupling_f:.17g}\n.ends\n',
+                       encoding='utf-8')
+    frequencies, actual = simulator(str(circuit), 'dut', ['A', 'B'], (3, 9), str(root))
+    predicted_y = -1j * math.tau * frequencies * prediction_f
+    np.testing.assert_allclose(actual[:, 0, 1], predicted_y, rtol=5e-6, atol=1e-20)
+    np.testing.assert_allclose(actual[:, 1, 0], predicted_y, rtol=5e-6, atol=1e-20)

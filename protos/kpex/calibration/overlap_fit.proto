@@ -24,6 +24,7 @@ syntax = "proto3";
 package kpex.calibration;
 
 import "kpex/calibration/preparation.proto";
+import "kpex/calibration/fit.proto";
 import "kpex/calibration/qualification.proto";
 import "kpex/calibration/targets.proto";
 import "kpex/result/solver_execution.proto";
@@ -79,6 +80,11 @@ message CalibrationOverlapRefinementSensitivity {
     optional double reference_parameter_value = 10;
     repeated CalibrationOverlapSensitivityLevel levels = 20;
     string diagnostic = 30;
+    // Every backend-supported axis is reported. Partial or absent optional
+    // coverage is informational; supplied evidence still has to qualify.
+    // A complete axis needs shared settings and successful refits.
+    CalibrationFitRefinementCoverage coverage = 40;
+    repeated string missing_case_ids = 50; // Cases in this fit without the axis.
 }
 
 message CalibrationOverlapSensitivityLevel {

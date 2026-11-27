@@ -43,9 +43,9 @@ from kpex.calibration.solve import CalibrationSolveResult, SolveOptions, solve_c
 from kpex.calibration.validation import CalibrationError
 from kpex.kpex_cli import KpexCLI
 from kpex.tech_info import TechInfo
+from kpex_protobuf.kpex.calibration.fit_pb2 import CalibrationFitRefinementCoverage as Coverage
 from kpex_protobuf.kpex.calibration.length_fit_pb2 import CalibrationLengthFitReport, CalibrationLengthFitResult
 from kpex_protobuf.kpex.calibration.overlap_fit_pb2 import CalibrationOverlapFitReport, CalibrationOverlapFitResult
-from kpex_protobuf.kpex.calibration.patterns_pb2 import PatternSetSpecification, TRAINING, VALIDATION
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
     CalibrationQualificationReport, CalibrationQualificationStatus as Status,
     CalibrationQualificationStudy, CalibrationQualificationTolerance, CalibrationRefinementAxis as Axis,
@@ -53,7 +53,9 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
 from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection, CalibrationRunManifest
 from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
-from tests.common.calibration_study import make_study, mock_solver
+from tests.common.calibration_study import (
+    assert_circuit_coupling, make_study, mock_solver, wire_patterns_and_coupling, overlap_patterns_and_coupling,
+)
 from tests.common.cli_runner import run_cli
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.xyce import xyce_port_admittance, requires_xyce
@@ -72,22 +74,6 @@ def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
     return make_study(tmp_path, tech_info, pattern_data, fake=True)
 
 
-def _wire_patterns_and_coupling():
-    lengths = {f'wire_{length}': length for length in (4, 8, 12, 16)}
-    patterns = [
-        {'id': name, 'role': 'VALIDATION' if length == 12 else 'TRAINING',
-         'length_um': str(length), 'width_um': '0.4', 'parallel_wires': {'layer': 'M1', 'gap_um': '0.2'}}
-        for name, length in lengths.items()
-    ]
-
-    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
-        coupling = (2e-16 * lengths.get(case_id, 4) + 1e-16) / 1e-6
-        return [[9e-9, -2e-9, -coupling],
-                [-2e-9, 8e-9, -2e-9], [-coupling, -2e-9, 9e-9]]
-
-    return patterns, matrix_for_case
-
-
 def _run_length_fit(study_path: Path, tmp_path: Path) -> CalibrationLengthFitReport:
     qualified = qualify_study(study_path, tmp_path / 'qualified')
     directory = tmp_path / 'fit'
@@ -102,7 +88,7 @@ def _run_length_fit(study_path: Path, tmp_path: Path) -> CalibrationLengthFitRep
 
 def test_failed_series_keep_successful_length_fits(tmp_path: Path, tech_info: TechInfo,
                                             pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch):
-    patterns, coupling = _wire_patterns_and_coupling()
+    patterns, coupling = wire_patterns_and_coupling()
     cases = [
         *patterns,
         pattern_data['patterns'][0],  # A distinct, stabilized series with only one length.
@@ -148,7 +134,7 @@ def _append_study(combined: CalibrationQualificationStudy, study: CalibrationQua
 
 def test_mixed_reference_controls_reject_length_series(tmp_path: Path, tech_info: TechInfo,
                                                        pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch):
-    patterns, coupling = _wire_patterns_and_coupling()
+    patterns, coupling = wire_patterns_and_coupling()
     mock_solver(monkeypatch, coupling)
     combined = CalibrationQualificationStudy(schema_version=1)
     for index, gmres in enumerate((1e-8, 5e-9)):
@@ -244,7 +230,7 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     assert held.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
     assert held.solver_coupling_f - held.reverse_solver_coupling_f == pytest.approx(1e-19, abs=1e-29)
     assert [s.axis for s in fit.refinement_sensitivity] == [
-        Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
+        Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN, Axis.ADAPTIVE_MESH_REFINEMENT,
     ]
     mesh = fit.refinement_sensitivity[1]
     assert not mesh.diagnostic
@@ -271,34 +257,6 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     assert not Path(args[-1]).exists()
 
 
-def _overlap_patterns_and_coupling(holdout_offset_f: float = 0
-                                   ) -> Tuple[PatternSetSpecification, Callable[[str, str], List[List[float]]]]:
-    specification = PatternSetSpecification(schema_version=1, grid_um='0.001', fringe_scale_mode='HALO_NORMALIZED')
-    overlap = specification.targets.add(id='overlap').overlap
-    overlap.top.canonical_layer, overlap.top.process_profile = 'routing2', 'M2'
-    overlap.bottom.canonical_layer, overlap.bottom.process_profile = 'routing1', 'M1'
-    rectangles = dict(training_1=(2, 4), training_2=(2, 8), training_3=(4, 4), training_4=(4, 8), held_out=(3, 6))
-    for case_id, (width, length) in rectangles.items():
-        pattern = specification.patterns.add(id=case_id, width_um=str(width), length_um=str(length),
-                                             role=VALIDATION if case_id == 'held_out' else TRAINING,
-                                             target_ids=['overlap'])
-        pattern.parallel_plates.lower_layer = 'M1'
-        pattern.parallel_plates.upper_layer = 'M2'
-
-    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
-        width, length = rectangles[case_id]
-        coupling = 1e-16 * width * length + 2e-17 * 2 * (width + length) - 4e-17
-        if case_id == 'held_out':
-            coupling += holdout_offset_f
-        if variant == 'mesh-medium':
-            coupling += 1.5e-18 if case_id == 'held_out' else 0.5e-18
-        coupling /= 1e-6  # The native solver report fixture is in microfarads.
-        return [[9e-9, -2e-9, -coupling],
-                [-2e-9, 8e-9, -2e-9], [-coupling + 1e-13, -2e-9, 9e-9]]
-
-    return specification, matrix_for_case
-
-
 @pytest.mark.parametrize('holdout_offset_f,budget_f,accepted', [
     (0, 1e-17, True),
     (2e-17, 1e-17, False),
@@ -307,7 +265,7 @@ def _overlap_patterns_and_coupling(holdout_offset_f: float = 0
 def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
                                monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float,
                                     budget_f: float, accepted: bool):
-    specification, matrix_for_case = _overlap_patterns_and_coupling(holdout_offset_f)
+    specification, matrix_for_case = overlap_patterns_and_coupling(holdout_offset_f)
     overlap = specification.targets[0].overlap
     mock_solver(monkeypatch, matrix_for_case)
     pattern_data = MessageToDict(specification, preserving_proto_field_name=True)
@@ -333,7 +291,8 @@ def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
     holdout, = report.fit.validation_samples
     assert holdout.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
     assert holdout.solver_coupling_f - holdout.reverse_solver_coupling_f == pytest.approx(1e-19, abs=1e-29)
-    solver, mesh, domain = report.refinement_sensitivity
+    solver, mesh, domain, adaptive = report.refinement_sensitivity
+    assert adaptive.coverage == Coverage.NOT_PROVIDED
     assert (solver.axis, mesh.axis, domain.axis) == (Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
     assert domain.reference_parameter_value == 8
     assert [level.parameter_value for level in domain.levels] == [2, 4]
@@ -565,10 +524,10 @@ def test_initial_and_adaptive_mesh_axes_use_their_own_panel_counts(
 def _cross_revision_study(tmp_path: Path, tech_info: TechInfo, monkeypatch: pytest.MonkeyPatch,
                           kind: str, change: str) -> Tuple[Path, Path, CalibrationQualificationReport]:
     if kind == 'length':
-        patterns, coupling = _wire_patterns_and_coupling()
+        patterns, coupling = wire_patterns_and_coupling()
         data = {'schema_version': 1, 'grid_um': '0.001', 'patterns': patterns}
     else:
-        specification, coupling = _overlap_patterns_and_coupling()
+        specification, coupling = overlap_patterns_and_coupling()
         data = MessageToDict(specification, preserving_proto_field_name=True)
         patterns = data['patterns']
     mock_solver(monkeypatch, coupling)
@@ -683,13 +642,7 @@ def test_cross_revision_fit_predicts_circuit_coupling(tmp_path: Path, targeted_t
     # Independent capacitor circuit at the held-out geometry. Its capacitance
     # is specified from the analytic input, not from the fitted prediction.
     coupling_f = 2e-16 * 12 + 1e-16 if kind == 'length' else 1e-16 * 18 + 2e-17 * 18 - 4e-17
-    circuit = tmp_path / 'holdout.spice'
-    circuit.write_text(f'.subckt dut A B\nCa A 0 3f\nCb B 0 2f\nCab A B {coupling_f:.17g}\n.ends\n',
-                       encoding='utf-8')
-    frequencies, actual = simulator(str(circuit), 'dut', ['A', 'B'], (3, 9), str(tmp_path))
-    predicted_y = -1j * math.tau * frequencies * holdout.predicted_coupling_f
-    np.testing.assert_allclose(actual[:, 0, 1], predicted_y, rtol=5e-6, atol=1e-20)
-    np.testing.assert_allclose(actual[:, 1, 0], predicted_y, rtol=5e-6, atol=1e-20)
+    assert_circuit_coupling(tmp_path, simulator, coupling_f, holdout.predicted_coupling_f)
 
 
 @pytest.mark.slow

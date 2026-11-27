@@ -32,7 +32,7 @@ from typing import Dict, List, Tuple
 
 from .artifacts import sha256_file, validate_output_directory, write_message
 from .fit_evidence import (
-    qualified_couplings, read_verified_qualification, recent_couplings, refinement_residual_violation,
+    qualified_couplings, read_verified_qualification, refinement_settings, refinement_residual_violation,
 )
 from .overlap_fit import OverlapFit, OverlapObservation, fit_overlap_rectangles
 from .qualification import QualificationEvaluation
@@ -109,31 +109,22 @@ def _record_fit(result: CalibrationOverlapFitResult, observations: List[OverlapO
 def _add_sensitivity(report: CalibrationOverlapFitReport, evaluation: QualificationEvaluation,
                      observations: List[OverlapObservation], fit: OverlapFit, grid: Fraction):
     reference_errors = {sample.case_id: sample.residual_f for sample in report.fit.validation_samples}
-    cases = {case.case_id: case for case in evaluation.report.cases}
-    axes = sorted({ref.axis for case in cases.values() for ref in case.refinements})
-    for axis in axes:
-        result = report.refinement_sensitivity.add(axis=axis)
-        refinements = {item.case_id: next((ref for ref in cases[item.case_id].refinements if ref.axis == axis), None)
-                       for item in observations}
-        if any(ref is None for ref in refinements.values()):
-            result.diagnostic = 'The cases do not share this refinement axis'
-            report.fit.diagnostics.append(f'{Axis.Name(axis)}: {result.diagnostic}')
-            continue
+    reference = {item.case_id: item.coupling_f for item in observations}
+    for settings in refinement_settings(evaluation.report.cases, reference, report.solver.name):
+        axis = settings.axis
+        result = report.refinement_sensitivity.add(
+            axis=axis, coverage=settings.coverage, missing_case_ids=settings.missing_case_ids,
+            diagnostic=settings.diagnostic,
+        )
+        if settings.rejects_fit:
+            report.fit.diagnostics.append(f'{Axis.Name(axis)}: {settings.diagnostic}')
         scale = float(grid) if axis == Axis.DOMAIN_MARGIN else 1
-        result.reference_parameter_value = next(iter(refinements.values())).levels[-1].parameter_value * scale
-        couplings = {item.case_id: recent_couplings(refinements[item.case_id], item.coupling_f)
-                     for item in observations}
-        common = set.intersection(*(set(values) for values in couplings.values()))
-        if len(common) < 2:
-            result.diagnostic = 'Fewer than two recent refinement settings are shared by every case'
-            report.fit.diagnostics.append(f'{Axis.Name(axis)}: {result.diagnostic}')
-        # Preserve the backend's recorded coarse-to-fine order, which need not
-        # be numerically decreasing for another solver's refinement control.
-        ordered = [level.parameter_value for level in next(iter(refinements.values())).levels[-3:-1]
-                   if level.parameter_value in common]
-        for setting in ordered:
+        if settings.reference_parameter_value is not None:
+            result.reference_parameter_value = settings.reference_parameter_value * scale
+        for setting in settings.parameter_values:
             level = result.levels.add(parameter_value=setting * scale)
-            alternate = [replace(item, coupling_f=couplings[item.case_id][setting]) for item in observations]
+            alternate = [replace(item, coupling_f=settings.case_couplings[item.case_id][setting])
+                         for item in observations]
             try:
                 alternative_fit = fit_overlap_rectangles(alternate)
             except CalibrationError as exc:

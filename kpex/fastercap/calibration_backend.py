@@ -127,6 +127,10 @@ class FasterCapCalibrationBackend:
     def required_refinement_axes(cls) -> Tuple[int, ...]:
         return (Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
 
+    @classmethod
+    def supported_refinement_axes(cls) -> Tuple[int, ...]:
+        return (*cls.required_refinement_axes(), Axis.ADAPTIVE_MESH_REFINEMENT)
+
     def validate_run(self, manifest: CalibrationRunManifest, *, qualification: bool):
         from ..calibration.solve import validate_options_message
 
