@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for kpex/pex25d/exporters.py: 68%</title>
+    <title>Coverage for kpex/pex25d/exporters.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>kpex<span class="sep">/</span>pex25d<span class="sep">/</span>exporters.py</b>:
-            <span class="pc_cov">68%</span>
+            <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">47 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">32<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">15<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">47<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">5<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_1d37c45e615ed646_format_version_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 19:48 +0000
+            created at 2026-11-27 20:21 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -197,15 +197,15 @@
     <p class="run"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">        <span class="key">return</span> <span class="nam">backend</span><span class="op">.</span><span class="nam">export</span><span class="op">(</span><span class="nam">scene</span><span class="op">,</span> <span class="nam">output_dir_path</span><span class="op">=</span><span class="nam">output_dir_path</span><span class="op">,</span> <span class="nam">prefix</span><span class="op">=</span><span class="nam">prefix</span><span class="op">,</span> <span class="nam">options</span><span class="op">=</span><span class="nam">options</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">    <span class="key">except</span> <span class="op">(</span><span class="nam">ExportError</span><span class="op">,</span> <span class="nam">NotImplementedError</span><span class="op">,</span> <span class="nam">OSError</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">    <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">exc</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">        <span class="nam">provider</span> <span class="op">=</span> <span class="nam">target</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">            <span class="nam">registry</span> <span class="op">=</span> <span class="nam">registry</span> <span class="key">if</span> <span class="nam">registry</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">exporter_registry</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">            <span class="nam">provider</span> <span class="op">=</span> <span class="nam">registry</span><span class="op">.</span><span class="nam">get_info</span><span class="op">(</span><span class="nam">target</span><span class="op">)</span><span class="op">.</span><span class="nam">qualified_name</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">            <span class="key">pass</span>  <span class="com"># Metadata failures must not hide the exporter&#x27;s original crash.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ExporterExecutionError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">Exporter &#x27;</span><span class="op">{</span><span class="nam">provider</span><span class="op">}</span><span class="fst">&#x27; crashed: </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">exc</span><span class="op">)</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">exc</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span> <span class="key">from</span> <span class="nam">exc</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">    <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">exc</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">        <span class="nam">provider</span> <span class="op">=</span> <span class="nam">target</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">            <span class="nam">registry</span> <span class="op">=</span> <span class="nam">registry</span> <span class="key">if</span> <span class="nam">registry</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">exporter_registry</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">            <span class="nam">provider</span> <span class="op">=</span> <span class="nam">registry</span><span class="op">.</span><span class="nam">get_info</span><span class="op">(</span><span class="nam">target</span><span class="op">)</span><span class="op">.</span><span class="nam">qualified_name</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">        <span class="key">except</span> <span class="nam">Exception</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">            <span class="key">pass</span>  <span class="com"># Metadata failures must not hide the exporter&#x27;s original crash.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ExporterExecutionError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">Exporter &#x27;</span><span class="op">{</span><span class="nam">provider</span><span class="op">}</span><span class="fst">&#x27; crashed: </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">exc</span><span class="op">)</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">exc</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span> <span class="key">from</span> <span class="nam">exc</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t"><span class="key">def</span> <span class="nam">validate_export_scene</span><span class="op">(</span><span class="nam">scene</span><span class="op">:</span> <span class="nam">PEX25DScene</span><span class="op">,</span> <span class="op">*</span><span class="op">,</span> <span class="nam">report</span><span class="op">:</span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">DiagnosticsReport</span><span class="op">]</span> <span class="op">=</span> <span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -225,7 +225,7 @@
     <p class="run"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">        <span class="nam">Validator</span><span class="op">(</span><span class="nam">report</span><span class="op">)</span><span class="op">.</span><span class="nam">check_ground_contacts</span><span class="op">(</span><span class="nam">scene</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">    <span class="nam">errors</span> <span class="op">=</span> <span class="nam">report</span><span class="op">.</span><span class="nam">num_errors</span> <span class="op">-</span> <span class="nam">errors_before</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">    <span class="key">if</span> <span class="nam">errors</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="key">raise</span> <span class="nam">InvalidSceneError</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">The scene has </span><span class="op">{</span><span class="nam">errors</span><span class="op">}</span><span class="fst"> error(s), so it was not exported</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="key">raise</span> <span class="nam">InvalidSceneError</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">The scene has </span><span class="op">{</span><span class="nam">errors</span><span class="op">}</span><span class="fst"> error(s), so it was not exported</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t"><span class="key">def</span> <span class="nam">exporter_registry</span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">ExporterRegistry</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -243,8 +243,8 @@
     <p class="pln"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t"><span class="str">    Constructs the exporter without geometry imports; KLayout loads on export.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t163" href="#t163">163</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t164" href="#t164">164</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">fastercap</span><span class="op">.</span><span class="nam">pex25d_exporter</span> <span class="key">import</span> <span class="nam">FasterCapSceneExporter</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t165" href="#t165">165</a></span><span class="t">    <span class="key">return</span> <span class="nam">FasterCapSceneExporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t164" href="#t164">164</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">fastercap</span><span class="op">.</span><span class="nam">pex25d_exporter</span> <span class="key">import</span> <span class="nam">FasterCapSceneExporter</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t165" href="#t165">165</a></span><span class="t">    <span class="key">return</span> <span class="nam">FasterCapSceneExporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t166" href="#t166">166</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t167" href="#t167">167</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t168" href="#t168">168</a></span><span class="t"><span class="key">def</span> <span class="nam">create_fastcap2_exporter</span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">PEX25DSceneExporter</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -252,8 +252,8 @@
     <p class="pln"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t171" href="#t171">171</a></span><span class="t"><span class="str">    Constructs the exporter without geometry imports; KLayout loads on export.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t172" href="#t172">172</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">fastercap</span><span class="op">.</span><span class="nam">pex25d_exporter</span> <span class="key">import</span> <span class="nam">FastCap2SceneExporter</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t174" href="#t174">174</a></span><span class="t">    <span class="key">return</span> <span class="nam">FastCap2SceneExporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">fastercap</span><span class="op">.</span><span class="nam">pex25d_exporter</span> <span class="key">import</span> <span class="nam">FastCap2SceneExporter</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t174" href="#t174">174</a></span><span class="t">    <span class="key">return</span> <span class="nam">FastCap2SceneExporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t175" href="#t175">175</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t176" href="#t176">176</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t177" href="#t177">177</a></span><span class="t"><span class="key">def</span> <span class="nam">create_stl_exporter</span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">PEX25DSceneExporter</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -262,8 +262,8 @@
     <p class="pln"><span class="n"><a id="t180" href="#t180">180</a></span><span class="t"><span class="str">    Constructs the exporter without geometry imports; KLayout loads on export.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t181" href="#t181">181</a></span><span class="t"><span class="str">    The solids are built from the FasterCap model for now.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t182" href="#t182">182</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t183" href="#t183">183</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">stl</span><span class="op">.</span><span class="nam">pex25d_exporter</span> <span class="key">import</span> <span class="nam">STLSceneExporter</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t184" href="#t184">184</a></span><span class="t">    <span class="key">return</span> <span class="nam">STLSceneExporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t183" href="#t183">183</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">stl</span><span class="op">.</span><span class="nam">pex25d_exporter</span> <span class="key">import</span> <span class="nam">STLSceneExporter</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t184" href="#t184">184</a></span><span class="t">    <span class="key">return</span> <span class="nam">STLSceneExporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -273,7 +273,7 @@
             <a class="nav" href="z_1d37c45e615ed646_format_version_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 19:48 +0000
+            created at 2026-11-27 20:21 +0000
         </p>
     </div>
 </footer>

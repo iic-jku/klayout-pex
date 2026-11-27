@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for kpex/pex25d/importers.py: 33%</title>
+    <title>Coverage for kpex/pex25d/importers.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>kpex<span class="sep">/</span>pex25d<span class="sep">/</span>importers.py</b>:
-            <span class="pc_cov">33%</span>
+            <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">24 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">8<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">16<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">24<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">5<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_1d37c45e615ed646_pex25d_cli_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 19:48 +0000
+            created at 2026-11-27 20:21 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -147,38 +147,38 @@
     <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t"><span class="str">    ImporterError, NotImplementedError and OSError pass through unchanged; unexpected</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t"><span class="str">    exceptions, and results that are not a PEX25DFile, become ImporterExecutionError.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">    <span class="nam">registry</span> <span class="op">=</span> <span class="nam">registry</span> <span class="key">if</span> <span class="nam">registry</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">importer_registry</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="nam">backend</span> <span class="op">=</span> <span class="nam">registry</span><span class="op">.</span><span class="nam">load</span><span class="op">(</span><span class="nam">source</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">    <span class="nam">provider</span> <span class="op">=</span> <span class="nam">registry</span><span class="op">.</span><span class="nam">get_info</span><span class="op">(</span><span class="nam">source</span><span class="op">)</span><span class="op">.</span><span class="nam">qualified_name</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">        <span class="nam">result</span> <span class="op">=</span> <span class="nam">backend</span><span class="op">.</span><span class="nam">import_file</span><span class="op">(</span><span class="nam">input_file_path</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">                                     <span class="nam">supporting_files</span><span class="op">=</span><span class="nam">supporting_files</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">                                     <span class="nam">options</span><span class="op">=</span><span class="nam">options</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">                                     <span class="nam">report</span><span class="op">=</span><span class="nam">report</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">    <span class="key">except</span> <span class="op">(</span><span class="nam">ImporterError</span><span class="op">,</span> <span class="nam">NotImplementedError</span><span class="op">,</span> <span class="nam">OSError</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">    <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">exc</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ImporterExecutionError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">Importer &#x27;</span><span class="op">{</span><span class="nam">provider</span><span class="op">}</span><span class="fst">&#x27; crashed: </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">exc</span><span class="op">)</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">exc</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span> <span class="key">from</span> <span class="nam">exc</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">    <span class="nam">registry</span> <span class="op">=</span> <span class="nam">registry</span> <span class="key">if</span> <span class="nam">registry</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">importer_registry</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="nam">backend</span> <span class="op">=</span> <span class="nam">registry</span><span class="op">.</span><span class="nam">load</span><span class="op">(</span><span class="nam">source</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">    <span class="nam">provider</span> <span class="op">=</span> <span class="nam">registry</span><span class="op">.</span><span class="nam">get_info</span><span class="op">(</span><span class="nam">source</span><span class="op">)</span><span class="op">.</span><span class="nam">qualified_name</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">        <span class="nam">result</span> <span class="op">=</span> <span class="nam">backend</span><span class="op">.</span><span class="nam">import_file</span><span class="op">(</span><span class="nam">input_file_path</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">                                     <span class="nam">supporting_files</span><span class="op">=</span><span class="nam">supporting_files</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">                                     <span class="nam">options</span><span class="op">=</span><span class="nam">options</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">                                     <span class="nam">report</span><span class="op">=</span><span class="nam">report</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">    <span class="key">except</span> <span class="op">(</span><span class="nam">ImporterError</span><span class="op">,</span> <span class="nam">NotImplementedError</span><span class="op">,</span> <span class="nam">OSError</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">    <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">exc</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ImporterExecutionError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">Importer &#x27;</span><span class="op">{</span><span class="nam">provider</span><span class="op">}</span><span class="fst">&#x27; crashed: </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">exc</span><span class="op">)</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">exc</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span> <span class="key">from</span> <span class="nam">exc</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">result</span><span class="op">,</span> <span class="nam">protobuf</span><span class="op">.</span><span class="nam">pex25d_file_pb2</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">PEX25DFile</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ImporterExecutionError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">Importer &#x27;</span><span class="op">{</span><span class="nam">provider</span><span class="op">}</span><span class="fst">&#x27; returned </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">result</span><span class="op">)</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">, not a PEX25DFile</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="key">return</span> <span class="nam">result</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">result</span><span class="op">,</span> <span class="nam">protobuf</span><span class="op">.</span><span class="nam">pex25d_file_pb2</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">PEX25DFile</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ImporterExecutionError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">Importer &#x27;</span><span class="op">{</span><span class="nam">provider</span><span class="op">}</span><span class="fst">&#x27; returned </span><span class="op">{</span><span class="nam">type</span><span class="op">(</span><span class="nam">result</span><span class="op">)</span><span class="op">.</span><span class="nam">__name__</span><span class="op">}</span><span class="fst">, not a PEX25DFile</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="key">return</span> <span class="nam">result</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="key">def</span> <span class="nam">importer_registry</span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">ImporterRegistry</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">    <span class="str">&quot;&quot;&quot;Discover installed importers alongside the built-in implementations.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">plugin</span><span class="op">.</span><span class="nam">importer_registry</span> <span class="key">import</span> <span class="nam">ImporterRegistry</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">    <span class="key">return</span> <span class="nam">ImporterRegistry</span><span class="op">(</span><span class="op">{</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="str">&#x27;openrcx-uf&#x27;</span><span class="op">:</span> <span class="nam">create_openrcx_uf_importer</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">    <span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">plugin</span><span class="op">.</span><span class="nam">importer_registry</span> <span class="key">import</span> <span class="nam">ImporterRegistry</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">    <span class="key">return</span> <span class="nam">ImporterRegistry</span><span class="op">(</span><span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="str">&#x27;openrcx-uf&#x27;</span><span class="op">:</span> <span class="nam">create_openrcx_uf_importer</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">    <span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t"><span class="key">def</span> <span class="nam">create_openrcx_uf_importer</span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">PEX25DImporter</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">    <span class="str">&quot;&quot;&quot;OpenRCX Universal Pattern Format (UF) 3D patterns with one ground plane.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">openrcx</span><span class="op">.</span><span class="nam">pex25d_importer</span> <span class="key">import</span> <span class="nam">OpenRCXUFImporter</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="key">return</span> <span class="nam">OpenRCXUFImporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">openrcx</span><span class="op">.</span><span class="nam">pex25d_importer</span> <span class="key">import</span> <span class="nam">OpenRCXUFImporter</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="key">return</span> <span class="nam">OpenRCXUFImporter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -188,7 +188,7 @@
             <a class="nav" href="z_1d37c45e615ed646_pex25d_cli_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 19:48 +0000
+            created at 2026-11-27 20:21 +0000
         </p>
     </div>
 </footer>
