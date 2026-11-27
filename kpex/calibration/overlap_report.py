@@ -73,7 +73,7 @@ def _plate_observations(report: CalibrationOverlapFitReport, evaluation: Qualifi
         if (target != report.target or case.technology != report.technology or case.units != units
                 or case.pattern.measurement != report.measurement or run.manifest.solver != report.solver
                 or run.manifest.options.threads_per_job != first_run.manifest.options.threads_per_job
-                or run.manifest.options.fastercap != first_run.manifest.options.fastercap
+                or run.manifest.options.solver_controls != first_run.manifest.options.solver_controls
                 or run.preparation.domain_margin_grid != first_run.preparation.domain_margin_grid):
             raise CalibrationError(f"Case '{case.case_id}' does not share the overlap fit's target or reference settings")
         dimensions = case.pattern.dimensions_grid
@@ -125,7 +125,11 @@ def _add_sensitivity(report: CalibrationOverlapFitReport, evaluation: Qualificat
         if len(common) < 2:
             result.diagnostic = 'Fewer than two recent refinement settings are shared by every case'
             report.fit.diagnostics.append(f'{Axis.Name(axis)}: {result.diagnostic}')
-        for setting in sorted(common, reverse=axis != Axis.DOMAIN_MARGIN):
+        # Preserve the backend's recorded coarse-to-fine order, which need not
+        # be numerically decreasing for another solver's refinement control.
+        ordered = [level.parameter_value for level in next(iter(refinements.values())).levels[-3:-1]
+                   if level.parameter_value in common]
+        for setting in ordered:
             level = result.levels.add(parameter_value=setting * scale)
             alternate = [replace(item, coupling_f=couplings[item.case_id][setting]) for item in observations]
             try:
@@ -164,7 +168,7 @@ def fit_qualified_overlap(study_path: Path, qualification_path: Path, output_dir
     validate_output_directory(output_dir)
     qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
     report = CalibrationOverlapFitReport(
-        schema_version=1, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
+        schema_version=2, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256, residual_budget_f=budget_f,
     )
     observations, reverse_couplings, grid = _plate_observations(report, evaluation)

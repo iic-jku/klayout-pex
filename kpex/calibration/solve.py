@@ -45,8 +45,10 @@ from ..version import __version__
 from ..util.number_range import DELAUNAY_B_MAX, RELATIVE_ERROR
 from kpex_protobuf.kpex.calibration.solving_pb2 import (
     CalibrationRunManifest, CalibrationRunCase, CalibrationRunCheckpoint,
-    CalibrationRunCompletion, CalibrationSolveOptions, FasterCapControls,
+    CalibrationRunCompletion, CalibrationSolveOptions,
 )
+from kpex_protobuf.kpex.fastercap.calibration_pb2 import CalibrationControls
+from ..fastercap.calibration_backend import controls_message
 from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationArtifactReference
 from kpex_protobuf.kpex.result.solver_execution_pb2 import SolverExecution, SolverIdentity
 
@@ -110,7 +112,7 @@ class SolveOptions:
 
 
 def options_message(options: SolveOptions) -> CalibrationSolveOptions:
-    controls = FasterCapControls(interaction_ratio=options.interaction_ratio,
+    controls = CalibrationControls(interaction_ratio=options.interaction_ratio,
                                  mesh_max_area_um2=options.mesh_max_area_um2,
                                  mesh_min_angle_deg=options.mesh_min_angle_deg)
     if options.automatic_tolerance is not None:
@@ -118,12 +120,14 @@ def options_message(options: SolveOptions) -> CalibrationSolveOptions:
     else:
         controls.mesh_refinement = options.mesh_refinement
         controls.gmres_tolerance = options.gmres_tolerance
-    return CalibrationSolveOptions(jobs=options.jobs, threads_per_job=options.threads_per_job,
-                                   solver_timeout_seconds=options.solver_timeout_seconds, fastercap=controls)
+    result = CalibrationSolveOptions(jobs=options.jobs, threads_per_job=options.threads_per_job,
+                                   solver_timeout_seconds=options.solver_timeout_seconds)
+    result.solver_controls.Pack(controls)
+    return result
 
 
 def validate_options_message(message: CalibrationSolveOptions) -> SolveOptions:
-    controls = message.fastercap
+    controls = controls_message(message.solver_controls)
     if not controls.HasField('automatic_tolerance') and not controls.HasField('mesh_refinement'):
         raise CalibrationError('Saved solver options need an explicit refinement mode')
     return SolveOptions(jobs=message.jobs, threads_per_job=message.threads_per_job,
@@ -295,7 +299,7 @@ def solve_calibration(prepared_path: Path, output_dir: Path, *, executable: str 
     try:
         output.mkdir()
         written = snapshot_preparation(prepared, output / 'preparation')
-        manifest = CalibrationRunManifest(schema_version=1, kpex_version=__version__, solver=solver,
+        manifest = CalibrationRunManifest(schema_version=2, kpex_version=__version__, solver=solver,
                                           options=options_message(options),
                                           preparation=reference(output / 'preparation/manifest.json', output))
         jobs = []

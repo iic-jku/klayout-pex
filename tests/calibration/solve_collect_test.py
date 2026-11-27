@@ -35,6 +35,7 @@ import pytest
 from typing import Any, Callable, Dict, List
 from kpex.tech_info import TechInfo
 
+from kpex.fastercap.calibration_backend import statistics_message
 from kpex.calibration.artifacts import read_message, write_message, sha256_file
 from kpex.calibration.patterns import read_patterns
 from kpex.calibration.prepare import prepare_calibration
@@ -90,7 +91,7 @@ def test_solve_and_offline_recollection(preparation: Path, fake_solver: Callable
     assert collection.execution_complete
     assert list(collection.cases[0].measured_matrix.conductor_ids) == ['A', 'B']
     assert list(collection.cases[0].measured_matrix.rows[0].values) == pytest.approx([7e-15, -1e-15])
-    assert collection.cases[0].refined_panels == 123
+    assert statistics_message(collection.cases[0].solver_statistics).refined_panels == 123
     with mock.patch('subprocess.Popen', side_effect=AssertionError('collection must never execute')):
         again = collect_calibration(result.manifest_path, tmp_path / 'again')
     assert read_message(again.manifest_path, CalibrationCollection()) == collection
@@ -518,7 +519,7 @@ def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
     assert list(case.measured_matrix.rows[0].values) == [7.000000000123456e-9 / 1e6, -1.01e-9 / 1e6]
     assert case.measured_matrix.rows[1].values[0] == -1.000000000123456e-9 / 1e6
     # Report and console counts have different link conventions. Keep each source intact.
-    assert case.refined_panels == 123
+    assert statistics_message(case.solver_statistics).refined_panels == 123
     raw = tmp_path / 'runs/cases/plates/numerical-report.json'
     assert (tmp_path / 'runs/collection/runs/cases/plates/numerical-report.json').read_bytes() == raw.read_bytes()
     shutil.move(tmp_path / 'runs', tmp_path / 'relocated')

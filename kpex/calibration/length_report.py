@@ -90,7 +90,11 @@ def _add_refinement_sensitivity(
         if len(common) < 2:
             sensitivity.diagnostic = 'Fewer than two recent refinement settings are shared by every case'
             result.diagnostics.append(f'{Axis.Name(axis)}: {sensitivity.diagnostic}')
-        for value in sorted(common, reverse=axis != Axis.DOMAIN_MARGIN):
+        # Preserve the backend's recorded coarse-to-fine order, which need not
+        # be numerically decreasing for another solver's refinement control.
+        ordered = [level.parameter_value for level in refinements[0].levels[-3:-1]
+                   if level.parameter_value in common]
+        for value in ordered:
             level = sensitivity.levels.add(parameter_value=value)
             alternate = [replace(item, capacitance_f=couplings[item.case_id][value]) for item in observations]
             try:
@@ -121,7 +125,7 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
     qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
 
     report = CalibrationLengthFitReport(
-        schema_version=1, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
+        schema_version=2, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256,
         residual_budget_f=policy.weight_floor_f * policy.max_weighted_residual,
         max_condition_number=policy.max_condition_number,
@@ -147,7 +151,7 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
                 run = evaluation.references[case.case_id].run
                 options = run.manifest.options
                 settings.add((run.preparation.domain_margin_grid, options.threads_per_job,
-                              options.fastercap.SerializeToString(deterministic=True)))
+                              options.solver_controls.SerializeToString(deterministic=True)))
                 observation, reverse[case.case_id] = _observation(case)
                 observations.append(observation)
             if len(settings) != 1:

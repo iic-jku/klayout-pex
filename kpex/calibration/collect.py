@@ -35,6 +35,7 @@ from typing import Dict, List, Optional, Tuple
 from .artifacts import (artifact_path, copy_artifact, read_message, sha256_file,
                         validate_output_directory, verify_artifacts, write_message)
 from .validation import CalibrationError
+from .backend import calibration_backend
 from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest, CapacitanceMeasurement
 from kpex_protobuf.kpex.calibration.solving_pb2 import (
     CalibrationRunManifest, CalibrationRunCheckpoint, CalibrationRunCompletion,
@@ -49,41 +50,6 @@ class CalibrationCollectionResult:
     written_paths: Tuple[Path, ...]
     successful_cases: int
     failed_cases: int
-
-
-def read_native_statistics(log: Path) -> Dict[str, Optional[int]]:
-    """Read only the final matrix's statistics block; missing or ambiguous counts stay unknown."""
-    fields = {
-        'input_panels': ('Number of input panels to solver engine:', r'Number of input panels to solver engine: (\d+)'),
-        'refined_panels': ('Number of panels after refinement:', r'Number of panels after refinement: (\d+)'),
-        'potential_estimates': ('Number of potential estimates:', r'Number of potential estimates: (\d+)'),
-        'links': ('Number of links:', r'Number of links: (\d+)(?: \(.*\))?'),
-    }
-    unknown = {name: None for name in fields}
-    lines = log.read_text(encoding='utf-8', errors='replace').splitlines()
-    matrices = [index for index, line in enumerate(lines) if line.strip() == 'Capacitance matrix is:']
-    if not matrices:
-        return unknown
-    tail = lines[matrices[-1] + 1:]
-    # A later unfinished adaptive iteration must not contribute statistics to an earlier matrix.
-    for index, line in enumerate(tail):
-        if line.startswith('Iteration number #'):
-            tail = tail[:index]
-            break
-    blocks = [index for index, line in enumerate(tail) if line.strip() == 'Solve statistics:']
-    if len(blocks) != 1:
-        return unknown
-    block = tail[blocks[0] + 1:]
-    for name, (prefix, pattern) in fields.items():
-        candidates = [line.strip() for line in block if line.strip().startswith(prefix)]
-        if len(candidates) == 1:
-            match = re.fullmatch(pattern, candidates[0])
-            if match:
-                try:
-                    unknown[name] = int(match.group(1))
-                except ValueError:
-                    pass  # Oversized or malformed native counts are unknown, not fabricated
-    return unknown
 
 
 def _validate_checkpoint(checkpoint: CalibrationRunCheckpoint, case_id: str):
@@ -103,18 +69,17 @@ def _validate_checkpoint(checkpoint: CalibrationRunCheckpoint, case_id: str):
 
 def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationCollectionResult:
     # No geometry imports or executable discovery: saved evidence is portable.
-    from .solve import reference, validate_options_message
+    from .solve import reference
     from .prepared_input import read_preparation
-    from ..fastercap.result_collection import collect_fastercap_matrix
-    from ..fastercap.fastercap_error import FasterCapError
 
     validate_output_directory(output_dir)
     root = run_manifest.parent
     manifest_hash = sha256_file(run_manifest)
     manifest = read_message(run_manifest, CalibrationRunManifest())
-    if manifest.schema_version != 1 or not manifest.kpex_version or manifest.solver.name != 'fastercap':
+    if manifest.schema_version != 2 or not manifest.kpex_version:
         raise CalibrationError('Unsupported calibration run schema, version or solver')
-    validate_options_message(manifest.options)
+    backend = calibration_backend(manifest.solver.name)
+    backend.validate_run(manifest, qualification=False)
     if (not manifest.solver.version or not manifest.solver.operating_system or not manifest.solver.architecture
             or re.fullmatch(r'[0-9a-f]{64}', manifest.solver.executable_sha256) is None):
         raise CalibrationError('Solver identity is incomplete')
@@ -215,7 +180,7 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
         output.mkdir()
         written = [copy_artifact(artifact_path(root, name), output / 'runs' / name, digest)
                    for name, digest in files.items()]
-        collection = CalibrationCollection(schema_version=1, execution_complete=complete,
+        collection = CalibrationCollection(schema_version=2, execution_complete=complete,
                                             run_manifest=reference(output / 'runs' / run_manifest.name, output))
         for case, preparation, checkpoint in zip(manifest.cases, prepared.cases, checkpoints):
             record = collection.cases.add(case_id=case.case_id, execution=checkpoint.execution)
@@ -226,35 +191,8 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
                 record.status = CalibrationCaseResult.EXECUTION_FAILED
                 record.diagnostics.append(checkpoint.execution.diagnostic)
             elif status == SolverExecution.SUCCEEDED:
-                log = output / 'runs' / case.log_path
-                try:
-                    numerical_report = None
-                    expected_input = None
-                    if case.numerical_report_path:
-                        if not checkpoint.HasField('numerical_report') or not checkpoint.execution.arguments:
-                            raise FasterCapError('Requested numerical report or recorded solver arguments are missing')
-                        numerical_report = output / 'runs' / case.numerical_report_path
-                        expected_input = checkpoint.execution.arguments[-1]
-                        # The recorded argv retains quotes for FasterCap's second
-                        # tokenizer; its report identifies the unquoted input path.
-                        if expected_input.startswith('"') and expected_input.endswith('"'):
-                            expected_input = expected_input[1:-1]
-                    native, measured = collect_fastercap_matrix(
-                        log, list(preparation.measurement.conductor_order), preparation.measurement.reference.profile,
-                        numerical_report=numerical_report, expected_input=expected_input,
-                        expected_version=manifest.solver.version)
-                    record.native_matrix.CopyFrom(native)
-                    record.measured_matrix.CopyFrom(measured)
-                    record.status = CalibrationCaseResult.COLLECTED
-                except FasterCapError as exc:
-                    record.status = CalibrationCaseResult.INVALID_RESULT
-                    record.diagnostics.append(str(exc))
-                for name, value in read_native_statistics(log).items():
-                    if value is not None and value <= 2**64 - 1:
-                        setattr(record, name, value)
-                for line in log.read_text(encoding='utf-8', errors='replace').splitlines():
-                    if re.match(r'^\s*(Warning|Error):', line, flags=re.IGNORECASE):
-                        record.diagnostics.append(line)
+                backend.collect_result(case, checkpoint, preparation, output / 'runs',
+                                       manifest.solver.version, record)
             else:
                 raise NotImplementedError(f'Collect execution status {status}')
         collection.artifacts.extend(reference(path, output) for path in written)

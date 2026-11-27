@@ -34,6 +34,7 @@ from typing import Any, Callable, Dict, List, Tuple
 import pytest
 from google.protobuf.json_format import MessageToDict
 
+from kpex.fastercap.calibration_backend import statistics_message
 from kpex.calibration.artifacts import read_message, sha256_file, write_message
 from kpex.calibration.patterns import read_patterns
 from kpex.calibration.prepare import prepare_calibration
@@ -82,7 +83,7 @@ def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
     if adaptive:
         variants['adaptive-coarse'] = (8, replace(reference, mesh_refinement=0.18))
         variants['adaptive-medium'] = (8, replace(reference, mesh_refinement=0.12))
-    study = CalibrationQualificationStudy(schema_version=1)
+    study = CalibrationQualificationStudy(schema_version=2)
     # Use an explicit 2% budget for the real pilot. The solver test verifies
     # the reported comparisons, allowing platform-dependent convergence.
     study.tolerance.absolute_floor_f = 2e-18
@@ -95,11 +96,11 @@ def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
         entry.sha256 = sha256_file(result.collection_path)
     for pattern in patterns:
         case = study.cases.add(case_id=pattern['id'], reference_collection_id='reference')
-        case.refinements.add(axis=Axis.GMRES_TOLERANCE, collection_ids=['solver-coarse', 'solver-medium', 'reference'])
+        case.refinements.add(axis=Axis.LINEAR_SOLVER_TOLERANCE, collection_ids=['solver-coarse', 'solver-medium', 'reference'])
         case.refinements.add(axis=Axis.INITIAL_MESH_MAX_AREA, collection_ids=['mesh-coarse', 'mesh-medium', 'reference'])
         case.refinements.add(axis=Axis.DOMAIN_MARGIN, collection_ids=['domain-small', 'domain-medium', 'reference'])
         if adaptive:
-            case.refinements.add(axis=Axis.FASTERCAP_MESH_REFINEMENT,
+            case.refinements.add(axis=Axis.ADAPTIVE_MESH_REFINEMENT,
                                  collection_ids=['adaptive-coarse', 'adaptive-medium', 'reference'])
     return study, write_message(root / 'study.pb.json', study)
 
@@ -206,7 +207,7 @@ def test_mixed_reference_controls_reject_length_series(tmp_path: Path, tech_info
                                                        pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch):
     patterns, coupling = _wire_patterns_and_coupling()
     _mock_solver(monkeypatch, coupling)
-    combined = CalibrationQualificationStudy(schema_version=1)
+    combined = CalibrationQualificationStudy(schema_version=2)
     for index, gmres in enumerate((1e-8, 5e-9)):
         group = f'group_{index}'
         root = tmp_path / group
@@ -309,7 +310,7 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     assert held.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
     assert held.solver_coupling_f - held.reverse_solver_coupling_f == pytest.approx(1e-19, abs=1e-29)
     assert [s.axis for s in fit.refinement_sensitivity] == [
-        Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
+        Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
     ]
     mesh = fit.refinement_sensitivity[1]
     assert not mesh.diagnostic
@@ -392,7 +393,7 @@ def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
     assert holdout.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
     assert holdout.solver_coupling_f - holdout.reverse_solver_coupling_f == pytest.approx(1e-19, abs=1e-29)
     solver, mesh, domain = report.refinement_sensitivity
-    assert (solver.axis, mesh.axis, domain.axis) == (Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
+    assert (solver.axis, mesh.axis, domain.axis) == (Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
     assert domain.reference_parameter_value == 8
     assert [level.parameter_value for level in domain.levels] == [2, 4]
     alternate, = mesh.levels[1].validation_samples
@@ -582,12 +583,12 @@ def test_refinement_axes_with_fastercap(tmp_path: Path, tech_info: TechInfo, pat
     case = report.cases[0]
     assert case.reference_matrix.rows[0].values[0] > 0
     assert [axis.axis for axis in case.refinements] == [
-        Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
-        Axis.FASTERCAP_MESH_REFINEMENT,
+        Axis.LINEAR_SOLVER_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
+        Axis.ADAPTIVE_MESH_REFINEMENT,
     ]
     for axis in case.refinements:
         assert len(axis.levels) == 3
-        assert all(level.refined_panels > 0 and len(level.matrix_diagnostics) == 2 for level in axis.levels)
+        assert all(statistics_message(level.solver_statistics).refined_panels > 0 and len(level.matrix_diagnostics) == 2 for level in axis.levels)
         assert not any('geometry' in diagnostic or 'controls changed' in diagnostic for diagnostic in axis.diagnostics)
         if axis.status == Status.STABILIZED:
             assert len(axis.changes) == 2
@@ -608,12 +609,12 @@ def test_initial_and_adaptive_mesh_axes_use_their_own_panel_counts(
     case, = qualify_study(path, tmp_path / 'qualify').report.cases
     by_axis = {refinement.axis: refinement for refinement in case.refinements}
     initial = by_axis[Axis.INITIAL_MESH_MAX_AREA]
-    assert [level.input_panels for level in initial.levels] == [20, 30, 40]
-    assert [level.refined_panels for level in initial.levels] == [90, 60, 80]
+    assert [statistics_message(level.solver_statistics).input_panels for level in initial.levels] == [20, 30, 40]
+    assert [statistics_message(level.solver_statistics).refined_panels for level in initial.levels] == [90, 60, 80]
     assert initial.status == Status.STABILIZED
 
-    adaptive = by_axis[Axis.FASTERCAP_MESH_REFINEMENT]
-    assert [level.input_panels for level in adaptive.levels] == [40, 40, 40]
+    adaptive = by_axis[Axis.ADAPTIVE_MESH_REFINEMENT]
+    assert [statistics_message(level.solver_statistics).input_panels for level in adaptive.levels] == [40, 40, 40]
     assert [level.parameter_value for level in adaptive.levels] == [0.18, 0.12, 0.06]
     assert adaptive.status == expected and case.status == expected
     if expected == Status.INCOMPLETE:
