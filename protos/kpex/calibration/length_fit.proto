@@ -66,14 +66,15 @@ message CalibrationLengthFitResult {
 
     CalibrationLengthSeries series = 1;
     FitStatus status = 10;
-    double distributed_coupling_f_per_um = 20; // Constrained to be nonnegative.
-    double end_correction_f = 30; // Signed intercept for both ends combined.
-    double condition_number = 40; // Two-parameter design with normalized columns.
-    bool zero_slope_constraint_active = 50;
+    optional double distributed_coupling_f_per_um = 20; // Constrained to be nonnegative.
+    optional double end_correction_f = 30; // Signed intercept for both ends combined.
+    optional double condition_number = 40; // Two-parameter design with normalized columns.
+    optional bool zero_slope_constraint_active = 50;
     repeated CalibrationLengthFitSample training_samples = 60;
     repeated CalibrationLengthFitSample validation_samples = 70;
     repeated string diagnostics = 80;
     repeated CalibrationLengthRefinementSensitivity refinement_sensitivity = 90;
+    repeated string case_ids = 100; // Includes cases from series without a fitted result.
 }
 
 message CalibrationLengthFitSample {

@@ -83,7 +83,9 @@ def run_fit_length_command(args: argparse.Namespace):
         sys.exit(ExitCode.USAGE)
     info(f'Length fit report: {path}')
     if any(result.status != CalibrationLengthFitResult.ACCEPTED for result in report.fits):
-        error('The length fit exceeded the declared residual budget or was physically inadequate')
+        for result in report.fits:
+            for diagnostic in result.diagnostics:
+                error(f"Length series {', '.join(result.case_ids)}: {diagnostic}")
         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
 

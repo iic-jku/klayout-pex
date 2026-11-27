@@ -48,8 +48,6 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
 
 def _series(reference: QualificationMeasurement) -> CalibrationLengthSeries:
     pattern = reference.pattern
-    if pattern.family not in (PARALLEL_PLATES, PARALLEL_WIRES):
-        raise CalibrationError(f"Case '{pattern.id}' must be a parallel-plate or parallel-wire pattern")
     targets = {target.id: target for target in reference.run.preparation.targets}
     return CalibrationLengthSeries(
         technology=reference.run.preparation.technology, pattern_family=pattern.family,
@@ -70,22 +68,12 @@ def _observation(case: CalibrationQualificationCaseResult) -> Tuple[LengthObserv
 
 def _add_refinement_sensitivity(
     result: CalibrationLengthFitResult, observations: List[LengthObservation],
-    cases: Dict[str, CalibrationQualificationCaseResult], references: Dict[str, QualificationMeasurement],
+    cases: Dict[str, CalibrationQualificationCaseResult],
     policy: LengthFitPolicy,
 ):
-    settings = set()
-    for item in observations:
-        run = references[item.case_id].run
-        settings.add((run.preparation.domain_margin_grid,
-                      run.manifest.options.fastercap.SerializeToString(deterministic=True)))
-
     reference_residuals = {item.case_id: item.residual_f for item in result.validation_samples}
     for axis in REFINEMENT_AXES:
         sensitivity = result.refinement_sensitivity.add(axis=axis)
-        if len(settings) != 1:
-            sensitivity.diagnostic = 'The cases use different reference numerical settings'
-            continue
-
         refinements = [next(ref for ref in cases[item.case_id].refinements if ref.axis == axis)
                        for item in observations]
         sensitivity.reference_parameter_value = refinements[0].levels[-1].parameter_value
@@ -124,32 +112,44 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
         max_condition_number=policy.max_condition_number,
     )
     series_by_key: Dict[bytes, CalibrationLengthSeries] = {}
-    observations: Dict[bytes, List[LengthObservation]] = defaultdict(list)
-    reverse: Dict[str, float] = {}
+    grouped_cases: Dict[bytes, List[CalibrationQualificationCaseResult]] = defaultdict(list)
     cases = {case.case_id: case for case in evaluation.report.cases}
     for case in evaluation.report.cases:
-        observation, reverse[case.case_id] = _observation(case)
         series = _series(evaluation.references[case.case_id])
         key = series.SerializeToString(deterministic=True)
         series_by_key[key] = series
-        observations[key].append(observation)
+        grouped_cases[key].append(case)
 
     for key, series in series_by_key.items():
+        members = grouped_cases[key]
+        result = report.fits.add(series=series, case_ids=[case.case_id for case in members])
+        observations, reverse = [], {}
         try:
-            fit = fit_length_series(observations[key], policy)
+            if series.pattern_family not in (PARALLEL_PLATES, PARALLEL_WIRES):
+                raise CalibrationError('A length fit requires parallel plates or parallel wires')
+            settings = set()
+            for case in members:
+                run = evaluation.references[case.case_id].run
+                options = run.manifest.options
+                settings.add((run.preparation.domain_margin_grid, options.threads_per_job,
+                              options.fastercap.SerializeToString(deterministic=True)))
+                observation, reverse[case.case_id] = _observation(case)
+                observations.append(observation)
+            if len(settings) != 1:
+                raise CalibrationError('The cases use different reference numerical settings')
+            fit = fit_length_series(observations, policy)
         except CalibrationError as exc:
-            exc.add_note('Length series with cases ' + ', '.join(obs.case_id for obs in observations[key]))
-            raise
-        result = report.fits.add(
-            series=series,
-            status=(CalibrationLengthFitResult.REJECTED if fit['diagnostics']
-                    else CalibrationLengthFitResult.ACCEPTED),
-            distributed_coupling_f_per_um=fit['parameters']['c_infinite_f_per_um'],
-            end_correction_f=fit['parameters']['c_end_f'],
-            condition_number=fit['sensitivity']['dimensionless_condition_number'],
-            zero_slope_constraint_active=bool(fit['constraints']['active']),
-            diagnostics=fit['diagnostics'],
-        )
+            result.status = CalibrationLengthFitResult.REJECTED
+            result.diagnostics.append(str(exc))
+            continue
+
+        result.status = (CalibrationLengthFitResult.REJECTED if fit['diagnostics']
+                         else CalibrationLengthFitResult.ACCEPTED)
+        result.distributed_coupling_f_per_um = fit['parameters']['c_infinite_f_per_um']
+        result.end_correction_f = fit['parameters']['c_end_f']
+        result.condition_number = fit['sensitivity']['dimensionless_condition_number']
+        result.zero_slope_constraint_active = bool(fit['constraints']['active'])
+        result.diagnostics.extend(fit['diagnostics'])
         for subset, samples in (('training', result.training_samples), ('validation', result.validation_samples)):
             for item in fit[subset]['observations']:
                 samples.add(
@@ -157,7 +157,7 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
                     reverse_solver_coupling_f=reverse[item['case_id']],
                     predicted_coupling_f=item['predicted_f'], residual_f=item['residual_f'],
                 )
-        _add_refinement_sensitivity(result, observations[key], cases, evaluation.references, policy)
+        _add_refinement_sensitivity(result, observations, cases, policy)
     if sha256_file(qualification_path) != qualification_sha256:
         raise CalibrationError('Qualification report changed during fitting')
     output_dir.mkdir()

@@ -130,6 +130,106 @@ def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
     return _study(tmp_path, tech_info, pattern_data, fake=True)
 
 
+def _wire_patterns_and_coupling():
+    lengths = {f'wire_{length}': length for length in (4, 8, 12, 16)}
+    patterns = [
+        {'id': name, 'role': 'VALIDATION' if length == 12 else 'TRAINING',
+         'length_um': str(length), 'width_um': '0.4', 'parallel_wires': {'layer': 'M1', 'gap_um': '0.2'}}
+        for name, length in lengths.items()
+    ]
+
+    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
+        coupling = (2e-16 * lengths.get(case_id, 4) + 1e-16) / 1e-6
+        return [[9e-9, -2e-9, -coupling],
+                [-2e-9, 8e-9, -2e-9], [-coupling, -2e-9, 9e-9]]
+
+    return patterns, matrix_for_case
+
+
+def _run_length_fit(study_path: Path, tmp_path: Path) -> CalibrationLengthFitReport:
+    qualified = qualify_study(study_path, tmp_path / 'qualified')
+    directory = tmp_path / 'fit'
+    code, output = run_cli(KpexCLI().main, [
+        'kpex', 'calibrate', 'fit-length', '--study', str(study_path),
+        '--qualification', str(qualified.report_path), '--residual-budget-f', '1e-17',
+        '--out-dir', str(directory),
+    ])
+    assert code == 1, output
+    return read_message(directory / 'fit-length.pb.json', CalibrationLengthFitReport())
+
+
+def test_failed_series_keep_successful_length_fits(tmp_path: Path, tech_info: TechInfo,
+                                            pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch):
+    patterns, coupling = _wire_patterns_and_coupling()
+    cases = [
+        *patterns,
+        pattern_data['patterns'][0],  # A distinct, stabilized series with only one length.
+        {'id': 'fringe', 'role': 'TRAINING', 'width_um': '2', 'length_um': '4',
+         'directional_fringe': {'edge_layer': 'M1', 'receiver_layer': 'M2', 'receiver_width_um': '2',
+                                'lateral_offset_um': '0.1'}},  # Valid for qualification, not fit-length.
+        dict(patterns[0], id='unstabilized', width_um='0.8'),
+    ]
+    _mock_solver(monkeypatch, coupling)
+    study, _ = _study(tmp_path, tech_info, dict(pattern_data, patterns=cases), fake=True, case_count=len(cases))
+    next(item for item in study.cases if item.case_id == 'unstabilized').ClearField('refinements')
+    path = write_message(tmp_path / 'study-with-unusable-cases.pb.json', study)
+
+    report = _run_length_fit(path, tmp_path)
+    accepted, few_lengths, unsupported, unstabilized = report.fits
+    assert accepted.status == CalibrationLengthFitResult.ACCEPTED
+    assert accepted.case_ids == ['wire_4', 'wire_8', 'wire_12', 'wire_16']
+    assert accepted.distributed_coupling_f_per_um == pytest.approx(2e-16, abs=1e-29)
+    for result, case_id, message in [
+        (few_lengths, 'plates', 'at least 3 independent training lengths'),
+        (unsupported, 'fringe', 'requires parallel plates or parallel wires'),
+        (unstabilized, 'unstabilized', 'INCOMPLETE'),
+    ]:
+        assert result.status == CalibrationLengthFitResult.REJECTED
+        assert result.case_ids == [case_id]
+        assert any(message in diagnostic for diagnostic in result.diagnostics)
+        assert not result.HasField('distributed_coupling_f_per_um')
+
+
+def test_mixed_reference_controls_reject_length_series(tmp_path: Path, tech_info: TechInfo,
+                                                       pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch):
+    patterns, coupling = _wire_patterns_and_coupling()
+    _mock_solver(monkeypatch, coupling)
+    combined = CalibrationQualificationStudy(schema_version=1)
+    for index, gmres in enumerate((1e-8, 5e-9)):
+        group = f'group_{index}'
+        root = tmp_path / group
+        root.mkdir()
+        data = dict(pattern_data, patterns=patterns[2 * index:2 * index + 2])
+        def solve_at_reference(manifest_path, output_dir, *, options):
+            # Scale the entire GMRES series so each case stays independently qualified.
+            return solve_original(manifest_path, output_dir,
+                                  options=replace(options, gmres_tolerance=options.gmres_tolerance * gmres / 1e-8))
+
+        solve_original = solve_calibration
+        with monkeypatch.context() as scope:
+            scope.setattr(sys.modules[__name__], 'solve_calibration', solve_at_reference)
+            study, _ = _study(root, tech_info, data, fake=True, case_count=2)
+        combined.tolerance.CopyFrom(study.tolerance)
+        for item in study.collections:
+            collection = combined.collections.add(id=f'{group}_{item.id}').collection
+            collection.CopyFrom(item.collection)
+            collection.path = f'{group}/{collection.path}'
+        for item in study.cases:
+            case = combined.cases.add()
+            case.CopyFrom(item)
+            case.reference_collection_id = f'{group}_{item.reference_collection_id}'
+            for refinement in case.refinements:
+                refinement.collection_ids[:] = [f'{group}_{name}' for name in refinement.collection_ids]
+
+    path = write_message(tmp_path / 'mixed-settings-study.pb.json', combined)
+    report = _run_length_fit(path, tmp_path)
+    result, = report.fits
+    assert result.status == CalibrationLengthFitResult.REJECTED
+    assert result.case_ids == ['wire_4', 'wire_8', 'wire_12', 'wire_16']
+    assert list(result.diagnostics) == ['The cases use different reference numerical settings']
+    assert not result.HasField('end_correction_f')
+
+
 @pytest.mark.parametrize('holdout_offset_f', [0, 2e-17])
 def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
                                     monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float):
