@@ -55,7 +55,8 @@ from tests.common.fastercap_report import numerical_report
 
 
 def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
-           *, fake: bool = False, case_count: int = 1) -> Tuple[CalibrationQualificationStudy, Path]:
+           *, fake: bool = False, case_count: int = 1, adaptive: bool = False
+           ) -> Tuple[CalibrationQualificationStudy, Path]:
     prepared = {}
     patterns = pattern_data['patterns'][:case_count]
     for margin in (2, 4, 8):
@@ -75,6 +76,9 @@ def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
         'domain-small': (2, reference),
         'domain-medium': (4, reference),
     }
+    if adaptive:
+        variants['adaptive-coarse'] = (8, replace(reference, mesh_refinement=0.18))
+        variants['adaptive-medium'] = (8, replace(reference, mesh_refinement=0.12))
     study = CalibrationQualificationStudy(schema_version=1)
     # Use an explicit 2% budget for the real pilot. The solver test verifies
     # the reported comparisons, allowing platform-dependent convergence.
@@ -91,10 +95,14 @@ def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
         case.refinements.add(axis=Axis.GMRES_TOLERANCE, collection_ids=['solver-coarse', 'solver-medium', 'reference'])
         case.refinements.add(axis=Axis.INITIAL_MESH_MAX_AREA, collection_ids=['mesh-coarse', 'mesh-medium', 'reference'])
         case.refinements.add(axis=Axis.DOMAIN_MARGIN, collection_ids=['domain-small', 'domain-medium', 'reference'])
+        if adaptive:
+            case.refinements.add(axis=Axis.FASTERCAP_MESH_REFINEMENT,
+                                 collection_ids=['adaptive-coarse', 'adaptive-medium', 'reference'])
     return study, write_message(root / 'study.pb.json', study)
 
 
-def _mock_solver(monkeypatch: pytest.MonkeyPatch, matrix_for_case: Callable[[str, str], List[List[float]]]):
+def _mock_solver(monkeypatch: pytest.MonkeyPatch, matrix_for_case: Callable[[str, str], List[List[float]]],
+                 adaptive_middle_panels: int = 60):
     executable = Path(sys.executable).resolve()
     identity = SolverIdentity(name='fastercap', version='6.4.0', executable_path=str(executable),
                               executable_sha256=sha256_file(executable), operating_system='test', architecture='test')
@@ -102,13 +110,17 @@ def _mock_solver(monkeypatch: pytest.MonkeyPatch, matrix_for_case: Callable[[str
 
     def run(exe: str, deck: str, log: str, *args: Any, report_path: str, **kwargs: Any) -> FasterCapRunResult:
         variant = Path(log).parents[2].name
-        panels = {'mesh-coarse': 40, 'mesh-medium': 60}.get(variant, 80)
+        input_panels = {'mesh-coarse': 20, 'mesh-medium': 30}.get(variant, 40)
+        # Fixed -m can adapt a coarser input to a larger final mesh.
+        panels = {'mesh-coarse': 90, 'mesh-medium': 60, 'adaptive-coarse': 50,
+                  'adaptive-medium': adaptive_middle_panels}.get(variant, 80)
         names = ['g1_B', 'g2_substrate', 'g3_A']
         matrix = matrix_for_case(Path(log).parent.name, variant)
         external = numerical_report(names, matrix, deck)
         external['build']['version'] = 'FasterCap version 6.4.0'
         Path(report_path).write_text(json.dumps(external), encoding='utf-8')
         Path(log).write_text('Capacitance matrix is:\nSolve statistics:\n'
+                             f'Number of input panels to solver engine: {input_panels}\n'
                              f'Number of panels after refinement: {panels}\n', encoding='utf-8')
         return FasterCapRunResult((exe, deck), 0, 0.1)
 
@@ -355,14 +367,15 @@ def test_physical_checks_use_charge_rows():
 @pytest.mark.slow
 @pytest.mark.fastercap
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
-def test_three_refinement_axes_with_fastercap(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any]):
-    _, path = _study(tmp_path, tech_info, pattern_data)
+def test_refinement_axes_with_fastercap(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any]):
+    _, path = _study(tmp_path, tech_info, pattern_data, adaptive=True)
     result = qualify_study(path, tmp_path / 'qualify')
     report = read_message(result.report_path, CalibrationQualificationReport())
     case = report.cases[0]
     assert case.reference_matrix.rows[0].values[0] > 0
     assert [axis.axis for axis in case.refinements] == [
         Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN,
+        Axis.FASTERCAP_MESH_REFINEMENT,
     ]
     for axis in case.refinements:
         assert len(axis.levels) == 3
@@ -373,3 +386,27 @@ def test_three_refinement_axes_with_fastercap(tmp_path: Path, tech_info: TechInf
             assert all(change.within_budget for change in axis.changes)
         else:
             assert axis.diagnostics
+
+
+@pytest.mark.parametrize('middle_panels, expected', [(60, Status.STABILIZED), (80, Status.INCOMPLETE)])
+def test_initial_and_adaptive_mesh_axes_use_their_own_panel_counts(
+        tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch,
+        middle_panels: int, expected: int):
+    def constant_matrix(case_id: str, variant: str) -> List[List[float]]:
+        return [[5e-9, -2e-9, -1e-9], [-2e-9, 6e-9, -3e-9], [-1e-9, -3e-9, 7e-9]]
+
+    _mock_solver(monkeypatch, constant_matrix, adaptive_middle_panels=middle_panels)
+    _, path = _study(tmp_path, tech_info, pattern_data, fake=True, adaptive=True)
+    case, = qualify_study(path, tmp_path / 'qualify').report.cases
+    by_axis = {refinement.axis: refinement for refinement in case.refinements}
+    initial = by_axis[Axis.INITIAL_MESH_MAX_AREA]
+    assert [level.input_panels for level in initial.levels] == [20, 30, 40]
+    assert [level.refined_panels for level in initial.levels] == [90, 60, 80]
+    assert initial.status == Status.STABILIZED
+
+    adaptive = by_axis[Axis.FASTERCAP_MESH_REFINEMENT]
+    assert [level.input_panels for level in adaptive.levels] == [40, 40, 40]
+    assert [level.parameter_value for level in adaptive.levels] == [0.18, 0.12, 0.06]
+    assert adaptive.status == expected and case.status == expected
+    if expected == Status.INCOMPLETE:
+        assert any('adaptive panel counts' in reason for reason in adaptive.diagnostics)

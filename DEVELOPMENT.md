@@ -509,9 +509,14 @@ solver before fitting coefficients.
 `kpex calibrate qualify --study study.pb.json --out-dir qualification` consumes a
 `CalibrationQualificationStudy` from `protos/kpex/calibration/qualification.proto`.
 Use named `CalibrationCollection` paths relative to the study and their exact SHA-256
-hashes. Each case names a common reference and up to three ordered refinement series.
-The three supported controls are manual GMRES tolerance, initial maximum triangle area
-and preparation domain margin.
+hashes. Each case names a common reference and three required refinement series for manual
+GMRES tolerance, initial maximum triangle area and preparation domain margin. Include
+`FASTERCAP_MESH_REFINEMENT` to check FasterCap's adaptive mesh control (`-m`) separately.
+
+An initial triangle area sweep needs increasing **input** panel counts. An adaptive
+mesh sweep holds the solver input files fixed and needs increasing **final** panel
+counts. The report records both counts. A study without an adaptive mesh sweep
+provides no direct evidence of stabilization with respect to `-m`.
 
 Each series needs three distinct levels ending at the reference. The two final entry-wise
 changes must meet the declared absolute and relative budget. Physical matrix diagnostics and

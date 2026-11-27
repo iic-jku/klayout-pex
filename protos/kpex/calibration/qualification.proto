@@ -56,6 +56,7 @@ enum CalibrationRefinementAxis {
     GMRES_TOLERANCE = 10; // Decreasing manual FasterCap GMRES tolerance.
     INITIAL_MESH_MAX_AREA = 20; // Decreasing initial maximum triangle area in um^2.
     DOMAIN_MARGIN = 30; // Increasing preparation margin in grid units.
+    FASTERCAP_MESH_REFINEMENT = 40; // Decreasing FasterCap adaptive mesh control (-m).
 }
 
 message CalibrationRefinementStudy {
@@ -120,6 +121,7 @@ message CalibrationRefinementLevel {
     double parameter_value = 10;
     optional uint64 refined_panels = 20;
     repeated CalibrationMatrixDiagnostics matrix_diagnostics = 30;
+    optional uint64 input_panels = 40;
 }
 
 message CalibrationRefinementChange {
