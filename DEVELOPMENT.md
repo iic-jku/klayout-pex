@@ -525,7 +525,10 @@ Review the report alongside the original study and saved collections before fitt
 --residual-budget-f 1e-17 --out-dir length-fit` writes `length-fit/fit-length.pb.json`.
 Each wire or plate series varies only length and needs at least three training lengths
 and one distinct held-out length. Use stabilized cases with the same reference solver
-settings. The budget limits the absolute residual in farads over the samples.
+settings. The residual budget applies to the reference fit and to the refits at the
+two recent refinement settings shared by all cases on each axis. Each refit uses its
+own training and held-out solver data. A missing setting or an unusable refit is
+reported as insufficient evidence for accepting the fit.
 
 The report includes every series and its case IDs. A series without a fit has a rejection
 diagnostic and absent fitted parameters. The command exits with status 1 if any series
@@ -549,7 +552,9 @@ kpex calibrate fit-overlap \
 The fit uses the directed Maxwell coupling from the qualified measurement. It separates the
 area term, the perimeter term and a signed correction for the four corners of the observed
 rectangles. The report contains the training and holdout residuals, the shared refinement
-settings and the resulting shifts in the area coefficient and validation errors. Review
+settings and the resulting shifts in the area coefficient and validation errors.
+The overlap fit uses the same residual budget check as the length fit. Passing this
+check establishes agreement across the tested settings. Review
 `overlap-fit/fit-overlap.pb.json` alongside the original qualification before adopting the
 area coefficient into any technology table.
 

@@ -86,6 +86,7 @@ message CalibrationOverlapSensitivityLevel {
     optional double area_coupling_change_f_per_um2 = 20;
     repeated CalibrationOverlapSensitivitySample validation_samples = 30;
     string diagnostic = 40;
+    optional double max_abs_training_residual_f = 50;
 }
 
 message CalibrationOverlapSensitivitySample {

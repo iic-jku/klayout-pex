@@ -61,7 +61,7 @@ def _add_fit_arguments(parser: argparse.ArgumentParser):
     parser.add_argument('--qualification', type=Path, required=True, metavar='FILE',
                         help='CalibrationQualificationReport written by calibrate qualify')
     parser.add_argument('--residual-budget-f', type=positive_number, required=True, metavar='FARADS',
-                        help='Maximum absolute residual per training or held-out measurement in farads')
+                        help='Maximum absolute residual in farads across the reference fit and refinement refits')
     parser.add_argument('--out-dir', type=Path, required=True, metavar='DIR',
                         help='New output directory under an existing parent')
     add_log_level_argument(parser)
