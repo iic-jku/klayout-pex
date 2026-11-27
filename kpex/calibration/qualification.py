@@ -45,7 +45,7 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
 from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCaseResult
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
-METHOD_VERSION = 4
+METHOD_VERSION = 1
 
 
 @dataclass(frozen=True)
@@ -209,10 +209,10 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
 
 def _validated_study(study: CalibrationQualificationStudy):
     tolerance = study.tolerance
-    if (study.schema_version != 2 or not study.collections or not study.cases
+    if (study.schema_version != 1 or not study.collections or not study.cases
             or not math.isfinite(tolerance.absolute_floor_f) or tolerance.absolute_floor_f <= 0
             or not 0 <= tolerance.relative_tolerance < 1):
-        raise CalibrationError('Study needs schema version 2, collections, cases, a positive finite absolute floor '
+        raise CalibrationError('Study needs schema version 1, collections, cases, a positive finite absolute floor '
                                'in farads and a relative tolerance in [0, 1)')
     for collection in study.collections:
         validate_identifier(collection.id, 'Collection ID')
@@ -280,7 +280,7 @@ def evaluate_qualification(path: Path) -> QualificationEvaluation:
     paths = verify_artifacts(path.parent, [item.collection for item in study.collections])
     runs = {item.id: read_collection(collection_path, item.collection.sha256)
             for item, collection_path in zip(study.collections, paths)}
-    report = CalibrationQualificationReport(schema_version=2, qualification_method_version=METHOD_VERSION,
+    report = CalibrationQualificationReport(schema_version=1, qualification_method_version=METHOD_VERSION,
                                             kpex_version=__version__, study_sha256=study_hash, study=study)
     references = {}
     for case in study.cases:

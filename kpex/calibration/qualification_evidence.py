@@ -75,7 +75,7 @@ class QualificationMeasurement:
 def read_collection(path: Path, expected_hash: str) -> QualificationRun:
     root = path.parent
     collection = read_message(path, CalibrationCollection())
-    if sha256_file(path) != expected_hash or collection.schema_version != 2:
+    if sha256_file(path) != expected_hash or collection.schema_version != 1:
         raise CalibrationError(f"Collection '{path}' changed or has an unsupported schema")
     verify_artifacts(root, collection.artifacts)
     hashes = {item.path: item.sha256 for item in collection.artifacts}
@@ -83,7 +83,7 @@ def read_collection(path: Path, expected_hash: str) -> QualificationRun:
     if hashes.get(collection.run_manifest.path) != collection.run_manifest.sha256:
         raise CalibrationError('Run manifest is absent from the collection artifact set')
     run = read_message(run_path, CalibrationRunManifest())
-    if (run.schema_version != 2 or not run.kpex_version
+    if (run.schema_version != 1 or not run.kpex_version
             or not run.solver.version or not run.solver.executable_sha256
             or not run.solver.operating_system or not run.solver.architecture):
         raise CalibrationError('Unsupported calibration run schema or solver identity')

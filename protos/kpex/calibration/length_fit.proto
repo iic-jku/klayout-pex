@@ -34,7 +34,7 @@ import "kpex/result/solver_execution.proto";
 // L is in micrometers. Each case has independent qualification evidence.
 // The report does not modify technology coefficients.
 message CalibrationLengthFitReport {
-    uint32 schema_version = 1;
+    uint32 schema_version = 1; // Currently 1.
     string kpex_version = 10;
     string study_sha256 = 20;
     string qualification_sha256 = 30;
@@ -45,7 +45,7 @@ message CalibrationLengthFitReport {
 
 // Setup shared by cases in which only the length varies.
 message CalibrationLengthSeries {
-    CalibratedTechnology technology = 1;
+    string physical_stack_sha256 = 1; // Common physical stack; coefficients are not part of fit identity.
     CalibrationPatternFamily pattern_family = 10;
     repeated string layers = 20; // Conductor A, then conductor B.
     kpex.pex25d.Units units = 30;
@@ -75,6 +75,9 @@ message CalibrationLengthFitResult {
     repeated string diagnostics = 80;
     repeated CalibrationLengthRefinementSensitivity refinement_sensitivity = 90;
     repeated string case_ids = 100; // Includes cases from series without a fitted result.
+    // Full source identity of each case, including coefficient revision and catalog selection.
+    // Also retained for rejected series that have no samples.
+    map<string, CalibratedTechnology> case_technologies = 110;
 }
 
 message CalibrationLengthFitSample {

@@ -299,7 +299,7 @@ def solve_calibration(prepared_path: Path, output_dir: Path, *, executable: str 
     try:
         output.mkdir()
         written = snapshot_preparation(prepared, output / 'preparation')
-        manifest = CalibrationRunManifest(schema_version=2, kpex_version=__version__, solver=solver,
+        manifest = CalibrationRunManifest(schema_version=1, kpex_version=__version__, solver=solver,
                                           options=options_message(options),
                                           preparation=reference(output / 'preparation/manifest.json', output))
         jobs = []

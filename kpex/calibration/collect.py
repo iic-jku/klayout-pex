@@ -76,7 +76,7 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
     root = run_manifest.parent
     manifest_hash = sha256_file(run_manifest)
     manifest = read_message(run_manifest, CalibrationRunManifest())
-    if manifest.schema_version != 2 or not manifest.kpex_version:
+    if manifest.schema_version != 1 or not manifest.kpex_version:
         raise CalibrationError('Unsupported calibration run schema, version or solver')
     backend = calibration_backend(manifest.solver.name)
     backend.validate_run(manifest, qualification=False)
@@ -180,7 +180,7 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
         output.mkdir()
         written = [copy_artifact(artifact_path(root, name), output / 'runs' / name, digest)
                    for name, digest in files.items()]
-        collection = CalibrationCollection(schema_version=2, execution_complete=complete,
+        collection = CalibrationCollection(schema_version=1, execution_complete=complete,
                                             run_manifest=reference(output / 'runs' / run_manifest.name, output))
         for case, preparation, checkpoint in zip(manifest.cases, prepared.cases, checkpoints):
             record = collection.cases.add(case_id=case.case_id, execution=checkpoint.execution)

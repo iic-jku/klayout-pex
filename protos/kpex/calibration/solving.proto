@@ -34,11 +34,9 @@ message CalibrationSolveOptions {
     uint32 threads_per_job = 10;
     // Positive finite wall-clock deadline per solver process, excluding queueing and export.
     double solver_timeout_seconds = 20;
-    reserved 30;
-    reserved "fastercap";
     // A registered backend protobuf message, checked against SolverIdentity.
     // Unknown message types and options are rejected, never treated as defaults.
-    google.protobuf.Any solver_controls = 40;
+    google.protobuf.Any solver_controls = 30;
 }
 
 // Immutable index written before execution. Each case checkpoint is durable
@@ -98,8 +96,6 @@ message CalibrationCaseResult {
     kpex.result.MaxwellCapacitanceMatrix native_matrix = 30;
     kpex.result.MaxwellCapacitanceMatrix measured_matrix = 40;
     repeated string diagnostics = 50;
-    reserved 60, 70, 80, 90;
-    reserved "input_panels", "refined_panels", "potential_estimates", "links";
     // A registered backend protobuf message. Missing statistics stay absent.
-    google.protobuf.Any solver_statistics = 100;
+    google.protobuf.Any solver_statistics = 60;
 }
