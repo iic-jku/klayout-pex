@@ -431,6 +431,55 @@ def test_qualified_report_and_budget_boundary(study: Tuple[CalibrationQualificat
         assert qualify_study(threshold_study, tmp_path / f'qualified-{i}').report.cases[0].status == status
 
 
+@pytest.mark.parametrize('change, expected', [
+    ('jobs', Status.STABILIZED),
+    ('timeout', Status.STABILIZED),
+    ('coefficients', Status.STABILIZED),
+    ('process-stack', Status.INCOMPLETE),
+    ('threads', Status.INCOMPLETE),
+])
+def test_qualification_compares_physics_and_numerical_settings(
+        study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path, tech_info: TechInfo,
+        change: str, expected: int):
+    specification, baseline_path = study
+    baseline = qualify_study(baseline_path, tmp_path / 'baseline').report.cases[0]
+    assert baseline.status == Status.STABILIZED
+    options = SolveOptions(mesh_refinement=0.06, gmres_tolerance=1e-8, mesh_max_area_um2=0.25,
+                           solver_timeout_seconds=120)
+    prepared = tmp_path / 'prepared-8' / 'manifest.json'
+    if change == 'jobs':
+        options = replace(options, jobs=2)
+    elif change == 'timeout':
+        options = replace(options, solver_timeout_seconds=3600)
+    elif change == 'threads':
+        options = replace(options, threads_per_job=2)
+    else:
+        if change == 'coefficients':
+            tech_info.tech.process_parasitics.side_halo += 1
+        else:
+            tech_info.process_metal_layers[0].metal_layer.thickness += 0.05
+        prepared = prepare_calibration(tech_info, read_patterns(tmp_path / 'patterns-8.pb.json'),
+                                       tmp_path / 'prepared-changed').manifest_path
+        if change == 'coefficients':
+            scene_name = 'case_plates.pex25d.scene.pb'
+            assert (prepared.parent / scene_name).read_bytes() == (
+                tmp_path / 'prepared-8' / scene_name).read_bytes()
+
+    new_reference = solve_calibration(prepared, tmp_path / 'reference-changed', options=options)
+    collection = next(item.collection for item in specification.collections if item.id == 'reference')
+    collection.path = new_reference.collection_path.relative_to(tmp_path).as_posix()
+    collection.sha256 = sha256_file(new_reference.collection_path)
+    path = write_message(tmp_path / 'changed-study.pb.json', specification)
+    case = qualify_study(path, tmp_path / 'qualification-changed').report.cases[0]
+
+    assert case.status == expected
+    if change == 'coefficients':
+        assert case.technology.resolved_technology_sha256 != baseline.technology.resolved_technology_sha256
+        assert case.technology.physical_stack_sha256 == baseline.technology.physical_stack_sha256
+    elif change == 'process-stack':
+        assert case.technology.physical_stack_sha256 != baseline.technology.physical_stack_sha256
+
+
 def test_incomplete_evidence_cannot_qualify(study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path):
     specification, _ = study
     case = specification.cases[0]
