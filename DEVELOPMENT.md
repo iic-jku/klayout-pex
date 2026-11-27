@@ -519,6 +519,18 @@ signed refinement changes are recorded separately in `qualification/qualificatio
 The command returns a diagnostic error for incomplete or rejected cases after writing the report.
 Review the report alongside the original study and saved collections before fitting coefficients.
 
+### Fitting finite-length coupling
+
+`kpex calibrate fit-length --study study.pb.json --qualification qualification/qualification.pb.json
+--residual-budget-f 1e-17 --out-dir length-fit` writes `length-fit/fit-length.pb.json`.
+Each wire or plate series varies only length and needs at least three training lengths
+and one distinct held-out length. Use stabilized cases with the same reference solver
+settings. The budget limits the absolute residual in farads over the samples.
+
+The report includes every series and its case IDs. A series without a fit has a rejection
+diagnostic and absent fitted parameters. The command exits with status 1 if any series
+is rejected, and 2 if the command cannot read or verify the input evidence.
+
 ### Fitting an overlap coefficient
 
 Use aligned rectangular parallel plates that share one typed overlap target, technology and
