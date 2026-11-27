@@ -51,7 +51,8 @@ def _series(reference: QualificationMeasurement) -> CalibrationLengthSeries:
     pattern = reference.pattern
     targets = {target.id: target for target in reference.run.preparation.targets}
     return CalibrationLengthSeries(
-        technology=reference.run.preparation.technology, pattern_family=pattern.family,
+        physical_stack_sha256=reference.run.preparation.technology.physical_stack_sha256,
+        pattern_family=pattern.family,
         layers=pattern.layers, units=reference.run.preparation.units,
         width_grid=pattern.dimensions_grid.width, gap_grid=pattern.dimensions_grid.gap,
         measurement=pattern.measurement, solver=reference.run.manifest.solver,
@@ -125,23 +126,26 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
     qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
 
     report = CalibrationLengthFitReport(
-        schema_version=2, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
+        schema_version=3, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256,
         residual_budget_f=policy.weight_floor_f * policy.max_weighted_residual,
         max_condition_number=policy.max_condition_number,
     )
-    series_by_key: Dict[bytes, CalibrationLengthSeries] = {}
-    grouped_cases: Dict[bytes, List[CalibrationQualificationCaseResult]] = defaultdict(list)
+    series_by_key: Dict[Tuple[bytes, bytes], CalibrationLengthSeries] = {}
+    grouped_cases: Dict[Tuple[bytes, bytes], List[CalibrationQualificationCaseResult]] = defaultdict(list)
     cases = {case.case_id: case for case in evaluation.report.cases}
     for case in evaluation.report.cases:
         series = _series(evaluation.references[case.case_id])
-        key = series.SerializeToString(deterministic=True)
+        key = (series.SerializeToString(deterministic=True),
+               case.technology.SerializeToString(deterministic=True))
         series_by_key[key] = series
         grouped_cases[key].append(case)
 
     for key, series in series_by_key.items():
         members = grouped_cases[key]
         result = report.fits.add(series=series, case_ids=[case.case_id for case in members])
+        for case in members:
+            result.case_technologies[case.case_id].CopyFrom(case.technology)
         observations, reverse = [], {}
         try:
             if series.pattern_family not in (PARALLEL_PLATES, PARALLEL_WIRES):

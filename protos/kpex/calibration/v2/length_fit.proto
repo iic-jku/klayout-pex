@@ -1,0 +1,114 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/kpex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+// Read-only schema for saved version-2 fit reports.
+syntax = "proto3";
+
+package kpex.calibration.v2;
+
+import "kpex/calibration/patterns.proto";
+import "kpex/calibration/preparation.proto";
+import "kpex/calibration/qualification.proto";
+import "kpex/calibration/targets.proto";
+import "kpex/pex25d/pex25d_units.proto";
+import "kpex/result/solver_execution.proto";
+
+// Fit -C[A,B] = distributed_coupling_f_per_um * L + end_correction_f.
+// L is in micrometers. Each case has independent qualification evidence.
+// The report does not modify technology coefficients.
+message CalibrationLengthFitReport {
+    uint32 schema_version = 1;
+    string kpex_version = 10;
+    string study_sha256 = 20;
+    string qualification_sha256 = 30;
+    double residual_budget_f = 40;
+    double max_condition_number = 50;
+    repeated CalibrationLengthFitResult fits = 60;
+}
+
+// Setup shared by cases in which only the length varies.
+message CalibrationLengthSeries {
+    kpex.calibration.CalibratedTechnology technology = 1;
+    kpex.calibration.CalibrationPatternFamily pattern_family = 10;
+    repeated string layers = 20; // Conductor A, then conductor B.
+    kpex.pex25d.Units units = 30;
+    int64 width_grid = 40;
+    int64 gap_grid = 50;
+    kpex.calibration.CapacitanceMeasurement measurement = 60;
+    kpex.result.SolverIdentity solver = 70;
+    repeated kpex.calibration.CalibrationTarget targets = 80;
+}
+
+message CalibrationLengthFitResult {
+    enum FitStatus {
+        STATUS_UNSPECIFIED = 0;
+        // Residuals meet the budget and sampled predictions are nonnegative.
+        ACCEPTED = 10;
+        REJECTED = 20;
+    }
+
+    CalibrationLengthSeries series = 1;
+    FitStatus status = 10;
+    optional double distributed_coupling_f_per_um = 20; // Constrained to be nonnegative.
+    optional double end_correction_f = 30; // Signed intercept for both ends combined.
+    optional double condition_number = 40; // Two-parameter design with normalized columns.
+    optional bool zero_slope_constraint_active = 50;
+    repeated CalibrationLengthFitSample training_samples = 60;
+    repeated CalibrationLengthFitSample validation_samples = 70;
+    repeated string diagnostics = 80;
+    repeated CalibrationLengthRefinementSensitivity refinement_sensitivity = 90;
+    repeated string case_ids = 100; // Includes cases from series without a fitted result.
+}
+
+message CalibrationLengthFitSample {
+    string case_id = 1;
+    double length_um = 10;
+    double solver_coupling_f = 20; // -C[A,B], charge-row convention.
+    double reverse_solver_coupling_f = 30; // -C[B,A], retained without averaging.
+    double predicted_coupling_f = 40;
+    double residual_f = 50; // Predicted minus measured.
+}
+
+// Refit the same training lengths at the shared settings used for the final
+// two qualification steps, and predict the same held-out lengths again.
+// Observed changes describe sensitivity to these settings.
+message CalibrationLengthRefinementSensitivity {
+    kpex.calibration.CalibrationRefinementAxis axis = 1;
+    optional double reference_parameter_value = 10; // Shared reference setting, in the same units as the levels.
+    repeated CalibrationLengthSensitivityLevel levels = 20; // Coarse to fine, excluding the reference.
+    string diagnostic = 30; // Missing or partially shared settings.
+}
+
+message CalibrationLengthSensitivityLevel {
+    // Backend-defined parameter of the recorded refinement axis.
+    double parameter_value = 1;
+    repeated CalibrationLengthSensitivitySample validation_samples = 10;
+    optional double max_abs_training_residual_f = 20;
+    string diagnostic = 30; // A numerical setting at which refitting failed.
+}
+
+message CalibrationLengthSensitivitySample {
+    string case_id = 1;
+    double solver_coupling_f = 10; // -C[A,B] at this setting.
+    double predicted_coupling_f = 20; // Training data from the same setting.
+    double residual_f = 30;
+    double residual_change_f = 40; // Residual at this setting minus the reference residual.
+}

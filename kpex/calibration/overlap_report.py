@@ -51,7 +51,7 @@ def _plate_observations(report: CalibrationOverlapFitReport, evaluation: Qualifi
     reverse_couplings: Dict[str, float] = {}
     first = evaluation.report.cases[0]
     first_run = evaluation.references[first.case_id].run
-    report.technology.CopyFrom(first.technology)
+    report.physical_stack_sha256 = first.technology.physical_stack_sha256
     report.solver.CopyFrom(first_run.manifest.solver)
     report.measurement.CopyFrom(first.pattern.measurement)
     units = first.units
@@ -70,12 +70,13 @@ def _plate_observations(report: CalibrationOverlapFitReport, evaluation: Qualifi
             raise CalibrationError(f"Case '{case.case_id}' needs an overlap target bound to its bottom and top plates")
         if case.case_id == first.case_id:
             report.target.CopyFrom(target)
-        if (target != report.target or case.technology != report.technology or case.units != units
+        if (target != report.target or case.technology != first.technology or case.units != units
                 or case.pattern.measurement != report.measurement or run.manifest.solver != report.solver
                 or run.manifest.options.threads_per_job != first_run.manifest.options.threads_per_job
                 or run.manifest.options.solver_controls != first_run.manifest.options.solver_controls
                 or run.preparation.domain_margin_grid != first_run.preparation.domain_margin_grid):
             raise CalibrationError(f"Case '{case.case_id}' does not share the overlap fit's target or reference settings")
+        report.case_technologies[case.case_id].CopyFrom(case.technology)
         dimensions = case.pattern.dimensions_grid
         observations.append(OverlapObservation(case.case_id, case.pattern.role, float(dimensions.width * grid),
                                                float(dimensions.length * grid), forward_f))
@@ -168,7 +169,7 @@ def fit_qualified_overlap(study_path: Path, qualification_path: Path, output_dir
     validate_output_directory(output_dir)
     qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
     report = CalibrationOverlapFitReport(
-        schema_version=2, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
+        schema_version=3, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256, residual_budget_f=budget_f,
     )
     observations, reverse_couplings, grid = _plate_observations(report, evaluation)

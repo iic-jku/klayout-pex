@@ -257,6 +257,6 @@ def test_saved_fit_report_preserves_refinement_evidence(tmp_path: Path, kind: st
     original = path.read_bytes()
     result = read_message(path, current)
     expected = type(current).FromString(saved.SerializeToString())
-    expected.schema_version = 2
+    expected.schema_version = 3
     assert result == expected
     assert path.read_bytes() == original

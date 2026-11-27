@@ -1,0 +1,99 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/kpex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+// Read-only schema for saved version-2 fit reports.
+syntax = "proto3";
+
+package kpex.calibration.v2;
+
+import "kpex/calibration/preparation.proto";
+import "kpex/calibration/qualification.proto";
+import "kpex/calibration/targets.proto";
+import "kpex/result/solver_execution.proto";
+
+// A fit of aligned, overlapping rectangles to one declared overlap target.
+// The area term is a candidate for the overlap row. The perimeter and corner
+// terms describe finite plates for this fit.
+message CalibrationOverlapFitReport {
+    uint32 schema_version = 1;
+    string kpex_version = 10;
+    string study_sha256 = 20;
+    string qualification_sha256 = 30;
+    double residual_budget_f = 40;
+    kpex.calibration.CalibratedTechnology technology = 50;
+    kpex.calibration.CalibrationTarget target = 60;
+    kpex.result.SolverIdentity solver = 70;
+    kpex.calibration.CapacitanceMeasurement measurement = 80;
+    CalibrationOverlapFitResult fit = 90;
+    repeated CalibrationOverlapRefinementSensitivity refinement_sensitivity = 100;
+}
+
+message CalibrationOverlapFitResult {
+    enum FitStatus {
+        STATUS_UNSPECIFIED = 0;
+        ACCEPTED = 10;
+        REJECTED = 20;
+    }
+
+    FitStatus status = 1;
+    double area_coupling_f_per_um2 = 10;
+    double edge_coupling_f_per_um = 20;
+    double corner_correction_f = 30;
+    double condition_number = 40; // Three-parameter design with normalized columns.
+    repeated CalibrationOverlapFitSample training_samples = 50;
+    repeated CalibrationOverlapFitSample validation_samples = 60;
+    repeated string diagnostics = 70;
+}
+
+message CalibrationOverlapFitSample {
+    string case_id = 1;
+    double width_um = 10;
+    double length_um = 20;
+    double solver_coupling_f = 30; // -C[A,B], charge-row convention.
+    double reverse_solver_coupling_f = 40; // -C[B,A], retained without averaging.
+    double predicted_coupling_f = 50;
+    double residual_f = 60; // Prediction minus solver coupling.
+}
+
+message CalibrationOverlapRefinementSensitivity {
+    kpex.calibration.CalibrationRefinementAxis axis = 1;
+    optional double reference_parameter_value = 10;
+    repeated CalibrationOverlapSensitivityLevel levels = 20;
+    string diagnostic = 30;
+}
+
+message CalibrationOverlapSensitivityLevel {
+    // Backend-defined refinement setting; DOMAIN_MARGIN is expressed in micrometers.
+    double parameter_value = 1;
+    optional double area_coupling_f_per_um2 = 10;
+    optional double area_coupling_change_f_per_um2 = 20;
+    repeated CalibrationOverlapSensitivitySample validation_samples = 30;
+    string diagnostic = 40;
+    optional double max_abs_training_residual_f = 50;
+}
+
+message CalibrationOverlapSensitivitySample {
+    string case_id = 1;
+    double solver_coupling_f = 10;
+    double predicted_coupling_f = 20;
+    double residual_f = 30;
+    double residual_change_f = 40; // Relative to the reference-setting residual.
+}
