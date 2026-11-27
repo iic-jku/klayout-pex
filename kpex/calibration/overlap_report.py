@@ -70,7 +70,8 @@ def _plate_observations(report: CalibrationOverlapFitReport, evaluation: Qualifi
             raise CalibrationError(f"Case '{case.case_id}' needs an overlap target bound to its bottom and top plates")
         if case.case_id == first.case_id:
             report.target.CopyFrom(target)
-        if (target != report.target or case.technology != first.technology or case.units != units
+        if (target != report.target
+                or case.technology.physical_stack_sha256 != report.physical_stack_sha256 or case.units != units
                 or case.pattern.measurement != report.measurement or run.manifest.solver != report.solver
                 or run.manifest.options.threads_per_job != first_run.manifest.options.threads_per_job
                 or run.manifest.options.solver_controls != first_run.manifest.options.solver_controls

@@ -131,13 +131,12 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
         residual_budget_f=policy.weight_floor_f * policy.max_weighted_residual,
         max_condition_number=policy.max_condition_number,
     )
-    series_by_key: Dict[Tuple[bytes, bytes], CalibrationLengthSeries] = {}
-    grouped_cases: Dict[Tuple[bytes, bytes], List[CalibrationQualificationCaseResult]] = defaultdict(list)
+    series_by_key: Dict[bytes, CalibrationLengthSeries] = {}
+    grouped_cases: Dict[bytes, List[CalibrationQualificationCaseResult]] = defaultdict(list)
     cases = {case.case_id: case for case in evaluation.report.cases}
     for case in evaluation.report.cases:
         series = _series(evaluation.references[case.case_id])
-        key = (series.SerializeToString(deterministic=True),
-               case.technology.SerializeToString(deterministic=True))
+        key = series.SerializeToString(deterministic=True)
         series_by_key[key] = series
         grouped_cases[key].append(case)
 
