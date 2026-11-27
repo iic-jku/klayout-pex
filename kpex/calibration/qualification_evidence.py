@@ -175,11 +175,13 @@ def read_measurement(run: QualificationRun, case_id: str) -> QualificationMeasur
             )
         except FasterCapError as exc:
             raise CalibrationError(f"Cannot verify collected matrix for '{case_id}': {exc}") from exc
-        panels = read_native_statistics(log)['refined_panels']
-        if panels is not None and panels > 2**64 - 1:
-            panels = None
-        if (record.refined_panels if record.HasField('refined_panels') else None) != panels:
-            raise CalibrationError(f"Collected panel count for '{case_id}' differs from the saved log")
+        statistics = read_native_statistics(log)
+        for field in ('input_panels', 'refined_panels'):
+            count = statistics[field]
+            if count is not None and count > 2**64 - 1:
+                count = None
+            if (getattr(record, field) if record.HasField(field) else None) != count:
+                raise CalibrationError(f"Collected {field} for '{case_id}' differs from the saved log")
         if record.native_matrix != native or record.measured_matrix != measured:
             raise CalibrationError(f"Collected matrix for '{case_id}' differs from the native report")
     elif record.status not in (CalibrationCaseResult.INCOMPLETE, CalibrationCaseResult.EXECUTION_FAILED,

@@ -46,7 +46,8 @@ from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
 REFINEMENT_AXES = (Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
-METHOD_VERSION = 2
+SUPPORTED_REFINEMENT_AXES = (*REFINEMENT_AXES, Axis.FASTERCAP_MESH_REFINEMENT)
+METHOD_VERSION = 3
 
 
 @dataclass(frozen=True)
@@ -143,6 +144,9 @@ def _controls(level: QualificationMeasurement, axis: int) -> Tuple[float, Calibr
         case Axis.INITIAL_MESH_MAX_AREA:
             value = fixed.fastercap.mesh_max_area_um2
             fixed.fastercap.ClearField('mesh_max_area_um2')
+        case Axis.FASTERCAP_MESH_REFINEMENT:
+            value = fixed.fastercap.mesh_refinement
+            fixed.fastercap.ClearField('mesh_refinement')
         case Axis.DOMAIN_MARGIN:
             value = level.run.preparation.domain_margin_grid
             scene.domain.ClearField('box')
@@ -172,6 +176,8 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
         parameters.append(value)
         level = result.levels.add(collection_id=name, parameter_value=value)
         record = measurement.record
+        if record.HasField('input_panels'):
+            level.input_panels = record.input_panels
         if record.HasField('refined_panels'):
             level.refined_panels = record.refined_panels
         pattern, target_pattern = measurement.pattern, target.pattern
@@ -182,8 +188,9 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
                 or technology.physical_stack_sha256 != target_tech.physical_stack_sha256
                 or measurement.run.manifest.solver != target.run.manifest.solver):
             result.diagnostics.append(f'{name}: physical geometry, measurement or solver identity changed')
-        if spec.axis == Axis.GMRES_TOLERANCE and measurement.solver_inputs != target.solver_inputs:
-            result.diagnostics.append(f'{name}: solver input files changed in the GMRES study')
+        if (spec.axis in (Axis.GMRES_TOLERANCE, Axis.FASTERCAP_MESH_REFINEMENT)
+                and measurement.solver_inputs != target.solver_inputs):
+            result.diagnostics.append(f'{name}: solver input files changed in the {Axis.Name(spec.axis)} study')
         if controls != target_controls or controls.fastercap.HasField('automatic_tolerance'):
             result.diagnostics.append(f'{name}: fixed numerical controls changed or automatic refinement is active')
         diagnostics, errors = _physical(measurement, tolerance)
@@ -197,10 +204,12 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
     if any(value <= 0 for value in parameters) or any(
             not (left < right if increasing else left > right) for left, right in zip(parameters, parameters[1:])):
         result.diagnostics.append('Refinement controls must be positive and strictly ordered from coarse to fine')
-    if spec.axis == Axis.INITIAL_MESH_MAX_AREA:
-        counts = [level.refined_panels for level in result.levels]
+    if spec.axis in (Axis.INITIAL_MESH_MAX_AREA, Axis.FASTERCAP_MESH_REFINEMENT):
+        initial = spec.axis == Axis.INITIAL_MESH_MAX_AREA
+        counts = [level.input_panels if initial else level.refined_panels for level in result.levels]
         if not all(counts) or any(left >= right for left, right in zip(counts, counts[1:])):
-            result.diagnostics.append('Observed refined panel counts must be present and strictly increase')
+            kind = 'input' if initial else 'adaptive'
+            result.diagnostics.append(f'Observed {kind} panel counts must be present and strictly increase')
     incompatible = bool(result.diagnostics)
     result.diagnostics.extend(physical_messages)
     if rejected:
@@ -259,7 +268,7 @@ def _validated_study(study: CalibrationQualificationStudy):
         axes = set()
         for refinement in case.refinements:
             levels = refinement.collection_ids
-            if (refinement.axis not in REFINEMENT_AXES or refinement.axis in axes or not levels
+            if (refinement.axis not in SUPPORTED_REFINEMENT_AXES or refinement.axis in axes or not levels
                     or any(level not in names for level in levels) or len(set(levels)) != len(levels)
                     or levels[-1] != case.reference_collection_id):
                 raise CalibrationError('Each refinement needs a unique supported axis and distinct declared '
