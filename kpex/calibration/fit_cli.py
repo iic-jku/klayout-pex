@@ -70,6 +70,8 @@ def _add_fit_arguments(parser: argparse.ArgumentParser):
 def run_fit_length_command(args: argparse.Namespace):
     from .length_fit import LengthFitPolicy
     from .length_report import fit_qualified_lengths
+    from kpex_protobuf.kpex.calibration.fit_pb2 import CalibrationFitRefinementCoverage as Coverage
+    from kpex_protobuf.kpex.calibration.qualification_pb2 import CalibrationRefinementAxis as Axis
     from kpex_protobuf.kpex.calibration.length_fit_pb2 import CalibrationLengthFitResult
 
     set_log_level(args.log_level)
@@ -82,6 +84,11 @@ def run_fit_length_command(args: argparse.Namespace):
             error(note)
         sys.exit(ExitCode.USAGE)
     info(f'Length fit report: {path}')
+    for result in report.fits:
+        for sensitivity in result.refinement_sensitivity:
+            if sensitivity.coverage in (Coverage.NOT_PROVIDED, Coverage.PARTIAL):
+                info(f"Length series {', '.join(result.case_ids)}, {Axis.Name(sensitivity.axis)}: "
+                     f'{sensitivity.diagnostic}')
     if any(result.status != CalibrationLengthFitResult.ACCEPTED for result in report.fits):
         for result in report.fits:
             for diagnostic in result.diagnostics:
@@ -91,6 +98,8 @@ def run_fit_length_command(args: argparse.Namespace):
 
 def run_fit_overlap_command(args: argparse.Namespace):
     from .overlap_report import fit_qualified_overlap
+    from kpex_protobuf.kpex.calibration.fit_pb2 import CalibrationFitRefinementCoverage as Coverage
+    from kpex_protobuf.kpex.calibration.qualification_pb2 import CalibrationRefinementAxis as Axis
     from kpex_protobuf.kpex.calibration.overlap_fit_pb2 import CalibrationOverlapFitResult
 
     try:
@@ -99,6 +108,9 @@ def run_fit_overlap_command(args: argparse.Namespace):
         error(str(exc))
         sys.exit(ExitCode.USAGE)
     info(f'Overlap fit report: {path}')
+    for sensitivity in report.refinement_sensitivity:
+        if sensitivity.coverage in (Coverage.NOT_PROVIDED, Coverage.PARTIAL):
+            info(f'{Axis.Name(sensitivity.axis)}: {sensitivity.diagnostic}')
     if report.fit.status != CalibrationOverlapFitResult.ACCEPTED:
         for diagnostic in report.fit.diagnostics:
             error(diagnostic)

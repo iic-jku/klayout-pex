@@ -25,6 +25,7 @@ package kpex.calibration;
 
 import "kpex/calibration/patterns.proto";
 import "kpex/calibration/preparation.proto";
+import "kpex/calibration/fit.proto";
 import "kpex/calibration/qualification.proto";
 import "kpex/calibration/targets.proto";
 import "kpex/pex25d/pex25d_units.proto";
@@ -97,6 +98,11 @@ message CalibrationLengthRefinementSensitivity {
     optional double reference_parameter_value = 10; // Shared reference setting, in the same units as the levels.
     repeated CalibrationLengthSensitivityLevel levels = 20; // Coarse to fine, excluding the reference.
     string diagnostic = 30; // Missing or partially shared settings.
+    // Every backend-supported axis is reported. Partial or absent optional
+    // coverage is informational; supplied evidence still has to qualify.
+    // A complete axis needs shared settings and successful refits.
+    CalibrationFitRefinementCoverage coverage = 40;
+    repeated string missing_case_ids = 50; // Cases in this fit without the axis.
 }
 
 message CalibrationLengthSensitivityLevel {

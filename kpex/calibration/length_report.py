@@ -31,7 +31,7 @@ from typing import Dict, List, Tuple
 
 from .artifacts import sha256_file, validate_output_directory, write_message
 from .fit_evidence import (
-    qualified_couplings, read_verified_qualification, recent_couplings, refinement_residual_violation,
+    qualified_couplings, read_verified_qualification, refinement_settings, refinement_residual_violation,
 )
 from .length_fit import LengthFitPolicy, LengthObservation, fit_length_series
 from .qualification_evidence import QualificationMeasurement
@@ -75,29 +75,22 @@ def _add_refinement_sensitivity(
 ):
     budget_f = policy.weight_floor_f * policy.max_weighted_residual
     reference_residuals = {item.case_id: item.residual_f for item in result.validation_samples}
-    axes = sorted({ref.axis for item in observations for ref in cases[item.case_id].refinements})
-    for axis in axes:
-        sensitivity = result.refinement_sensitivity.add(axis=axis)
-        refinements = [next((ref for ref in cases[item.case_id].refinements if ref.axis == axis), None)
-                       for item in observations]
-        if any(ref is None for ref in refinements):
-            sensitivity.diagnostic = 'The cases do not share this refinement axis'
-            result.diagnostics.append(f'{Axis.Name(axis)}: {sensitivity.diagnostic}')
-            continue
-        sensitivity.reference_parameter_value = refinements[0].levels[-1].parameter_value
-        couplings = {item.case_id: recent_couplings(refinement, item.capacitance_f)
-                     for item, refinement in zip(observations, refinements)}
-        common = set.intersection(*(set(values) for values in couplings.values()))
-        if len(common) < 2:
-            sensitivity.diagnostic = 'Fewer than two recent refinement settings are shared by every case'
-            result.diagnostics.append(f'{Axis.Name(axis)}: {sensitivity.diagnostic}')
-        # Preserve the backend's recorded coarse-to-fine order, which need not
-        # be numerically decreasing for another solver's refinement control.
-        ordered = [level.parameter_value for level in refinements[0].levels[-3:-1]
-                   if level.parameter_value in common]
-        for value in ordered:
+    members = [cases[item.case_id] for item in observations]
+    reference = {item.case_id: item.capacitance_f for item in observations}
+    for settings in refinement_settings(members, reference, result.series.solver.name):
+        axis = settings.axis
+        sensitivity = result.refinement_sensitivity.add(
+            axis=axis, coverage=settings.coverage, missing_case_ids=settings.missing_case_ids,
+            diagnostic=settings.diagnostic,
+        )
+        if settings.rejects_fit:
+            result.diagnostics.append(f'{Axis.Name(axis)}: {settings.diagnostic}')
+        if settings.reference_parameter_value is not None:
+            sensitivity.reference_parameter_value = settings.reference_parameter_value
+        for value in settings.parameter_values:
             level = sensitivity.levels.add(parameter_value=value)
-            alternate = [replace(item, capacitance_f=couplings[item.case_id][value]) for item in observations]
+            alternate = [replace(item, capacitance_f=settings.case_couplings[item.case_id][value])
+                         for item in observations]
             try:
                 fit = fit_length_series(alternate, policy)
             except CalibrationError as exc:

@@ -23,13 +23,16 @@
 #
 """Qualification evidence shared by the capacitance fitters."""
 
+from dataclasses import dataclass, field
 import math
 from pathlib import Path
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Iterator, Optional, Sequence, Tuple
 
 from .artifacts import read_message, sha256_file
+from .backend import calibration_backend
 from .qualification import QualificationEvaluation, charge_rows, evaluate_qualification
 from .validation import CalibrationError
+from kpex_protobuf.kpex.calibration.fit_pb2 import CalibrationFitRefinementCoverage as Coverage
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
     CalibrationQualificationCaseResult, CalibrationQualificationReport, CalibrationQualificationStatus as Status,
     CalibrationRefinementResult,
@@ -78,6 +81,59 @@ def recent_couplings(refinement: CalibrationRefinementResult, reference_f: float
                         if (entry.entry.charge_conductor_id, entry.entry.excitation_conductor_id) == ('A', 'B'))
         couplings[level.parameter_value] = value_f
     return couplings
+
+
+@dataclass(frozen=True)
+class RefinementSettings:
+    """Coverage and shared settings for a single axis in one fit."""
+
+    axis: int
+    coverage: int
+    missing_case_ids: Tuple[str, ...]
+    required: bool
+    reference_parameter_value: Optional[float] = None
+    parameter_values: Tuple[float, ...] = ()
+    case_couplings: Dict[str, Dict[float, float]] = field(default_factory=dict)
+    diagnostic: str = ''
+
+    @property
+    def rejects_fit(self) -> bool:
+        # Incomplete optional coverage is informational. Complete coverage still
+        # has to supply the shared settings needed to evaluate sensitivity.
+        return bool(self.diagnostic) and (self.required or self.coverage == Coverage.COMPLETE)
+
+
+def refinement_settings(cases: Sequence[CalibrationQualificationCaseResult],
+                        reference_couplings: Dict[str, float], solver_name: str) -> Iterator[RefinementSettings]:
+    """Describe every supported axis, using only the cases in this fit."""
+    backend = calibration_backend(solver_name)
+    supported = backend.supported_refinement_axes()
+    required = backend.required_refinement_axes()
+    if not cases:
+        raise CalibrationError('Refinement sensitivity requires at least one case')
+    for case in cases:
+        if any(ref.axis not in supported for ref in case.refinements):
+            raise CalibrationError(f"Case '{case.case_id}' contains an unsupported refinement axis")
+    for axis in supported:
+        refinements = {case.case_id: next((ref for ref in case.refinements if ref.axis == axis), None)
+                       for case in cases}
+        missing = tuple(case_id for case_id, ref in refinements.items() if ref is None)
+        if missing:
+            coverage = Coverage.NOT_PROVIDED if len(missing) == len(cases) else Coverage.PARTIAL
+            yield RefinementSettings(axis, coverage, missing, axis in required,
+                                     diagnostic='Sensitivity not evaluated: refinement evidence is missing for '
+                                                + ', '.join(missing))
+            continue
+        first = refinements[cases[0].case_id]
+        couplings = {case_id: recent_couplings(ref, reference_couplings[case_id])
+                     for case_id, ref in refinements.items()}
+        common = set.intersection(*(set(values) for values in couplings.values()))
+        diagnostic = ('Fewer than two recent refinement settings are shared by every case' if len(common) < 2 else '')
+        # Preserve recorded coarse-to-fine order; another backend's refinement
+        # parameter need not decrease numerically.
+        ordered = tuple(level.parameter_value for level in first.levels[-3:-1] if level.parameter_value in common)
+        yield RefinementSettings(axis, Coverage.COMPLETE, (), axis in required,
+                                 first.levels[-1].parameter_value, ordered, couplings, diagnostic)
 
 
 def read_verified_qualification(study_path: Path, qualification_path: Path
