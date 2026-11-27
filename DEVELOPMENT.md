@@ -518,6 +518,11 @@ changes must meet the declared absolute and relative budget. Physical matrix dia
 signed refinement changes are recorded separately in `qualification/qualification.pb.json`.
 The command returns a diagnostic error for incomplete or rejected cases after writing the report.
 Review the report alongside the original study and saved collections before fitting coefficients.
+Qualification can combine runs from before and after a parasitic coefficient update
+when the process stack, physical scene and requested measurement agree. Job count and
+time limit may differ. Use the same thread count and numerical controls except for
+the control named by the refinement axis.
+Regenerate reports from the saved collections when upgrading the qualification method.
 
 ### Result file
 

@@ -46,7 +46,7 @@ from kpex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
 REFINEMENT_AXES = (Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
-METHOD_VERSION = 1
+METHOD_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -131,6 +131,9 @@ def _physical(measurement: QualificationMeasurement, tolerance: CalibrationQuali
 def _controls(level: QualificationMeasurement, axis: int) -> Tuple[float, CalibrationSolveOptions, PEX25DScene]:
     fixed = CalibrationSolveOptions()
     fixed.CopyFrom(level.run.manifest.options)
+    # Scheduling and time limits do not change a completed solve's inputs.
+    fixed.ClearField('jobs')
+    fixed.ClearField('solver_timeout_seconds')
     scene = PEX25DScene()
     scene.CopyFrom(level.scene)
     match axis:
@@ -171,11 +174,14 @@ def _refinement(spec: CalibrationRefinementStudy, target: QualificationMeasureme
         record = measurement.record
         if record.HasField('refined_panels'):
             level.refined_panels = record.refined_panels
-        if (scene != target_scene or measurement.pattern != target.pattern
-                or measurement.run.preparation.technology != target.run.preparation.technology
-                or list(measurement.run.preparation.targets) != list(target.run.preparation.targets)
+        pattern, target_pattern = measurement.pattern, target.pattern
+        technology, target_tech = measurement.run.preparation.technology, target.run.preparation.technology
+        if (scene != target_scene or pattern.family != target_pattern.family
+                or pattern.layers != target_pattern.layers or pattern.dimensions_grid != target_pattern.dimensions_grid
+                or pattern.measurement != target_pattern.measurement
+                or technology.physical_stack_sha256 != target_tech.physical_stack_sha256
                 or measurement.run.manifest.solver != target.run.manifest.solver):
-            result.diagnostics.append(f'{name}: physical geometry, measurement, targets or solver identity changed')
+            result.diagnostics.append(f'{name}: physical geometry, measurement or solver identity changed')
         if spec.axis == Axis.GMRES_TOLERANCE and measurement.solver_inputs != target.solver_inputs:
             result.diagnostics.append(f'{name}: solver input files changed in the GMRES study')
         if controls != target_controls or controls.fastercap.HasField('automatic_tolerance'):
