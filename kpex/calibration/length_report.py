@@ -30,9 +30,10 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from .artifacts import sha256_file, validate_output_directory, write_message
-from .fit_evidence import qualified_couplings, read_verified_qualification, recent_couplings
+from .fit_evidence import (
+    qualified_couplings, read_verified_qualification, recent_couplings, refinement_residual_violation,
+)
 from .length_fit import LengthFitPolicy, LengthObservation, fit_length_series
-from .qualification import REFINEMENT_AXES
 from .qualification_evidence import QualificationMeasurement
 from .validation import CalibrationError
 from ..version import __version__
@@ -71,17 +72,24 @@ def _add_refinement_sensitivity(
     cases: Dict[str, CalibrationQualificationCaseResult],
     policy: LengthFitPolicy,
 ):
+    budget_f = policy.weight_floor_f * policy.max_weighted_residual
     reference_residuals = {item.case_id: item.residual_f for item in result.validation_samples}
-    for axis in REFINEMENT_AXES:
+    axes = sorted({ref.axis for item in observations for ref in cases[item.case_id].refinements})
+    for axis in axes:
         sensitivity = result.refinement_sensitivity.add(axis=axis)
-        refinements = [next(ref for ref in cases[item.case_id].refinements if ref.axis == axis)
+        refinements = [next((ref for ref in cases[item.case_id].refinements if ref.axis == axis), None)
                        for item in observations]
+        if any(ref is None for ref in refinements):
+            sensitivity.diagnostic = 'The cases do not share this refinement axis'
+            result.diagnostics.append(f'{Axis.Name(axis)}: {sensitivity.diagnostic}')
+            continue
         sensitivity.reference_parameter_value = refinements[0].levels[-1].parameter_value
         couplings = {item.case_id: recent_couplings(refinement, item.capacitance_f)
                      for item, refinement in zip(observations, refinements)}
         common = set.intersection(*(set(values) for values in couplings.values()))
         if len(common) < 2:
             sensitivity.diagnostic = 'Fewer than two recent refinement settings are shared by every case'
+            result.diagnostics.append(f'{Axis.Name(axis)}: {sensitivity.diagnostic}')
         for value in sorted(common, reverse=axis != Axis.DOMAIN_MARGIN):
             level = sensitivity.levels.add(parameter_value=value)
             alternate = [replace(item, capacitance_f=couplings[item.case_id][value]) for item in observations]
@@ -89,6 +97,7 @@ def _add_refinement_sensitivity(
                 fit = fit_length_series(alternate, policy)
             except CalibrationError as exc:
                 level.diagnostic = str(exc)
+                result.diagnostics.append(f'{Axis.Name(axis)} at {value:g}: {level.diagnostic}')
                 continue
             level.max_abs_training_residual_f = fit['training']['max_abs_residual_f']
             for item in fit['validation']['observations']:
@@ -97,6 +106,12 @@ def _add_refinement_sensitivity(
                     predicted_coupling_f=item['predicted_f'], residual_f=item['residual_f'],
                     residual_change_f=item['residual_f'] - reference_residuals[item['case_id']],
                 )
+            violation = refinement_residual_violation(
+                level.max_abs_training_residual_f, (item.residual_f for item in level.validation_samples), budget_f,
+            )
+            if violation:
+                level.diagnostic = violation
+                result.diagnostics.append(f'{Axis.Name(axis)} at {value:g}: {violation}')
 
 
 def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir: Path, policy: LengthFitPolicy
@@ -143,8 +158,6 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
             result.diagnostics.append(str(exc))
             continue
 
-        result.status = (CalibrationLengthFitResult.REJECTED if fit['diagnostics']
-                         else CalibrationLengthFitResult.ACCEPTED)
         result.distributed_coupling_f_per_um = fit['parameters']['c_infinite_f_per_um']
         result.end_correction_f = fit['parameters']['c_end_f']
         result.condition_number = fit['sensitivity']['dimensionless_condition_number']
@@ -158,6 +171,8 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
                     predicted_coupling_f=item['predicted_f'], residual_f=item['residual_f'],
                 )
         _add_refinement_sensitivity(result, observations, cases, policy)
+        result.status = (CalibrationLengthFitResult.REJECTED if result.diagnostics
+                         else CalibrationLengthFitResult.ACCEPTED)
     if sha256_file(qualification_path) != qualification_sha256:
         raise CalibrationError('Qualification report changed during fitting')
     output_dir.mkdir()

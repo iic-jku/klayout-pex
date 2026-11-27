@@ -25,7 +25,7 @@
 
 import math
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from .artifacts import read_message, sha256_file
 from .qualification import QualificationEvaluation, charge_rows, evaluate_qualification
@@ -94,3 +94,12 @@ def read_verified_qualification(study_path: Path, qualification_path: Path
         raise CalibrationError('Qualification report differs from the recomputed study and solver evidence')
 
     return qualification_sha256, evaluation
+
+
+
+def refinement_residual_violation(max_abs_training_residual_f: float, validation_residuals_f: Iterable[float],
+                                  budget_f: float) -> Optional[str]:
+    maximum_f = max(max_abs_training_residual_f, max(abs(value) for value in validation_residuals_f))
+    if maximum_f > budget_f:
+        return f'Maximum absolute residual {maximum_f:.6g} F exceeds the declared budget {budget_f:.6g} F'
+    return None

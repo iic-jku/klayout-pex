@@ -31,9 +31,11 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from .artifacts import sha256_file, validate_output_directory, write_message
-from .fit_evidence import qualified_couplings, read_verified_qualification, recent_couplings
+from .fit_evidence import (
+    qualified_couplings, read_verified_qualification, recent_couplings, refinement_residual_violation,
+)
 from .overlap_fit import OverlapFit, OverlapObservation, fit_overlap_rectangles
-from .qualification import REFINEMENT_AXES, QualificationEvaluation
+from .qualification import QualificationEvaluation
 from .validation import CalibrationError
 from ..version import __version__
 
@@ -70,6 +72,7 @@ def _plate_observations(report: CalibrationOverlapFitReport, evaluation: Qualifi
             report.target.CopyFrom(target)
         if (target != report.target or case.technology != report.technology or case.units != units
                 or case.pattern.measurement != report.measurement or run.manifest.solver != report.solver
+                or run.manifest.options.threads_per_job != first_run.manifest.options.threads_per_job
                 or run.manifest.options.fastercap != first_run.manifest.options.fastercap
                 or run.preparation.domain_margin_grid != first_run.preparation.domain_margin_grid):
             raise CalibrationError(f"Case '{case.case_id}' does not share the overlap fit's target or reference settings")
@@ -99,17 +102,21 @@ def _record_fit(result: CalibrationOverlapFitResult, observations: List[OverlapO
             result.diagnostics.append(f"Case '{item.case_id}' has negative predicted coupling")
         if abs(residual) > budget_f:
             result.diagnostics.append(f"Case '{item.case_id}' exceeds the declared residual budget")
-    result.status = CalibrationOverlapFitResult.REJECTED if result.diagnostics else CalibrationOverlapFitResult.ACCEPTED
 
 
 def _add_sensitivity(report: CalibrationOverlapFitReport, evaluation: QualificationEvaluation,
                      observations: List[OverlapObservation], fit: OverlapFit, grid: Fraction):
     reference_errors = {sample.case_id: sample.residual_f for sample in report.fit.validation_samples}
     cases = {case.case_id: case for case in evaluation.report.cases}
-    for axis in REFINEMENT_AXES:
+    axes = sorted({ref.axis for case in cases.values() for ref in case.refinements})
+    for axis in axes:
         result = report.refinement_sensitivity.add(axis=axis)
-        refinements = {item.case_id: next(ref for ref in cases[item.case_id].refinements if ref.axis == axis)
+        refinements = {item.case_id: next((ref for ref in cases[item.case_id].refinements if ref.axis == axis), None)
                        for item in observations}
+        if any(ref is None for ref in refinements.values()):
+            result.diagnostic = 'The cases do not share this refinement axis'
+            report.fit.diagnostics.append(f'{Axis.Name(axis)}: {result.diagnostic}')
+            continue
         scale = float(grid) if axis == Axis.DOMAIN_MARGIN else 1
         result.reference_parameter_value = next(iter(refinements.values())).levels[-1].parameter_value * scale
         couplings = {item.case_id: recent_couplings(refinements[item.case_id], item.coupling_f)
@@ -117,6 +124,7 @@ def _add_sensitivity(report: CalibrationOverlapFitReport, evaluation: Qualificat
         common = set.intersection(*(set(values) for values in couplings.values()))
         if len(common) < 2:
             result.diagnostic = 'Fewer than two recent refinement settings are shared by every case'
+            report.fit.diagnostics.append(f'{Axis.Name(axis)}: {result.diagnostic}')
         for setting in sorted(common, reverse=axis != Axis.DOMAIN_MARGIN):
             level = result.levels.add(parameter_value=setting * scale)
             alternate = [replace(item, coupling_f=couplings[item.case_id][setting]) for item in observations]
@@ -124,17 +132,28 @@ def _add_sensitivity(report: CalibrationOverlapFitReport, evaluation: Qualificat
                 alternative_fit = fit_overlap_rectangles(alternate)
             except CalibrationError as exc:
                 level.diagnostic = str(exc)
+                report.fit.diagnostics.append(f'{Axis.Name(axis)} at {level.parameter_value:g}: {level.diagnostic}')
                 continue
             level.area_coupling_f_per_um2 = alternative_fit.area_coupling_f_per_um2
             level.area_coupling_change_f_per_um2 = alternative_fit.area_coupling_f_per_um2 - fit.area_coupling_f_per_um2
+            training_residuals = []
             for item in alternate:
-                if item.role == TRAINING:
-                    continue
                 prediction = alternative_fit.predictions_f[item.case_id]
                 residual = prediction - item.coupling_f
+                if item.role == TRAINING:
+                    training_residuals.append(abs(residual))
+                    continue
                 level.validation_samples.add(case_id=item.case_id, solver_coupling_f=item.coupling_f,
                                              predicted_coupling_f=prediction, residual_f=residual,
                                              residual_change_f=residual - reference_errors[item.case_id])
+            level.max_abs_training_residual_f = max(training_residuals)
+            violation = refinement_residual_violation(
+                level.max_abs_training_residual_f, (item.residual_f for item in level.validation_samples),
+                report.residual_budget_f,
+            )
+            if violation:
+                level.diagnostic = violation
+                report.fit.diagnostics.append(f'{Axis.Name(axis)} at {level.parameter_value:g}: {violation}')
 
 
 def fit_qualified_overlap(study_path: Path, qualification_path: Path, output_dir: Path, budget_f: float
@@ -152,6 +171,8 @@ def fit_qualified_overlap(study_path: Path, qualification_path: Path, output_dir
     fit = fit_overlap_rectangles(observations)
     _record_fit(report.fit, observations, reverse_couplings, fit, budget_f)
     _add_sensitivity(report, evaluation, observations, fit, grid)
+    report.fit.status = (CalibrationOverlapFitResult.REJECTED if report.fit.diagnostics
+                         else CalibrationOverlapFitResult.ACCEPTED)
     if sha256_file(qualification_path) != qualification_sha256:
         raise CalibrationError('Qualification report changed during fitting')
     output_dir.mkdir()

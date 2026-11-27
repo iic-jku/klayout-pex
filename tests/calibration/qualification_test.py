@@ -230,9 +230,27 @@ def test_mixed_reference_controls_reject_length_series(tmp_path: Path, tech_info
     assert not result.HasField('end_correction_f')
 
 
-@pytest.mark.parametrize('holdout_offset_f', [0, 2e-17])
+
+@pytest.mark.parametrize('residual, rejected', [
+    (math.nextafter(1e-17, 0), False),
+    (1e-17, False),
+    (math.nextafter(1e-17, math.inf), True),
+])
+def test_refinement_budget_boundary(residual: float, rejected: bool):
+    from kpex.calibration.fit_evidence import refinement_residual_violation
+
+    assert bool(refinement_residual_violation(residual, [-1e-18], 1e-17)) == rejected
+    assert bool(refinement_residual_violation(1e-18, [-residual], 1e-17)) == rejected
+
+
+@pytest.mark.parametrize('holdout_offset_f,budget_f,accepted', [
+    (0, 1e-17, True),
+    (2e-17, 1e-17, False),
+    (0, 5e-19, False),  # The reference passes, but a refit changes the holdout error by 1 aF.
+])
 def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
-                                    monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float):
+                                    monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float,
+                                    budget_f: float, accepted: bool):
     lengths = {f'wire_{length}': length for length in (4, 8, 12, 16)}
     pattern_data['patterns'] = [
         {'id': name, 'role': 'VALIDATION' if length == 12 else 'TRAINING',
@@ -261,15 +279,15 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     write_message(qualified.report_path, qualified.report, replace=True)
     out_dir = tmp_path / 'fit'
     args = ['kpex', 'calibrate', 'fit-length', '--study', str(path),
-            '--qualification', str(qualified.report_path), '--residual-budget-f', '1e-17',
+            '--qualification', str(qualified.report_path), '--residual-budget-f', str(budget_f),
             '--out-dir', str(out_dir)]
     code, output = run_cli(KpexCLI().main, args)
-    assert code == (1 if holdout_offset_f else 0), output
+    assert code == (0 if accepted else 1), output
     report = read_message(out_dir / 'fit-length.pb.json', CalibrationLengthFitReport())
     assert report.qualification_sha256 == sha256_file(qualified.report_path)
     assert report.study_sha256 == sha256_file(path)
     fit, = report.fits
-    assert fit.status == (CalibrationLengthFitResult.REJECTED if holdout_offset_f
+    assert fit.status == (CalibrationLengthFitResult.REJECTED if not accepted
                           else CalibrationLengthFitResult.ACCEPTED)
     assert fit.distributed_coupling_f_per_um == pytest.approx(2e-16, abs=1e-29)
     assert fit.end_correction_f == pytest.approx(1e-16, abs=1e-29)
@@ -293,6 +311,8 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     assert alternative.predicted_coupling_f - held.predicted_coupling_f == pytest.approx(0.5e-18, abs=1e-29)
     assert alternative.residual_change_f == pytest.approx(-1e-18, abs=1e-29)
     assert mesh.levels[1].max_abs_training_residual_f == pytest.approx(0, abs=1e-29)
+    if budget_f == 5e-19:
+        assert any('INITIAL_MESH_MAX_AREA at 0.75' in message for message in fit.diagnostics)
 
     # Editing only the saved qualification must be detected even when the
     # evidence still supports a fit and the modified report parses correctly.
@@ -304,9 +324,14 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     assert not Path(args[-1]).exists()
 
 
-@pytest.mark.parametrize('holdout_offset_f', [0, 2e-17])
+@pytest.mark.parametrize('holdout_offset_f,budget_f,accepted', [
+    (0, 1e-17, True),
+    (2e-17, 1e-17, False),
+    (0, 5e-19, False),  # The reference passes, but a refit changes the holdout error by 1 aF.
+])
 def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
-                               monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float):
+                               monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float,
+                                    budget_f: float, accepted: bool):
     specification = PatternSetSpecification(schema_version=1, grid_um='0.001', fringe_scale_mode='HALO_NORMALIZED')
     overlap = specification.targets.add(id='overlap').overlap
     overlap.top.canonical_layer, overlap.top.process_profile = 'routing2', 'M2'
@@ -338,14 +363,14 @@ def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
     out_dir = tmp_path / 'fit'
     code, output = run_cli(KpexCLI().main, [
         'kpex', 'calibrate', 'fit-overlap', '--study', str(path),
-        '--qualification', str(qualified.report_path), '--residual-budget-f', '1e-17', '--out-dir', str(out_dir),
+        '--qualification', str(qualified.report_path), '--residual-budget-f', str(budget_f), '--out-dir', str(out_dir),
     ])
-    assert code == (1 if holdout_offset_f else 0), output
+    assert code == (0 if accepted else 1), output
     report = read_message(out_dir / 'fit-overlap.pb.json', CalibrationOverlapFitReport())
     assert report.target.overlap == overlap
     assert report.study_sha256 == sha256_file(path)
     assert report.qualification_sha256 == sha256_file(qualified.report_path)
-    assert report.fit.status == (CalibrationOverlapFitResult.REJECTED if holdout_offset_f
+    assert report.fit.status == (CalibrationOverlapFitResult.REJECTED if not accepted
                                  else CalibrationOverlapFitResult.ACCEPTED)
     assert report.fit.area_coupling_f_per_um2 == pytest.approx(1e-16, abs=1e-29)
     assert report.fit.edge_coupling_f_per_um == pytest.approx(2e-17, abs=1e-29)
@@ -363,18 +388,21 @@ def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
     # The 0.5 aF common training shift belongs wholly to the corner term.
     # A 1.5 aF held-out measurement shift thus decreases the residual by 1 aF.
     assert mesh.levels[1].area_coupling_change_f_per_um2 == pytest.approx(0, abs=1e-29)
+    assert mesh.levels[1].max_abs_training_residual_f == pytest.approx(0, abs=1e-29)
+    if budget_f == 5e-19:
+        assert any('INITIAL_MESH_MAX_AREA at 0.75' in message for message in report.fit.diagnostics)
     assert alternate.residual_change_f == pytest.approx(-1e-18, abs=1e-29)
 
     # Without independent domain evidence for the holdout, a small residual
     # cannot turn it into a qualified input.
-    if holdout_offset_f == 0:
+    if accepted:
         del study.cases[-1].refinements[-1]
         incomplete = write_message(tmp_path / 'incomplete-overlap-study.pb.json', study)
         report_path = qualify_study(incomplete, tmp_path / 'incomplete-qualification').report_path
         rejected = tmp_path / 'unqualified-fit'
         code, output = run_cli(KpexCLI().main, [
             'kpex', 'calibrate', 'fit-overlap', '--study', str(incomplete),
-            '--qualification', str(report_path), '--residual-budget-f', '1e-17', '--out-dir', str(rejected),
+            '--qualification', str(report_path), '--residual-budget-f', str(budget_f), '--out-dir', str(rejected),
         ])
         assert code == 2 and "Case 'held_out' is INCOMPLETE" in output
         assert not rejected.exists()
