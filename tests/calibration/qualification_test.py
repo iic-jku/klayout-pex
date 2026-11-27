@@ -201,6 +201,28 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     assert not Path(args[-1]).exists()
 
 
+def test_qualified_report_and_budget_boundary(study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path):
+    specification, path = study
+    qualified = qualify_study(path, tmp_path / 'qualified')
+    assert read_message(qualified.report_path, CalibrationQualificationReport()) == qualified.report
+    case = qualified.report.cases[0]
+    assert case.status == Status.STABILIZED
+    assert [item.status for item in case.refinements] == [Status.STABILIZED] * 3
+    assert case.reference_matrix.rows[0].values[0] == pytest.approx(7e-15, abs=1e-30)
+    change = max(abs(entry.signed_delta_f) for entry in case.refinements[0].changes[0].entries)
+    assert change == pytest.approx(1e-18, abs=1e-29)
+    # The entry-wise budget is inclusive. Just below the observed change
+    # the same solver runs must give an incomplete result.
+    for i, (threshold, status) in enumerate([
+        (math.nextafter(change, 0), Status.INCOMPLETE),
+        (change, Status.STABILIZED),
+        (math.nextafter(change, math.inf), Status.STABILIZED),
+    ]):
+        specification.tolerance.absolute_floor_f = threshold
+        threshold_study = write_message(tmp_path / f'threshold-{i}.pb.json', specification)
+        assert qualify_study(threshold_study, tmp_path / f'qualified-{i}').report.cases[0].status == status
+
+
 @pytest.mark.parametrize('change, expected', [
     ('jobs', Status.STABILIZED),
     ('timeout', Status.STABILIZED),
@@ -248,28 +270,6 @@ def test_qualification_compares_physics_and_numerical_settings(
         assert case.technology.physical_stack_sha256 == baseline.technology.physical_stack_sha256
     elif change == 'process-stack':
         assert case.technology.physical_stack_sha256 != baseline.technology.physical_stack_sha256
-
-
-def test_qualified_report_and_budget_boundary(study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path):
-    specification, path = study
-    qualified = qualify_study(path, tmp_path / 'qualified')
-    assert read_message(qualified.report_path, CalibrationQualificationReport()) == qualified.report
-    case = qualified.report.cases[0]
-    assert case.status == Status.STABILIZED
-    assert [item.status for item in case.refinements] == [Status.STABILIZED] * 3
-    assert case.reference_matrix.rows[0].values[0] == pytest.approx(7e-15, abs=1e-30)
-    change = max(abs(entry.signed_delta_f) for entry in case.refinements[0].changes[0].entries)
-    assert change == pytest.approx(1e-18, abs=1e-29)
-    # The entry-wise budget is inclusive. Just below the observed change
-    # the same solver runs must give an incomplete result.
-    for i, (threshold, status) in enumerate([
-        (math.nextafter(change, 0), Status.INCOMPLETE),
-        (change, Status.STABILIZED),
-        (math.nextafter(change, math.inf), Status.STABILIZED),
-    ]):
-        specification.tolerance.absolute_floor_f = threshold
-        threshold_study = write_message(tmp_path / f'threshold-{i}.pb.json', specification)
-        assert qualify_study(threshold_study, tmp_path / f'qualified-{i}').report.cases[0].status == status
 
 
 def test_incomplete_evidence_cannot_qualify(study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path):
