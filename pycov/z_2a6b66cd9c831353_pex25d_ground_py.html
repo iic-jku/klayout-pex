@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for kpex/klayout/pex25d_ground.py: 98%</title>
+    <title>Coverage for kpex/klayout/pex25d_ground.py: 91%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>kpex<span class="sep">/</span>klayout<span class="sep">/</span>pex25d_ground.py</b>:
-            <span class="pc_cov">98%</span>
+            <span class="pc_cov">91%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">66 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">65<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">60<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">6<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_2a6b66cd9c831353_pex25d_stack_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 19:13 +0000
+            created at 2026-11-27 19:48 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -174,10 +174,10 @@
     <p class="run"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">            <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">            <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">    <span class="key">for</span> <span class="nam">polygon</span> <span class="key">in</span> <span class="nam">conductor_region</span><span class="op">.</span><span class="nam">polygons</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">for</span> <span class="nam">ring</span> <span class="key">in</span> <span class="op">(</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">outer</span><span class="op">,</span> <span class="op">*</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">holes</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="key">for</span> <span class="nam">point</span> <span class="key">in</span> <span class="nam">ring</span><span class="op">.</span><span class="nam">points</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">for</span> <span class="nam">ring</span> <span class="key">in</span> <span class="op">(</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">outer</span><span class="op">,</span> <span class="op">*</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">holes</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="key">for</span> <span class="nam">point</span> <span class="key">in</span> <span class="nam">ring</span><span class="op">.</span><span class="nam">points</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="nam">region</span> <span class="op">=</span> <span class="nam">region_of</span><span class="op">(</span><span class="nam">conductor_region</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">    <span class="nam">field</span> <span class="op">=</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">Region</span><span class="op">(</span><span class="nam">region</span><span class="op">.</span><span class="nam">bbox</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">enlarged</span><span class="op">(</span><span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="nam">retained</span> <span class="op">=</span> <span class="nam">retained_ground_region</span><span class="op">(</span><span class="nam">ground</span><span class="op">,</span> <span class="nam">field</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -197,8 +197,8 @@
     <p class="run"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t"><span class="key">def</span> <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">value</span><span class="op">:</span> <span class="nam">int</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="op">(</span><span class="nam">is_supported_native_coordinate</span><span class="op">(</span><span class="nam">value</span> <span class="op">-</span> <span class="num">1</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">            <span class="key">and</span> <span class="nam">is_supported_native_coordinate</span><span class="op">(</span><span class="nam">value</span> <span class="op">+</span> <span class="num">1</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">        <span class="key">raise</span> <span class="nam">GroundGeometryError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">            <span class="str">&quot;Ground contact geometry needs a one-grid envelope within supported native coordinates&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">        <span class="key">raise</span> <span class="nam">GroundGeometryError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">            <span class="str">&quot;Ground contact geometry needs a one-grid envelope within supported native coordinates&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -208,7 +208,7 @@
             <a class="nav" href="z_2a6b66cd9c831353_pex25d_stack_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.5">coverage.py v7.17.5</a>,
-            created at 2026-11-27 19:13 +0000
+            created at 2026-11-27 19:48 +0000
         </p>
     </div>
 </footer>
