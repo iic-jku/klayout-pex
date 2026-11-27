@@ -163,7 +163,7 @@ def test_physical_component_selection_requires_explicit_scenario_capability(tmp_
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
 @pytest.mark.parametrize('pdk', list(PDK))
 def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tmp_path: Path, pdk: PDK):
-    from kpex.calibration.collect import read_native_statistics
+    from kpex.fastercap.calibration_backend import read_native_statistics
     from kpex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
     from kpex.fastercap.pex25d_exporter import FasterCapSceneExporter
 
