@@ -1,0 +1,49 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/kpex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+package kpex.fastercap;
+
+// FasterCap controls are backend-specific, not universal accuracy settings.
+message CalibrationControls {
+    // Automatic mode: finite relative stopping tolerance, strictly between 0 and 1.
+    // Cannot coexist with manual mesh_refinement / gmres_tolerance.
+    optional double automatic_tolerance = 1;
+    // Manual mode: both fields are required. Refinement is positive; GMRES is in (0, 1).
+    optional double mesh_refinement = 10;
+    optional double gmres_tolerance = 20;
+    // FasterCap -d: direct potential interaction coefficient / mesh refinement, > 0.
+    double interaction_ratio = 30;
+    // Initial triangulation, independent of adaptive refinement; 0 leaves area to the mesher.
+    double mesh_max_area_um2 = 40;
+    // Requested minimum initial triangle angle in degrees; converted to b = 2 sin(angle).
+    // In [0, degrees(asin(1.1 / 2))], preserving the mesher quality limit.
+    double mesh_min_angle_deg = 50;
+}
+
+// Native counters from the final matrix's console statistics block.
+// Unknown counts stay absent. These are boundary panels, not volume elements.
+message CalibrationStatistics {
+    optional uint64 input_panels = 1;
+    optional uint64 refined_panels = 10;
+    optional uint64 potential_estimates = 20;
+    optional uint64 links = 30;
+}
