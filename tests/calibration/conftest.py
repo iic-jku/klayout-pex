@@ -73,3 +73,22 @@ def pattern_data() -> Dict[str, Any]:
              'width_um': '0.4', 'length_um': '8', 'role': 'VALIDATION'},
         ],
     }
+
+
+@pytest.fixture
+def targeted_technology(tech_info: TechInfo) -> TechInfo:
+    tech = Technology()
+    tech.CopyFrom(tech_info.tech)
+    for number in (1, 2):
+        drawn = tech.layers.add(name=f'routing{number}')
+        drawn.drw_gds_pair.layer = number
+        computed = tech.lvs_computed_layers.add(original_layer_name=f'routing{number}', process_layer_name=f'M{number}')
+        computed.layer_info.name = f'M{number}'
+        computed.layer_info.drw_gds_pair.layer = number
+    caps = tech.process_parasitics.capacitance
+    caps.substrates.add(layer_name='routing1', area_capacitance=1.0, perimeter_capacitance=2.0)
+    caps.overlaps.add(top_layer_name='routing2', bottom_layer_name='routing1', capacitance=3.0)
+    caps.sidewalls.add(layer_name='routing2', capacitance=4.0, offset=-0.01)
+    caps.sideoverlaps.add(in_layer_name='routing1', out_layer_name='routing2', capacitance=5.0)
+    caps.sideoverlaps.add(in_layer_name='routing2', out_layer_name='routing1', capacitance=6.0)
+    return TechInfo(tech, dielectric_filter=None)

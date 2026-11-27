@@ -32,6 +32,7 @@ import sys
 from typing import Any, Callable, Dict, List, Tuple
 
 import pytest
+from google.protobuf.json_format import MessageToDict
 
 from kpex.calibration.artifacts import read_message, sha256_file, write_message
 from kpex.calibration.patterns import read_patterns
@@ -43,6 +44,8 @@ from kpex.fastercap.fastercap_runner import FasterCapRunResult
 from kpex.kpex_cli import KpexCLI
 from kpex.tech_info import TechInfo
 from kpex_protobuf.kpex.calibration.length_fit_pb2 import CalibrationLengthFitReport, CalibrationLengthFitResult
+from kpex_protobuf.kpex.calibration.overlap_fit_pb2 import CalibrationOverlapFitReport, CalibrationOverlapFitResult
+from kpex_protobuf.kpex.calibration.patterns_pb2 import PatternSetSpecification, TRAINING, VALIDATION
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
     CalibrationQualificationReport, CalibrationQualificationStatus as Status,
     CalibrationQualificationStudy, CalibrationQualificationTolerance, CalibrationRefinementAxis as Axis,
@@ -199,6 +202,83 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
     code, output = run_cli(KpexCLI().main, args)
     assert code == 2 and 'differs from the recomputed study' in output
     assert not Path(args[-1]).exists()
+
+
+@pytest.mark.parametrize('holdout_offset_f', [0, 2e-17])
+def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
+                               monkeypatch: pytest.MonkeyPatch, holdout_offset_f: float):
+    specification = PatternSetSpecification(schema_version=1, grid_um='0.001', fringe_scale_mode='HALO_NORMALIZED')
+    overlap = specification.targets.add(id='overlap').overlap
+    overlap.top.canonical_layer, overlap.top.process_profile = 'routing2', 'M2'
+    overlap.bottom.canonical_layer, overlap.bottom.process_profile = 'routing1', 'M1'
+    rectangles = dict(training_1=(2, 4), training_2=(2, 8), training_3=(4, 4), training_4=(4, 8), held_out=(3, 6))
+    for case_id, (width, length) in rectangles.items():
+        pattern = specification.patterns.add(id=case_id, width_um=str(width), length_um=str(length),
+                                             role=VALIDATION if case_id == 'held_out' else TRAINING,
+                                             target_ids=['overlap'])
+        pattern.parallel_plates.lower_layer = 'M1'
+        pattern.parallel_plates.upper_layer = 'M2'
+
+    def matrix_for_case(case_id: str, variant: str) -> List[List[float]]:
+        width, length = rectangles[case_id]
+        coupling = 1e-16 * width * length + 2e-17 * 2 * (width + length) - 4e-17
+        if case_id == 'held_out':
+            coupling += holdout_offset_f
+        if variant == 'mesh-medium':
+            coupling += 1.5e-18 if case_id == 'held_out' else 0.5e-18
+        coupling /= 1e-6  # The native solver report fixture is in microfarads.
+        return [[9e-9, -2e-9, -coupling],
+                [-2e-9, 8e-9, -2e-9], [-coupling + 1e-13, -2e-9, 9e-9]]
+
+    _mock_solver(monkeypatch, matrix_for_case)
+    pattern_data = MessageToDict(specification, preserving_proto_field_name=True)
+    study, path = _study(tmp_path, targeted_technology, pattern_data, fake=True, case_count=len(rectangles))
+    qualified = qualify_study(path, tmp_path / 'qualified')
+    assert all(case.status == Status.STABILIZED for case in qualified.report.cases)
+    out_dir = tmp_path / 'fit'
+    code, output = run_cli(KpexCLI().main, [
+        'kpex', 'calibrate', 'fit-overlap', '--study', str(path),
+        '--qualification', str(qualified.report_path), '--residual-budget-f', '1e-17', '--out-dir', str(out_dir),
+    ])
+    assert code == (1 if holdout_offset_f else 0), output
+    report = read_message(out_dir / 'fit-overlap.pb.json', CalibrationOverlapFitReport())
+    assert report.target.overlap == overlap
+    assert report.study_sha256 == sha256_file(path)
+    assert report.qualification_sha256 == sha256_file(qualified.report_path)
+    assert report.fit.status == (CalibrationOverlapFitResult.REJECTED if holdout_offset_f
+                                 else CalibrationOverlapFitResult.ACCEPTED)
+    assert report.fit.area_coupling_f_per_um2 == pytest.approx(1e-16, abs=1e-29)
+    assert report.fit.edge_coupling_f_per_um == pytest.approx(2e-17, abs=1e-29)
+    assert report.fit.corner_correction_f == pytest.approx(-4e-17, abs=1e-29)
+    assert len(report.fit.training_samples) == 4
+    holdout, = report.fit.validation_samples
+    assert holdout.residual_f == pytest.approx(-holdout_offset_f, abs=1e-29)
+    assert holdout.solver_coupling_f - holdout.reverse_solver_coupling_f == pytest.approx(1e-19, abs=1e-29)
+    solver, mesh, domain = report.refinement_sensitivity
+    assert (solver.axis, mesh.axis, domain.axis) == (Axis.GMRES_TOLERANCE, Axis.INITIAL_MESH_MAX_AREA, Axis.DOMAIN_MARGIN)
+    assert domain.reference_parameter_value == 8
+    assert [level.parameter_value for level in domain.levels] == [2, 4]
+    alternate, = mesh.levels[1].validation_samples
+    assert alternate.case_id == holdout.case_id
+    # The 0.5 aF common training shift belongs wholly to the corner term.
+    # A 1.5 aF held-out measurement shift thus decreases the residual by 1 aF.
+    assert mesh.levels[1].area_coupling_change_f_per_um2 == pytest.approx(0, abs=1e-29)
+    assert alternate.residual_change_f == pytest.approx(-1e-18, abs=1e-29)
+
+    # Without independent domain evidence for the holdout, a small residual
+    # cannot turn it into a qualified input.
+    if holdout_offset_f == 0:
+        del study.cases[-1].refinements[-1]
+        incomplete = write_message(tmp_path / 'incomplete-overlap-study.pb.json', study)
+        report_path = qualify_study(incomplete, tmp_path / 'incomplete-qualification').report_path
+        rejected = tmp_path / 'unqualified-fit'
+        code, output = run_cli(KpexCLI().main, [
+            'kpex', 'calibrate', 'fit-overlap', '--study', str(incomplete),
+            '--qualification', str(report_path), '--residual-budget-f', '1e-17', '--out-dir', str(rejected),
+        ])
+        assert code == 2 and "Case 'held_out' is INCOMPLETE" in output
+        assert not rejected.exists()
+
 
 
 def test_qualified_report_and_budget_boundary(study: Tuple[CalibrationQualificationStudy, Path], tmp_path: Path):

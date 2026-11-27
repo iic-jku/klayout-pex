@@ -50,7 +50,7 @@ def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     commands = parser.add_subparsers(dest='calibration_command', required=True)
     from .solve_cli import add_execution_subparsers
     from .qualification_cli import add_qualification_subparser
-    from .fit_cli import add_fit_length_subparser
+    from .fit_cli import add_fit_length_subparser, add_fit_overlap_subparser
     prepare = commands.add_parser(
         'prepare', help='Write validated PEX25D patterns and a preparation manifest',
         description='Create finite substrate, parallel-plate, parallel-wire and directional-fringe patterns '
@@ -67,6 +67,7 @@ def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     add_execution_subparsers(commands)
     add_qualification_subparser(commands)
     add_fit_length_subparser(commands)
+    add_fit_overlap_subparser(commands)
 
 
 def run_calibration_command(args: argparse.Namespace):
@@ -80,6 +81,9 @@ def run_calibration_command(args: argparse.Namespace):
     if args.calibration_command == 'fit-length':
         from .fit_cli import run_fit_length_command
         return run_fit_length_command(args)
+    if args.calibration_command == 'fit-overlap':
+        from .fit_cli import run_fit_overlap_command
+        return run_fit_overlap_command(args)
     if args.calibration_command != 'prepare':
         raise NotImplementedError(f'Calibration command {args.calibration_command!r}')
     try:

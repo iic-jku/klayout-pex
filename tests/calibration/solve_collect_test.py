@@ -224,7 +224,7 @@ def test_cli_commands_and_validation_before_loading(tmp_path: Path):
     from tests.common.cli_runner import run_cli
     from kpex.kpex_cli import KpexCLI
     code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', '--help'])
-    assert code == 0 and '{prepare,solve,collect,qualify,fit-length}' in output, output
+    assert code == 0 and '{prepare,solve,collect,qualify,fit-length,fit-overlap}' in output, output
     for command, manifest_type in [('solve', 'CalibrationManifest'), ('collect', 'CalibrationRunManifest')]:
         code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', command, '--help'])
         assert code == 0 and '--manifest FILE' in output and manifest_type in output, output

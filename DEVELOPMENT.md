@@ -519,6 +519,28 @@ signed refinement changes are recorded separately in `qualification/qualificatio
 The command returns a diagnostic error for incomplete or rejected cases after writing the report.
 Review the report alongside the original study and saved collections before fitting coefficients.
 
+### Fitting an overlap coefficient
+
+Use aligned rectangular parallel plates that share one typed overlap target, technology and
+reference solver settings. Vary width and length in at least four training rectangles so
+overlap area and perimeter change independently. Reserve one or more distinct rectangles
+for validation. A rotated copy of a training rectangle cannot serve as a holdout.
+
+```sh
+kpex calibrate fit-overlap \
+  --study study.pb.json \
+  --qualification qualification/qualification.pb.json \
+  --residual-budget-f 2e-17 \
+  --out-dir overlap-fit
+```
+
+The fit uses the directed Maxwell coupling from the qualified measurement. It separates the
+area term, the perimeter term and a signed correction for the four corners of the observed
+rectangles. The report contains the training and holdout residuals, the shared refinement
+settings and the resulting shifts in the area coefficient and validation errors. Review
+`overlap-fit/fit-overlap.pb.json` alongside the original qualification before adopting the
+area coefficient into any technology table.
+
 ### Result file
 
 Each run of `kpex extract` and `kpex pex25d` writes `kpex_result.json` into its run directory,

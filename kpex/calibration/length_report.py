@@ -26,13 +26,13 @@
 from collections import defaultdict
 from dataclasses import replace
 from fractions import Fraction
-import math
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from .artifacts import read_message, sha256_file, validate_output_directory, write_message
+from .artifacts import sha256_file, validate_output_directory, write_message
+from .fit_evidence import qualified_couplings, read_verified_qualification, recent_couplings
 from .length_fit import LengthFitPolicy, LengthObservation, fit_length_series
-from .qualification import REFINEMENT_AXES, charge_rows, evaluate_qualification
+from .qualification import REFINEMENT_AXES
 from .qualification_evidence import QualificationMeasurement
 from .validation import CalibrationError
 from ..version import __version__
@@ -42,10 +42,8 @@ from kpex_protobuf.kpex.calibration.length_fit_pb2 import (
 )
 from kpex_protobuf.kpex.calibration.patterns_pb2 import PARALLEL_PLATES, PARALLEL_WIRES
 from kpex_protobuf.kpex.calibration.qualification_pb2 import (
-    CalibrationQualificationCaseResult, CalibrationQualificationReport, CalibrationQualificationStatus as Status,
-    CalibrationRefinementAxis as Axis, CalibrationRefinementResult,
+    CalibrationQualificationCaseResult, CalibrationRefinementAxis as Axis,
 )
-from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
 
 def _series(reference: QualificationMeasurement) -> CalibrationLengthSeries:
@@ -63,48 +61,11 @@ def _series(reference: QualificationMeasurement) -> CalibrationLengthSeries:
 
 
 def _observation(case: CalibrationQualificationCaseResult) -> Tuple[LengthObservation, float]:
-    if case.status != Status.STABILIZED:
-        raise CalibrationError(f"Case '{case.case_id}' is {Status.Name(case.status)}. "
-                               'Fit requires all cases to be numerically stabilized')
-    matrix = case.reference_matrix
-    order = list(matrix.conductor_ids)
-    if matrix.reference_convention != Matrix.GROUNDED_PRINCIPAL_SUBMATRIX or sorted(order) != ['A', 'B']:
-        raise CalibrationError(f"Case '{case.case_id}' requires a grounded A/B Maxwell matrix")
-    if any({entry.charge_conductor_id, entry.excitation_conductor_id} == {'A', 'B'}
-           for entry in case.unresolved_entries):
-        raise CalibrationError(f"Case '{case.case_id}' A/B coupling is below qualification resolution")
-    capacitance = charge_rows(matrix)
-    a, b = order.index('A'), order.index('B')
+    forward_f, reverse_f = qualified_couplings(case)
     units = case.units
     length_um = float(Fraction(case.pattern.dimensions_grid.length * units.grid_numerator, units.grid_denominator))
-    observation = LengthObservation(case.case_id, case.pattern.role, length_um, -float(capacitance[a, b]))
-    return observation, -float(capacitance[b, a])
-
-
-def _ignore_eigensolver_roundoff(report: CalibrationQualificationReport):
-    # Eigensolver output can differ across platforms even when the matrices and
-    # every qualification decision are identical. The fit uses the recomputed
-    # classification. Preserve violation checks and compare the actual matrices.
-    for case in report.cases:
-        diagnostics = [*case.reference_diagnostics,
-                       *(diagnostic for refinement in case.refinements for level in refinement.levels
-                         for diagnostic in level.matrix_diagnostics)]
-        for diagnostic in diagnostics:
-            if not math.isfinite(diagnostic.minimum_energy_eigenvalue_f):
-                raise CalibrationError('Qualification report contains a nonfinite energy diagnostic')
-            diagnostic.ClearField('minimum_energy_eigenvalue_f')
-
-
-def _recent_couplings(refinement: CalibrationRefinementResult, reference_f: float) -> Dict[float, float]:
-    couplings = {}
-    value_f = reference_f
-    for level, step in zip(reversed(refinement.levels[-3:-1]), reversed(refinement.changes[-2:])):
-        # The qualification deltas are in charge-row convention. Coupling is
-        # -C[A,B], so walking backward adds the signed change in C[A,B].
-        value_f += next(entry.signed_delta_f for entry in step.entries
-                        if (entry.entry.charge_conductor_id, entry.entry.excitation_conductor_id) == ('A', 'B'))
-        couplings[level.parameter_value] = value_f
-    return couplings
+    observation = LengthObservation(case.case_id, case.pattern.role, length_um, forward_f)
+    return observation, reverse_f
 
 
 def _add_refinement_sensitivity(
@@ -128,7 +89,7 @@ def _add_refinement_sensitivity(
         refinements = [next(ref for ref in cases[item.case_id].refinements if ref.axis == axis)
                        for item in observations]
         sensitivity.reference_parameter_value = refinements[0].levels[-1].parameter_value
-        couplings = {item.case_id: _recent_couplings(refinement, item.capacitance_f)
+        couplings = {item.case_id: recent_couplings(refinement, item.capacitance_f)
                      for item, refinement in zip(observations, refinements)}
         common = set.intersection(*(set(values) for values in couplings.values()))
         if len(common) < 2:
@@ -154,18 +115,10 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
                           ) -> Tuple[Path, CalibrationLengthFitReport]:
     """Recompute qualification before accepting its measurements for fitting."""
     validate_output_directory(output_dir)
-    qualification_sha256 = sha256_file(qualification_path)
-    saved = read_message(qualification_path, CalibrationQualificationReport())
-    evaluation = evaluate_qualification(study_path)
-    # A package version change alone does not invalidate evidence produced by the same method.
-    evaluation.report.kpex_version = saved.kpex_version
-    _ignore_eigensolver_roundoff(saved)
-    _ignore_eigensolver_roundoff(evaluation.report)
-    if not saved.kpex_version or saved != evaluation.report:
-        raise CalibrationError('Qualification report differs from the recomputed study and solver evidence')
+    qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
 
     report = CalibrationLengthFitReport(
-        schema_version=1, kpex_version=__version__, study_sha256=saved.study_sha256,
+        schema_version=1, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256,
         residual_budget_f=policy.weight_floor_f * policy.max_weighted_residual,
         max_condition_number=policy.max_condition_number,
