@@ -126,7 +126,7 @@ def fit_qualified_lengths(study_path: Path, qualification_path: Path, output_dir
     qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
 
     report = CalibrationLengthFitReport(
-        schema_version=3, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
+        schema_version=1, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256,
         residual_budget_f=policy.weight_floor_f * policy.max_weighted_residual,
         max_condition_number=policy.max_condition_number,

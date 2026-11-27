@@ -121,11 +121,9 @@ message CalibrationRefinementLevel {
     // Interpretation, units and coarse-to-fine ordering are defined by the backend
     // for this axis. Values from different backends are not interchangeable.
     double parameter_value = 10;
-    reserved 20, 40;
-    reserved "refined_panels", "input_panels";
-    repeated CalibrationMatrixDiagnostics matrix_diagnostics = 30;
     // Backend evidence used to validate this refinement level.
-    google.protobuf.Any solver_statistics = 50;
+    google.protobuf.Any solver_statistics = 20;
+    repeated CalibrationMatrixDiagnostics matrix_diagnostics = 30;
 }
 
 message CalibrationRefinementChange {

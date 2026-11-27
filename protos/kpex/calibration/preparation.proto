@@ -29,8 +29,8 @@ import "kpex/pex25d/pex25d_units.proto";
 import "kpex/pex25d/pex25d_diagnostics.proto";
 import "kpex/tech/tech_selection.proto";
 
-// Preparation evidence only. Solver results and fitted coefficients need their
-// own contracts when those stages are implemented; no untyped placeholders.
+// Preparation inputs and generated geometry. Solver runs and fit results are
+// recorded separately.
 message CalibrationManifest {
     uint32 schema_version = 1; // Currently 1.
     uint32 pattern_generator_version = 10;

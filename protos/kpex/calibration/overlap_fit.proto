@@ -32,21 +32,19 @@ import "kpex/result/solver_execution.proto";
 // The area term is a candidate for the overlap row. The perimeter and corner
 // terms describe finite plates for this fit.
 message CalibrationOverlapFitReport {
-    uint32 schema_version = 1; // Currently 3.
+    uint32 schema_version = 1; // Currently 1.
     string kpex_version = 10;
     string study_sha256 = 20;
     string qualification_sha256 = 30;
     double residual_budget_f = 40;
-    reserved 50;
-    reserved "technology";
+    string physical_stack_sha256 = 50; // Common physical stack; coefficients are not part of fit identity.
     CalibrationTarget target = 60;
     kpex.result.SolverIdentity solver = 70;
     CapacitanceMeasurement measurement = 80;
     CalibrationOverlapFitResult fit = 90;
     repeated CalibrationOverlapRefinementSensitivity refinement_sensitivity = 100;
-    string physical_stack_sha256 = 110; // Common physical stack; coefficients are not part of fit identity.
     // Full source identity keyed by case ID, including coefficient revision and catalog selection.
-    map<string, CalibratedTechnology> case_technologies = 120;
+    map<string, CalibratedTechnology> case_technologies = 110;
 }
 
 message CalibrationOverlapFitResult {

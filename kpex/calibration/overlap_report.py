@@ -170,7 +170,7 @@ def fit_qualified_overlap(study_path: Path, qualification_path: Path, output_dir
     validate_output_directory(output_dir)
     qualification_sha256, evaluation = read_verified_qualification(study_path, qualification_path)
     report = CalibrationOverlapFitReport(
-        schema_version=3, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
+        schema_version=1, kpex_version=__version__, study_sha256=evaluation.report.study_sha256,
         qualification_sha256=qualification_sha256, residual_budget_f=budget_f,
     )
     observations, reverse_couplings, grid = _plate_observations(report, evaluation)

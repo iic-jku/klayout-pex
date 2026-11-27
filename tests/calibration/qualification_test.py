@@ -28,7 +28,6 @@ import json
 import math
 from pathlib import Path
 import shutil
-import sys
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import pytest
@@ -42,7 +41,6 @@ from kpex.calibration.prepare import prepare_calibration
 from kpex.calibration.qualification import _diagnose, qualify_study
 from kpex.calibration.solve import CalibrationSolveResult, SolveOptions, solve_calibration
 from kpex.calibration.validation import CalibrationError
-from kpex.fastercap.fastercap_runner import FasterCapRunResult
 from kpex.kpex_cli import KpexCLI
 from kpex.tech_info import TechInfo
 from kpex_protobuf.kpex.calibration.length_fit_pb2 import CalibrationLengthFitReport, CalibrationLengthFitResult
@@ -55,89 +53,11 @@ from kpex_protobuf.kpex.calibration.qualification_pb2 import (
 from kpex_protobuf.kpex.calibration.solving_pb2 import CalibrationCollection, CalibrationRunManifest
 from kpex_protobuf.kpex.calibration.preparation_pb2 import CalibrationManifest
 from kpex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
-from kpex_protobuf.kpex.result.solver_execution_pb2 import SolverIdentity
+from tests.common.calibration_study import make_study, mock_solver
 from tests.common.cli_runner import run_cli
-from tests.common.fastercap_report import numerical_report
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 from tests.common.vacask import vacask_port_admittance, requires_vacask
-
-
-def _study(root: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
-           *, fake: bool = False, case_count: int = 1, adaptive: bool = False
-           ) -> Tuple[CalibrationQualificationStudy, Path]:
-    prepared = {}
-    patterns = pattern_data['patterns'][:case_count]
-    for margin in (2, 4, 8):
-        specification = root / f'patterns-{margin}.pb.json'
-        data = dict(pattern_data, domain_margin_um=str(margin), patterns=patterns)
-        specification.write_text(json.dumps(data), encoding='utf-8')
-        prepared[margin] = prepare_calibration(
-            tech_info, read_patterns(specification), root / f'prepared-{margin}').manifest_path
-    reference = SolveOptions(mesh_refinement=0.06, gmres_tolerance=1e-8, mesh_max_area_um2=0.25,
-                             solver_timeout_seconds=120)
-    variants = {
-        'reference': (8, reference),
-        'solver-coarse': (8, replace(reference, gmres_tolerance=1e-4)),
-        'solver-medium': (8, replace(reference, gmres_tolerance=1e-6)),
-        'mesh-coarse': (8, replace(reference, mesh_max_area_um2=2.0)),
-        'mesh-medium': (8, replace(reference, mesh_max_area_um2=0.75)),
-        'domain-small': (2, reference),
-        'domain-medium': (4, reference),
-    }
-    if adaptive:
-        variants['adaptive-coarse'] = (8, replace(reference, mesh_refinement=0.18))
-        variants['adaptive-medium'] = (8, replace(reference, mesh_refinement=0.12))
-    study = CalibrationQualificationStudy(schema_version=2)
-    # Use an explicit 2% budget for the real pilot. The solver test verifies
-    # the reported comparisons, allowing platform-dependent convergence.
-    study.tolerance.absolute_floor_f = 2e-18
-    study.tolerance.relative_tolerance = 0 if fake else 0.02
-    for name, (margin, options) in variants.items():
-        result = solve_calibration(prepared[margin], root / name, options=options)
-        assert result.successful_cases == case_count, [
-            (case.case_id, list(case.diagnostics))
-            for case in read_message(result.collection_path, CalibrationCollection()).cases
-            if case.status != case.COLLECTED
-        ]
-        entry = study.collections.add(id=name).collection
-        entry.path = result.collection_path.relative_to(root).as_posix()
-        entry.sha256 = sha256_file(result.collection_path)
-    for pattern in patterns:
-        case = study.cases.add(case_id=pattern['id'], reference_collection_id='reference')
-        case.refinements.add(axis=Axis.LINEAR_SOLVER_TOLERANCE, collection_ids=['solver-coarse', 'solver-medium', 'reference'])
-        case.refinements.add(axis=Axis.INITIAL_MESH_MAX_AREA, collection_ids=['mesh-coarse', 'mesh-medium', 'reference'])
-        case.refinements.add(axis=Axis.DOMAIN_MARGIN, collection_ids=['domain-small', 'domain-medium', 'reference'])
-        if adaptive:
-            case.refinements.add(axis=Axis.ADAPTIVE_MESH_REFINEMENT,
-                                 collection_ids=['adaptive-coarse', 'adaptive-medium', 'reference'])
-    return study, write_message(root / 'study.pb.json', study)
-
-
-def _mock_solver(monkeypatch: pytest.MonkeyPatch, matrix_for_case: Callable[[str, str], List[List[float]]],
-                 adaptive_middle_panels: int = 60):
-    executable = Path(sys.executable).resolve()
-    identity = SolverIdentity(name='fastercap', version='6.4.0', executable_path=str(executable),
-                              executable_sha256=sha256_file(executable), operating_system='test', architecture='test')
-    monkeypatch.setattr('kpex.calibration.solve._solver_identity', lambda _: identity)
-
-    def run(exe: str, deck: str, log: str, *args: Any, report_path: str, **kwargs: Any) -> FasterCapRunResult:
-        variant = Path(log).parents[2].name
-        input_panels = {'mesh-coarse': 20, 'mesh-medium': 30}.get(variant, 40)
-        # Fixed -m can adapt a coarser input to a larger final mesh.
-        panels = {'mesh-coarse': 90, 'mesh-medium': 60, 'adaptive-coarse': 50,
-                  'adaptive-medium': adaptive_middle_panels}.get(variant, 80)
-        names = ['g1_B', 'g2_substrate', 'g3_A']
-        matrix = matrix_for_case(Path(log).parent.name, variant)
-        external = numerical_report(names, matrix, deck)
-        external['build']['version'] = 'FasterCap version 6.4.0'
-        Path(report_path).write_text(json.dumps(external), encoding='utf-8')
-        Path(log).write_text('Capacitance matrix is:\nSolve statistics:\n'
-                             f'Number of input panels to solver engine: {input_panels}\n'
-                             f'Number of panels after refinement: {panels}\n', encoding='utf-8')
-        return FasterCapRunResult((exe, deck), 0, 0.1)
-
-    monkeypatch.setattr('kpex.fastercap.fastercap_runner.run_fastercap', run)
 
 
 @pytest.fixture
@@ -148,8 +68,8 @@ def study(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any],
         # Passive network with ground in a non-terminal position and a known change on A.
         return [[5e-9, -2e-9, -1e-9], [-2e-9, 6e-9, -3e-9], [-1e-9, -3e-9, 7e-9 + added]]
 
-    _mock_solver(monkeypatch, matrix_for_case)
-    return _study(tmp_path, tech_info, pattern_data, fake=True)
+    mock_solver(monkeypatch, matrix_for_case)
+    return make_study(tmp_path, tech_info, pattern_data, fake=True)
 
 
 def _wire_patterns_and_coupling():
@@ -191,8 +111,8 @@ def test_failed_series_keep_successful_length_fits(tmp_path: Path, tech_info: Te
                                 'lateral_offset_um': '0.1'}},  # Valid for qualification, not fit-length.
         dict(patterns[0], id='unstabilized', width_um='0.8'),
     ]
-    _mock_solver(monkeypatch, coupling)
-    study, _ = _study(tmp_path, tech_info, dict(pattern_data, patterns=cases), fake=True, case_count=len(cases))
+    mock_solver(monkeypatch, coupling)
+    study, _ = make_study(tmp_path, tech_info, dict(pattern_data, patterns=cases), fake=True, case_count=len(cases))
     next(item for item in study.cases if item.case_id == 'unstabilized').ClearField('refinements')
     path = write_message(tmp_path / 'study-with-unusable-cases.pb.json', study)
 
@@ -229,8 +149,8 @@ def _append_study(combined: CalibrationQualificationStudy, study: CalibrationQua
 def test_mixed_reference_controls_reject_length_series(tmp_path: Path, tech_info: TechInfo,
                                                        pattern_data: Dict[str, Any], monkeypatch: pytest.MonkeyPatch):
     patterns, coupling = _wire_patterns_and_coupling()
-    _mock_solver(monkeypatch, coupling)
-    combined = CalibrationQualificationStudy(schema_version=2)
+    mock_solver(monkeypatch, coupling)
+    combined = CalibrationQualificationStudy(schema_version=1)
     for index, gmres in enumerate((1e-8, 5e-9)):
         group = f'group_{index}'
         root = tmp_path / group
@@ -244,8 +164,8 @@ def test_mixed_reference_controls_reject_length_series(tmp_path: Path, tech_info
 
         solve_original = solve_calibration
         with monkeypatch.context() as scope:
-            scope.setattr(sys.modules[__name__], 'solve_calibration', solve_at_reference)
-            study, _ = _study(root, tech_info, data, fake=True, case_count=2)
+            scope.setattr('tests.common.calibration_study.solve_calibration', solve_at_reference)
+            study, _ = make_study(root, tech_info, data, fake=True, case_count=2)
         _append_study(combined, study, group)
 
     path = write_message(tmp_path / 'mixed-settings-study.pb.json', combined)
@@ -296,8 +216,8 @@ def test_fit_qualified_wire_lengths(tmp_path: Path, tech_info: TechInfo, pattern
         return [[9e-9, -2e-9, -coupling],
                 [-2e-9, 8e-9, -2e-9], [-coupling + 1e-13, -2e-9, 9e-9]]
 
-    _mock_solver(monkeypatch, matrix_for_case)
-    _, path = _study(tmp_path, tech_info, pattern_data, fake=True, case_count=4)
+    mock_solver(monkeypatch, matrix_for_case)
+    _, path = make_study(tmp_path, tech_info, pattern_data, fake=True, case_count=4)
     qualified = qualify_study(path, tmp_path / 'qualified')
     assert all(case.status == Status.STABILIZED for case in qualified.report.cases)
     # Requalification on another platform can change the last bits of an eigenvalue.
@@ -389,9 +309,9 @@ def test_fit_qualified_overlap(tmp_path: Path, targeted_technology: TechInfo,
                                     budget_f: float, accepted: bool):
     specification, matrix_for_case = _overlap_patterns_and_coupling(holdout_offset_f)
     overlap = specification.targets[0].overlap
-    _mock_solver(monkeypatch, matrix_for_case)
+    mock_solver(monkeypatch, matrix_for_case)
     pattern_data = MessageToDict(specification, preserving_proto_field_name=True)
-    study, path = _study(tmp_path, targeted_technology, pattern_data, fake=True, case_count=len(specification.patterns))
+    study, path = make_study(tmp_path, targeted_technology, pattern_data, fake=True, case_count=len(specification.patterns))
     qualified = qualify_study(path, tmp_path / 'qualified')
     assert all(case.status == Status.STABILIZED for case in qualified.report.cases)
     out_dir = tmp_path / 'fit'
@@ -598,7 +518,7 @@ def test_physical_checks_use_charge_rows():
 @pytest.mark.fastercap
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
 def test_refinement_axes_with_fastercap(tmp_path: Path, tech_info: TechInfo, pattern_data: Dict[str, Any]):
-    _, path = _study(tmp_path, tech_info, pattern_data, adaptive=True)
+    _, path = make_study(tmp_path, tech_info, pattern_data, adaptive=True)
     result = qualify_study(path, tmp_path / 'qualify')
     report = read_message(result.report_path, CalibrationQualificationReport())
     case = report.cases[0]
@@ -625,8 +545,8 @@ def test_initial_and_adaptive_mesh_axes_use_their_own_panel_counts(
     def constant_matrix(case_id: str, variant: str) -> List[List[float]]:
         return [[5e-9, -2e-9, -1e-9], [-2e-9, 6e-9, -3e-9], [-1e-9, -3e-9, 7e-9]]
 
-    _mock_solver(monkeypatch, constant_matrix, adaptive_middle_panels=middle_panels)
-    _, path = _study(tmp_path, tech_info, pattern_data, fake=True, adaptive=True)
+    mock_solver(monkeypatch, constant_matrix, adaptive_middle_panels=middle_panels)
+    _, path = make_study(tmp_path, tech_info, pattern_data, fake=True, adaptive=True)
     case, = qualify_study(path, tmp_path / 'qualify').report.cases
     by_axis = {refinement.axis: refinement for refinement in case.refinements}
     initial = by_axis[Axis.INITIAL_MESH_MAX_AREA]
@@ -651,8 +571,8 @@ def _cross_revision_study(tmp_path: Path, tech_info: TechInfo, monkeypatch: pyte
         specification, coupling = _overlap_patterns_and_coupling()
         data = MessageToDict(specification, preserving_proto_field_name=True)
         patterns = data['patterns']
-    _mock_solver(monkeypatch, coupling)
-    combined = CalibrationQualificationStudy(schema_version=2)
+    mock_solver(monkeypatch, coupling)
+    combined = CalibrationQualificationStudy(schema_version=1)
     for index in range(2):
         root = tmp_path / f'group_{index}'
         root.mkdir()
@@ -680,8 +600,8 @@ def _cross_revision_study(tmp_path: Path, tech_info: TechInfo, monkeypatch: pyte
                 options, gmres_tolerance=options.gmres_tolerance * options_scale))
 
         with monkeypatch.context() as scope:
-            scope.setattr(sys.modules[__name__], 'solve_calibration', solve_at_reference)
-            study, _ = _study(root, tech_info, dict(data, patterns=subset), fake=True, case_count=len(subset))
+            scope.setattr('tests.common.calibration_study.solve_calibration', solve_at_reference)
+            study, _ = make_study(root, tech_info, dict(data, patterns=subset), fake=True, case_count=len(subset))
         _append_study(combined, study, f'group_{index}')
     path = write_message(tmp_path / 'combined-study.pb.json', combined)
     qualified = qualify_study(path, tmp_path / 'qualified')
@@ -724,7 +644,7 @@ def test_fits_across_technology_revisions(tmp_path: Path, targeted_technology: T
         assert "does not share the overlap fit's target or reference settings" in output
         assert not (tmp_path / 'fit').exists()
         return
-    assert report.schema_version == 3
+    assert report.schema_version == 1
     expected_sources = {case.case_id: case.technology for case in evidence.cases}
     if kind == 'length':
         assert len(report.fits) == (2 if change == 'stack' else 1)
